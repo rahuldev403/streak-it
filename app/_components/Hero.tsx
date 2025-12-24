@@ -40,15 +40,18 @@ const Hero = () => {
         {!user ? (
           <SignInButton mode="modal" fallbackRedirectUrl="/">
             <Button
-              className="text-black font-game rounded-md pt-3 mt-6"
+              className="text-black font-game rounded-md pt-3 mt-6 pointer-events-auto"
               variant={"pixel"}
             >
-              Sign Up
+              Get Started
             </Button>
           </SignInButton>
         ) : (
           <div className="flex items-center gap-4">
-            <Button variant={"pixel"} className="rounded-md font-game text-black pt-3 mt-6">
+            <Button
+              variant={"pixel"}
+              className="rounded-md font-game text-black pt-3 mt-6"
+            >
               go to Dashboard
             </Button>
           </div>

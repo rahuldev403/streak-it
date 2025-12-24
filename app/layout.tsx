@@ -7,7 +7,7 @@ import {
   Comfortaa,
 } from "next/font/google";
 import "./globals.css";
-import { Provider } from "@radix-ui/react-tooltip";
+import Provider from "./Provider";
 import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = Geist({
@@ -49,7 +49,12 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="bg-background">
+      <html
+        lang="en"
+        className="bg-background"
+        data-theme="dark"
+        style={{ colorScheme: "dark" }}
+      >
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} antialiased`}
         >
