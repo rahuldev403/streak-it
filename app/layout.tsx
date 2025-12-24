@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Rubik_Gemstones, Inter } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Rubik_Gemstones,
+  Inter,
+  Comfortaa,
+} from "next/font/google";
 import "./globals.css";
 import { Provider } from "@radix-ui/react-tooltip";
 
@@ -29,15 +35,21 @@ const inter = Inter({
   weight: "400",
 });
 
+const comfortaa = Comfortaa({
+  subsets: ["latin"],
+  variable: "--font-comfortaa",
+  weight: "400",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="bg-background">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} antialiased`}
       >
         <Provider>{children}</Provider>
       </body>

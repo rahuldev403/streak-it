@@ -1,13 +1,14 @@
-import { Button } from '@/components/ui/button'
-import React from 'react'
+
+import Hero from "./_components/Hero";
+import Header_one from "./_components/Header_one";
 
 const page = () => {
   return (
-    <div className='font-game'>
-      welcome to the page 
-      <Button>click</Button>
-    </div>
-  )
-}
+    <>
+      <Header_one />
+      <Hero />
+    </>
+  );
+};
 
-export default page
+export default page;
