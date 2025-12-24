@@ -4,6 +4,7 @@ import Image from "next/image";
 import bg from "@/public/bg.jpg";
 import { Button } from "@/components/ui/button";
 import { SignInButton, useUser } from "@clerk/nextjs";
+import { Link } from "lucide-react";
 
 const Hero = () => {
   const { user } = useUser();
@@ -48,12 +49,14 @@ const Hero = () => {
           </SignInButton>
         ) : (
           <div className="flex items-center gap-4">
-            <Button
-              variant={"pixel"}
-              className="rounded-md font-game text-black pt-3 mt-6"
-            >
-              go to Dashboard
-            </Button>
+            <Link href="/dashboard">
+              <Button
+                variant={"pixel"}
+                className="rounded-md font-game text-black pt-3 mt-6"
+              >
+                go to Dashboard
+              </Button>
+            </Link>
           </div>
         )}
       </div>

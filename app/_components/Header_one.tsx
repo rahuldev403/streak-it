@@ -146,12 +146,14 @@ const Header_one = () => {
           </SignInButton>
         ) : (
           <div className="flex items-center gap-4">
-            <Button
-              variant={"pixel"}
-              className="rounded-md text-black font-game"
-            >
-              Dashboard
-            </Button>
+            <Link href="/dashboard">
+              <Button
+                variant={"pixel"}
+                className="rounded-md text-black font-game"
+              >
+                Dashboard
+              </Button>
+            </Link>
             <UserButton />
           </div>
         )}

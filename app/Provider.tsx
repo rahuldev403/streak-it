@@ -4,6 +4,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ReactNode, useEffect, useState } from "react";
 import axios from "axios";
 import { UserDeatailContext } from "./context/UserDetailContext";
+import Header_one from "./_components/Header_one";
 interface ProviderProps {
   children: ReactNode;
   [key: string]: unknown;
@@ -34,6 +35,7 @@ const Provider = ({ children, ...props }: ProviderProps) => {
   return (
     <NextThemesProvider {...props}>
       <UserDeatailContext.Provider value={{ userDetail, setUserDetail }}>
+        <Header_one />
         {children}
       </UserDeatailContext.Provider>
     </NextThemesProvider>
