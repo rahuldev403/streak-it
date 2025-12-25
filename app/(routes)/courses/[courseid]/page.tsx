@@ -9,6 +9,7 @@ import CourseChapter from "./_components/CourseChapter";
 import CourseStatus from "./_components/CourseStatus";
 import UpgradeToPro from "@/app/_components/UpgradeToPro";
 import { CommunityHelp } from "./_components/CommunityHelp";
+import { useUser } from "@clerk/nextjs";
 
 type Chapter = {
   id: number;
@@ -49,12 +50,16 @@ interface UserProgress {
 
 const CourseDetail = () => {
   const { courseid } = useParams<{ courseid: string }>();
+  const { user } = useUser();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [chaptersLoading, setChaptersLoading] = useState(true);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
+
+  
+  const hasPremiumAccess = user?.publicMetadata?.plan === "unlimited";
 
   const fetchCourse = useCallback(async () => {
     if (!courseid) return;
@@ -190,8 +195,8 @@ const CourseDetail = () => {
         courseDetail={course}
         refreshData={fetchCourse}
       />
-      <div className="grid grid-cols-4 p-5 gap-4">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 p-3 sm:p-5 gap-4 sm:gap-6 max-w-7xl mx-auto">
+        <div className="w-full">
           <CourseChapter
             loading={loading}
             chapters={chapters}
@@ -202,9 +207,10 @@ const CourseDetail = () => {
             completedExercises={completedExercises}
             onCompleteChapter={handleChapterComplete}
             courseId={course.courseId}
+            hasPremiumAccess={hasPremiumAccess}
           />
         </div>
-        <div className="col-span-2 flex flex-col gap-6 justify-between ">
+        <div className="w-full flex flex-col gap-4 sm:gap-6">
           <CourseStatus
             loading={loading}
             courseDetail={course}

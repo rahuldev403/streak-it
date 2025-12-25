@@ -77,54 +77,60 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
   };
 
   return (
-    <div className="flex justify-center items-center my-2 px-4">
+    <div className="flex justify-center items-center my-2 px-2 sm:px-4">
       {loading ? (
-        <div className="w-full sm:w-[90%] lg:w-[80%] h-48 sm:h-56 lg:h-64 flex items-center justify-center">
+        <div className="w-full max-w-7xl h-40 sm:h-48 md:h-56 lg:h-64 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
-            <p className="font-game text-base sm:text-xl">
+            <p className="font-game text-sm sm:text-base md:text-xl">
               Loading course banner...
             </p>
           </div>
         </div>
       ) : (
-        <div className="w-full sm:w-[90%] lg:w-[80%] h-48 sm:h-56 lg:h-64 relative rounded-md overflow-hidden shadow-lg">
+        <div className="w-full max-w-7xl h-40 sm:h-48 md:h-56 lg:h-64 relative rounded-md overflow-hidden shadow-lg border-4 border-gray-800">
           <Image
             src={courseDetail?.bannerImage || "/default-banner.jpg"}
             alt={courseDetail?.title || "Course Banner"}
             layout="fill"
             objectFit="cover"
           />
-          <div className="absolute inset-0 bg-opacity-50 flex flex-col justify-center items-start text-center p-4 sm:p-6 lg:p-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 font-game">
+          <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-start p-3 sm:p-4 md:p-6 lg:p-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2 font-game drop-shadow-lg">
               {courseDetail?.title}
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 font-comfortaa text-start">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white mb-2 sm:mb-3 md:mb-4 font-comfortaa max-w-2xl line-clamp-2 sm:line-clamp-3 drop-shadow-lg text-start">
               {courseDetail?.description}
             </p>
-            {!courseDetail?.isEnrolled ? (
-              <Button
-                className="font-game rounded-md mt-4 text-base sm:text-xl lg:text-2xl px-4 sm:px-6"
-                onClick={EnrollCourse}
-                disabled={!canEnroll}
-                variant={"pixel"}
-              >
-                {loadingEnroll ? (
-                  <Loader2Icon className="animate-spin mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                ) : null}
-                {loadingEnroll ? "Enrolling..." : "Enroll Now"}
-              </Button>
-            ) : (
-              <Button
-                variant={"pixel"}
-                className="font-game rounded-md mt-4 px-4 sm:px-6"
-                onClick={handleContinueScroll}
-              >
-                <span className="font-game text-base sm:text-xl lg:text-2xl">
-                  continue to course &rarr;
-                </span>
-              </Button>
-            )}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-4">
+              {!courseDetail?.isEnrolled ? (
+                <Button
+                  className="font-game rounded-md text-xs sm:text-sm md:text-base lg:text-lg px-3 sm:px-4 md:px-6 w-full sm:w-auto"
+                  onClick={EnrollCourse}
+                  disabled={!canEnroll}
+                  variant={"pixel"}
+                >
+                  {loadingEnroll ? (
+                    <>
+                      <Loader2Icon className="animate-spin mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                      Enrolling...
+                    </>
+                  ) : (
+                    "Enroll Now"
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  variant={"pixel"}
+                  className="font-game rounded-md px-3 sm:px-4 md:px-6 w-full sm:w-auto"
+                  onClick={handleContinueScroll}
+                >
+                  <span className="font-game text-xs sm:text-sm md:text-base lg:text-lg">
+                    continue to course &rarr;
+                  </span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}

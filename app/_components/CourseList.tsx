@@ -35,7 +35,7 @@ const CourseList = () => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-center items-center mt-5 p-4 border-2 h-auto">
+    <div className="flex flex-col justify-center items-center mt-5 p-4 border-2 h-auto pointer-events-auto">
       <h2 className="font-game text-black font-bold text-3xl">All Courses</h2>
       {loading ? (
         <div className="flex flex-col items-center justify-center py-12">
@@ -56,7 +56,7 @@ const CourseList = () => {
               <Link
                 key={course.id}
                 href={`/courses/${course.courseId}`}
-                className="border-4 border-gray-800 rounded-md w-[90%] mx-auto box-shadow-lg bg-gray-200 relative"
+                className="border-4 border-gray-800 rounded-md w-[90%] mx-auto box-shadow-lg bg-gray-200 relative hover:shadow-[6px_6px_0_0_#000] transition-all cursor-pointer"
               >
                 <div>
                   <div className="p-2 ">

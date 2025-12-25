@@ -56,3 +56,10 @@ export const ChapterContentTable = pgTable("chapter_content", {
   solutionCode: text().notNull(),
   order: integer().default(0).notNull(),
 });
+
+export const UserActivityTable = pgTable("user_activity", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 100 }).notNull(),
+  date: varchar({ length: 100 }).notNull(), // YYYY-MM-DD format
+  activitiesCount: integer().default(0).notNull(),
+});

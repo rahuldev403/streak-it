@@ -1,6 +1,8 @@
 import { db } from "@/app/config/db";
 import { CourseChapterTable } from "@/app/config/schema";
 import { NextRequest, NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { isAdmin } from "@/lib/admin";
 
 // Sample chapter data
 const sampleChapters = [
@@ -686,7 +688,27 @@ const sampleChapters = [
 
 export const GET = async (req: NextRequest) => {
   try {
-    // Insert sample chapters into database
+    
+    const user = await currentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userEmail = user.primaryEmailAddress?.emailAddress;
+    if (!isAdmin(userEmail)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied. Admin privileges required.",
+        },
+        { status: 403 }
+      );
+    }
+
     const result = await db
       .insert(CourseChapterTable)
       .values(sampleChapters)

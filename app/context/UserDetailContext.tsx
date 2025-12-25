@@ -1,11 +1,11 @@
-import {createContext} from "react";
+import { createContext } from "react";
 
 interface UserDetailContextType {
-    userDetail: any;
-    setUserDetail: (detail: any) => void;
+  userDetail: any;
+  setUserDetail: (detail: any) => void;
 }
 
 export const UserDeatailContext = createContext<UserDetailContextType>({
-    userDetail:undefined,
-    setUserDetail:()=>{},
-})
+  userDetail: undefined,
+  setUserDetail: () => {},
+});

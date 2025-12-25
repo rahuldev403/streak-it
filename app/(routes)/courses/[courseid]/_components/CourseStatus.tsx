@@ -62,28 +62,28 @@ const CourseStatus = ({
 
   return (
     <div>
-      <div className=" p-6 bg-gray-200 dark:bg-gray-800 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] min-h-80 rounded-md">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">🎯</span>
-          <h3 className="font-bold font-game text-2xl text-black dark:text-white">
+      <div className="p-4 sm:p-6 bg-gray-200 dark:bg-gray-800 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] min-h-60 sm:min-h-80 rounded-md">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <span className="text-xl sm:text-2xl">🎯</span>
+          <h3 className="font-bold font-game text-lg sm:text-xl md:text-2xl text-black dark:text-white">
             Course Progress
           </h3>
         </div>
 
-        <p className="text-gray-700 dark:text-gray-300 mb-6 font-mono">
+        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 font-comfortaa">
           {isLoading ? "Syncing your chapters..." : statusMessage}
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           <div className="flex justify-between items-center">
-            <span className="font-game text-sm font-bold">
+            <span className="font-game text-xs sm:text-sm font-bold">
               Exercises Completed
             </span>
-            <span className="font-game text-sm font-bold">
+            <span className="font-game text-xs sm:text-sm font-bold">
               {safeCompleted} / {totalExercises}
             </span>
           </div>
-          <div className="w-full bg-gray-400 dark:bg-gray-600 rounded-none h-6 border-4 border-gray-800 shadow-[2px_2px_0_0_#000] dark:shadow-[2px_2px_0_0_#fff] overflow-hidden">
+          <div className="w-full bg-gray-400 dark:bg-gray-600 rounded-none h-5 sm:h-6 border-4 border-gray-800 shadow-[2px_2px_0_0_#000] dark:shadow-[2px_2px_0_0_#fff] overflow-hidden">
             <div
               className="bg-green-500 h-full border-r-4 border-gray-800 transition-all duration-500 relative"
               style={{ width: `${progressPercent}%` }}
@@ -91,8 +91,8 @@ const CourseStatus = ({
               <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600" />
             </div>
           </div>
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-gray-600 dark:text-gray-400 font-mono">
+          <div className="flex justify-between items-center text-[10px] sm:text-xs">
+            <span className="text-gray-600 dark:text-gray-400 font-comfortaa">
               {isLoading
                 ? "Loading progress..."
                 : safeCompleted === 0
@@ -105,18 +105,18 @@ const CourseStatus = ({
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2">
-          <div className="px-3 py-1 bg-yellow-400 text-yellow-800 border-2 border-yellow-600 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#d97706]">
+        <div className="mt-4 flex flex-wrap gap-2">
+          <div className="px-2 sm:px-3 py-1 bg-yellow-400 text-yellow-800 border-2 border-yellow-600 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#d97706] whitespace-nowrap">
             {courseDetail?.level?.toUpperCase() || "LEVEL"}
           </div>
-          <div className="px-3 py-1 bg-blue-400 text-blue-800 border-2 border-blue-600 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#1d4ed8]">
+          <div className="px-2 sm:px-3 py-1 bg-blue-400 text-blue-800 border-2 border-blue-600 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#1d4ed8] whitespace-nowrap">
             {totalChapters} CHAPTERS
           </div>
-          <div className="px-3 py-1 bg-green-400 text-green-900 border-2 border-green-600 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#15803d]">
+          <div className="px-2 sm:px-3 py-1 bg-green-400 text-green-900 border-2 border-green-600 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#15803d] whitespace-nowrap">
             {safeCompleted} EXERCISES
           </div>
           {enrolledDate && (
-            <div className="px-3 py-1 bg-white text-gray-900 border-2 border-gray-800 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#111]">
+            <div className="px-2 sm:px-3 py-1 bg-white text-gray-900 border-2 border-gray-800 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#111] whitespace-nowrap">
               Enrolled {enrolledDate}
             </div>
           )}

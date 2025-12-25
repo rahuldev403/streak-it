@@ -1,6 +1,7 @@
 import Image from "next/image";
 import boy from "@/public/boy.gif";
 import { useUser } from "@clerk/nextjs";
+import ActivityHeatmap from "./ActivityHeatmap";
 
 interface Stats {
   coursesEnrolled: number;
@@ -65,6 +66,7 @@ const UserStatus = ({ stats, loading }: UserStatusProps) => {
           </div>
         )}
       </div>
+      <ActivityHeatmap />
     </div>
   );
 };
