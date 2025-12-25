@@ -17,3 +17,11 @@ export const CourseTable = pgTable("courses", {
   level: varchar({ length: 100 }).default("beginner").notNull(),
   tags: varchar({ length: 500 }),
 });
+
+export const CourseChapterTable = pgTable("course_chapters", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  courseId: varchar({ length: 100 }).notNull(),
+  name: varchar({ length: 255 }).notNull(),
+  desc: varchar({ length: 1000 }).notNull(),
+  exercise: varchar({ length: 1000 }),
+});

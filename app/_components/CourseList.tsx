@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { LoadingScreen } from "@/components/ui/loading-screen";
+import Link from "next/link";
 type Course = {
   id: number;
   courseId: string;
@@ -44,29 +45,32 @@ const CourseList = () => {
         "
         >
           {courseList.map((course) => (
-            <div
+            <Link
               key={course.id}
+              href={`/courses/${course.courseId}`}
               className="border-4 border-gray-800 rounded-md w-[90%] mx-auto box-shadow-lg bg-gray-200 relative"
             >
-              <div className="p-2 ">
-                <Image
-                  src={course.bannerImage}
-                  alt={course.title}
-                  width={200}
-                  height={100}
-                  className="rounded-md object-cover w-full h-25 object-center"
-                />
+              <div>
+                <div className="p-2 ">
+                  <Image
+                    src={course.bannerImage}
+                    alt={course.title}
+                    width={200}
+                    height={100}
+                    className="rounded-md object-cover w-full h-25 object-center"
+                  />
+                </div>
+                <div className="p-2">
+                  <h3 className="font-game">{course.title}</h3>
+                  <p>{course.description}</p>
+                </div>
+                <div className="p-2 flex justify-between items-center">
+                  <span className="absolute bottom-0 right-0 px-3 py-1 text-xs font-bold bg-yellow-400 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-game rounded-br-md rounded-tl-md">
+                    {course.level}
+                  </span>
+                </div>
               </div>
-              <div className="p-2">
-                <h3 className="font-game">{course.title}</h3>
-                <p>{course.description}</p>
-              </div>
-              <div className="p-2 flex justify-between items-center">
-                <span className="absolute bottom-0 right-0 px-3 py-1 text-xs font-bold bg-yellow-400 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-game rounded-br-md rounded-tl-md">
-                  {course.level}
-                </span>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

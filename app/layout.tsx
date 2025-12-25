@@ -9,6 +9,7 @@ import {
 import "./globals.css";
 import Provider from "./Provider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,12 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} antialiased`}
         >
           <Provider>{children}</Provider>
+          <Toaster
+            position="top-right"
+            richColors
+            expand={true}
+            duration={4000}
+          />
         </body>
       </html>
     </ClerkProvider>
