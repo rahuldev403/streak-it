@@ -12,6 +12,7 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
 
 const courses = [
   {
@@ -67,7 +68,17 @@ const courses = [
 ];
 
 const Header_one = () => {
+  const params = useParams();
+  const pathname = usePathname();
   const { user } = useUser();
+
+  // Check if we're on a chapter page and extract chapter name
+  const isChapterPage =
+    pathname?.includes("/courses/") && params?.["chapter-name"];
+  const chapterName = isChapterPage
+    ? decodeURIComponent(params["chapter-name"] as string)
+    : null;
+
   return (
     <div className="flex justify-between items-center px-8 py-4 border-b border-gray-800 b-shadow-md ">
       <Link href="/">
@@ -75,6 +86,15 @@ const Header_one = () => {
           streak-setter
         </h2>
       </Link>
+
+      {/* Chapter name in center */}
+      {chapterName && (
+        <div className="flex-1 text-center">
+          <h3 className="font-game text-xl text-gray-800 dark:text-gray-200">
+            {chapterName}
+          </h3>
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         <DropdownMenu>

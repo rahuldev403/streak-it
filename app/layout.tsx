@@ -5,6 +5,7 @@ import {
   Rubik_Gemstones,
   Inter,
   Comfortaa,
+  Fira_Code,
 } from "next/font/google";
 import "./globals.css";
 import Provider from "./Provider";
@@ -43,6 +44,12 @@ const comfortaa = Comfortaa({
   weight: "400",
 });
 
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-fira-code",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,7 +64,7 @@ export default function RootLayout({
         style={{ colorScheme: "dark" }}
       >
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} ${firaCode.variable} antialiased`}
         >
           <Provider>{children}</Provider>
           <Toaster

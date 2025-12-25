@@ -7,13 +7,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Loader2, Play } from "lucide-react";
+import Link from "next/link";
 
 interface Chapter {
   id: number;
@@ -32,6 +32,7 @@ type Props = {
   isEnrolled?: boolean;
   completedExercises?: number;
   onCompleteChapter?: (chapterIndex: number) => Promise<void> | void;
+  courseId: string;
 };
 
 const CourseChapter = ({
@@ -43,6 +44,7 @@ const CourseChapter = ({
   isEnrolled,
   completedExercises = 0,
   onCompleteChapter,
+  courseId,
 }: Props) => {
   const [completingChapter, setCompletingChapter] = useState<number | null>(
     null
@@ -84,7 +86,12 @@ const CourseChapter = ({
   };
 
   if (loading || chaptersLoading) {
-    return <LoadingScreen message="Loading chapters..." size="md" />;
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mb-4"></div>
+        <p className="font-game text-xl">Loading chapters...</p>
+      </div>
+    );
   }
 
   if (chaptersError) {
@@ -134,6 +141,10 @@ const CourseChapter = ({
                 : status === "up-next"
                 ? "Up Next"
                 : "Locked";
+            const isLockedState =
+              !isEnrolled || status === "locked" || status === "up-next";
+            const isCurrent = status === "in-progress";
+            const isCompleted = status === "completed";
 
             return (
               <AccordionItem
@@ -177,17 +188,19 @@ const CourseChapter = ({
                     )}
 
                     <div className="flex gap-4 pt-4 flex-wrap">
-                      {isEnrolled ? (
+                      {!isLockedState ? (
                         <>
-                          <Button
-                            variant="pixel"
-                            onClick={() =>
-                              handlePlayChapter(chapter.id, chapter.name)
-                            }
-                            className="font-game border-4 border-gray-800 shadow-[4px_4px_0_0_#111]"
-                          >
-                            <Play className="w-5 h-5 mr-2" /> Start Chapter
-                          </Button>
+                          <Link href={`/courses/${courseId}/${chapter.name}`}>
+                            <Button
+                              variant="pixel"
+                              onClick={() =>
+                                handlePlayChapter(chapter.id, chapter.name)
+                              }
+                              className="font-game border-4 border-gray-800 shadow-[4px_4px_0_0_#111]"
+                            >
+                              <Play className="w-5 h-5 mr-2" /> Start Chapter
+                            </Button>
+                          </Link>
                           <Button
                             variant="outline"
                             className="font-game border-4 border-gray-800 rounded-none shadow-[4px_4px_0_0_#111]"
@@ -198,8 +211,9 @@ const CourseChapter = ({
                             variant="secondary"
                             onClick={() => handleCompleteClick(index)}
                             disabled={
-                              status === "completed" ||
-                              completingChapter === index
+                              isCompleted ||
+                              completingChapter === index ||
+                              !isCurrent
                             }
                             className="font-game border-4 border-gray-800 rounded-none shadow-[4px_4px_0_0_#111] min-w-40"
                           >
@@ -208,7 +222,7 @@ const CourseChapter = ({
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 Saving...
                               </>
-                            ) : status === "completed" ? (
+                            ) : isCompleted ? (
                               "Completed"
                             ) : (
                               "Mark Complete"
@@ -235,7 +249,11 @@ const CourseChapter = ({
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Enroll to unlock this chapter</p>
+                              <p>
+                                {isEnrolled
+                                  ? "Complete the previous chapter to unlock this one"
+                                  : "Enroll to unlock this chapter"}
+                              </p>
                             </TooltipContent>
                           </Tooltip>
 
@@ -256,7 +274,11 @@ const CourseChapter = ({
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Enroll to unlock this chapter</p>
+                              <p>
+                                {isEnrolled
+                                  ? "Complete the previous chapter to unlock this one"
+                                  : "Enroll to unlock this chapter"}
+                              </p>
                             </TooltipContent>
                           </Tooltip>
 
@@ -277,7 +299,11 @@ const CourseChapter = ({
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Enroll to unlock this chapter</p>
+                              <p>
+                                {isEnrolled
+                                  ? "Complete the previous chapter to unlock this one"
+                                  : "Enroll to unlock this chapter"}
+                              </p>
                             </TooltipContent>
                           </Tooltip>
                         </>

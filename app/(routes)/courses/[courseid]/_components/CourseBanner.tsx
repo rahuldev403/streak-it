@@ -9,7 +9,6 @@ import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { LoadingScreen } from "@/components/ui";
 
 interface Course {
   id: number;
@@ -80,7 +79,12 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
   return (
     <div className="flex justify-center items-center my-2">
       {loading ? (
-        <LoadingScreen message="Loading course banner..." size="lg" />
+        <div className="w-[80%] h-64 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
+            <p className="font-game text-xl">Loading course banner...</p>
+          </div>
+        </div>
       ) : (
         <div className="w-[80%] h-64 relative rounded-md overflow-hidden shadow-lg">
           <Image

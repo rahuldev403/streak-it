@@ -7,7 +7,6 @@ import axios from "axios";
 import { UserDeatailContext } from "./context/UserDetailContext";
 import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import Header_one from "./_components/Header_one";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 interface ProviderProps {
   children: ReactNode;
   [key: string]: unknown;
@@ -18,7 +17,14 @@ const GlobalLoadingScreen = React.memo(() => {
 
   if (!isLoading) return null;
 
-  return <LoadingScreen fullScreen message={loadingMessage} size="xl" />;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
+        <p className="font-game text-xl">{loadingMessage || "Loading..."}</p>
+      </div>
+    </div>
+  );
 });
 GlobalLoadingScreen.displayName = "GlobalLoadingScreen";
 

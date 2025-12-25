@@ -4,7 +4,6 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 import CourseBanner from "./_components/CourseBanner";
 import CourseChapter from "./_components/CourseChapter";
 import CourseStatus from "./_components/CourseStatus";
@@ -27,7 +26,7 @@ interface EnrolledCourse {
   progress: number;
 }
 
-interface Course {
+export interface Course {
   id: number;
   courseId: string;
   title: string;
@@ -38,6 +37,14 @@ interface Course {
   Chapters?: Chapter[];
   isEnrolled?: boolean;
   enrolledCourse?: EnrolledCourse | null;
+  completedChapters?: UserProgress[];
+}
+interface UserProgress {
+  id: number;
+  userId: string;
+  courseId: string;
+  chapterId: string;
+  updatedAt: string;
 }
 
 const CourseDetail = () => {
@@ -143,7 +150,14 @@ const CourseDetail = () => {
   );
 
   if (loading) {
-    return <LoadingScreen message="Loading course..." size="lg" />;
+    return (
+      <div className="h-[calc(100vh-73px)] w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
+          <p className="font-game text-xl">Loading course...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -187,6 +201,7 @@ const CourseDetail = () => {
             isEnrolled={isEnrolled}
             completedExercises={completedExercises}
             onCompleteChapter={handleChapterComplete}
+            courseId={course.courseId}
           />
         </div>
         <div className="col-span-2 flex flex-col gap-6 justify-between ">
