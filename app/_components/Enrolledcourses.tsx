@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import empty from "@/public/Questions-amico.svg";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 const Enrolledcourses = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   return (
@@ -20,12 +21,14 @@ const Enrolledcourses = () => {
             <h2 className="text-bold font-comfortaa text-3xl">
               No courses enrolled
             </h2>
-            <Button
-              variant={"pixel"}
-              className="mt-4 rounded-md text-black font-game"
-            >
-              Browse Courses
-            </Button>
+            <Link href="/courses">
+              <Button
+                variant={"pixel"}
+                className="mt-4 rounded-md text-black font-game"
+              >
+                Browse Courses
+              </Button>
+            </Link>
           </div>
         ) : (
           <div>courses</div>
