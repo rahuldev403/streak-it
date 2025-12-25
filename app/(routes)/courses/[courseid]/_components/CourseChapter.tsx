@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Play, Lock, Rocket, Dumbbell } from "lucide-react";
+import { Loader2, Play, Lock } from "lucide-react";
 import Link from "next/link";
 
 interface Chapter {
@@ -140,7 +140,7 @@ const CourseChapter = ({
   }
 
   return (
-    <div id="course-chapters" className="space-y-4 sm:space-y-6 px-4">
+    <div id="course-chapters" className="space-y-4 sm:space-y-6 ">
       <div className="rounded-lg bg-white dark:bg-gray-800 p-4 sm:p-6 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] max-h-210 overflow-y-auto">
         <h2 className="text-2xl sm:text-3xl font-bold font-game mb-4 sm:mb-6">
           Course Chapters
@@ -157,7 +157,7 @@ const CourseChapter = ({
                 : status === "up-next"
                 ? "Up Next"
                 : status === "premium-locked"
-                ? "Premium"
+                ? "🔒 Premium"
                 : "Locked";
             const isLockedState =
               !isEnrolled || status === "locked" || status === "up-next";
@@ -175,7 +175,7 @@ const CourseChapter = ({
                   className="px-3 sm:px-6 py-3 sm:py-4 hover:no-underline hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-game text-base sm:text-lg font-bold text-left hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] dark:hover:shadow-[2px_2px_0_0_#fff]"
                   disabled={isPremiumLocked}
                 >
-                  <div className="flex items-center gap-2 sm:gap-4 w-full min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-2 sm:gap-4 w-full">
                     <span className="bg-black text-white dark:bg-white dark:text-black rounded-none w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-base sm:text-lg font-bold border-2 border-gray-800 shadow-[2px_2px_0_0_#666] flex-shrink-0">
                       {isPremiumLocked ? (
                         <Lock className="w-4 h-4" />
@@ -184,7 +184,7 @@ const CourseChapter = ({
                       )}
                     </span>
                     <span
-                      className={`flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm sm:text-base ${
+                      className={`flex-1 truncate text-sm sm:text-base ${
                         isPremiumLocked
                           ? "text-gray-500 dark:text-gray-400"
                           : "text-black dark:text-white"
@@ -193,7 +193,7 @@ const CourseChapter = ({
                       {chapter.name}
                     </span>
                     <span
-                      className={`text-[10px] sm:text-xs font-mono border px-1 sm:px-2 py-0.5 rounded-none flex-shrink-0 whitespace-nowrap ${statusStyles[status]}`}
+                      className={`text-[10px] sm:text-xs font-mono border px-1 sm:px-2 py-0.5 rounded-none flex-shrink-0 ${statusStyles[status]}`}
                     >
                       {statusLabel}
                     </span>
@@ -213,15 +213,13 @@ const CourseChapter = ({
                           {totalChapters - FREE_CHAPTERS_LIMIT} remaining
                           chapters and get full access to this course!
                         </p>
-                        <Link href="/pricing">
-                          <Button
-                            variant="pixel"
-                            className="font-game bg-yellow-500 hover:bg-yellow-600 border-4 border-yellow-700"
-                          >
-                            <Rocket className="w-4 h-4 mr-2" />
-                            Upgrade to Premium
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="pixel"
+                          onClick={() => setIsPricingModalOpen(true)}
+                          className="font-game bg-yellow-500 hover:bg-yellow-600 border-4 border-yellow-700"
+                        >
+                          🚀 Upgrade to Premium
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -235,9 +233,8 @@ const CourseChapter = ({
 
                       {chapter.exercise && (
                         <div className="bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 rounded-none p-3 sm:p-4 shadow-[4px_4px_0_0_#d97706]">
-                          <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg flex items-center gap-2">
-                            <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" />
-                            Exercise Challenge
+                          <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg">
+                            💪 Exercise Challenge
                           </h4>
                           <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-mono">
                             {chapter.exercise}
@@ -376,7 +373,7 @@ const CourseChapter = ({
                               : `✨ ${
                                   totalChapters - completedCount
                                 } chapters left. Keep going!`
-                            : "Enroll to unlock chapter content."}
+                            : "🔒 Enroll to unlock chapter content."}
                         </p>
                       </div>
                     </div>

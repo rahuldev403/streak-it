@@ -52,7 +52,7 @@ interface UserProgress {
 const CourseDetail = () => {
   const { courseid } = useParams<{ courseid: string }>();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +60,7 @@ const CourseDetail = () => {
   const [chaptersLoading, setChaptersLoading] = useState(true);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
+  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
   // Check if device is small (mobile/tablet)
   useEffect(() => {
@@ -73,7 +74,22 @@ const CourseDetail = () => {
     return () => window.removeEventListener("resize", checkDeviceSize);
   }, []);
 
-  const hasPremiumAccess = user?.publicMetadata?.plan === "unlimited";
+  // Check subscription status from Clerk
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (!isLoaded || !user) return;
+
+      try {
+        const response = await axios.get("/api/user/subscription");
+        setHasPremiumAccess(response.data.hasPremium);
+      } catch (error) {
+        console.error("Failed to check subscription:", error);
+        setHasPremiumAccess(false);
+      }
+    };
+
+    checkSubscription();
+  }, [user, isLoaded]);
 
   const fetchCourse = useCallback(async () => {
     if (!courseid) return;
