@@ -9,56 +9,68 @@ import Link from "next/link";
 const Hero = () => {
   const { user } = useUser();
   return (
-    <div className="w-full relative h-screen overflow-hidden flex items-start justify-center pt-12 px-8">
-      <div
-        className="relative w-[80%] h-[80%] rounded-lg overflow-hidden shadow-2xl border-4 border-gray-800"
-        style={{ imageRendering: "pixelated" }}
+    <div className="flex flex-col items-center justify-center mt-1">
+      <h3
+        className="font-inter text-2xl bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent hidden md:block"
+        style={{
+          textShadow: "1px 1px 0 #000, 2px 2px 0 #fff, 3px 3px 0 #000",
+          fontFamily: "'Press Start 2P', 'Pixel', monospace",
+          letterSpacing: "2px",
+        }}
       >
-        <Image
-          src={bg}
-          alt="Background"
-          width={1000}
-          height={1000}
-          className="w-full h-full object-cover"
+        create the momentum you ever dreamed
+      </h3>
+      <div className="w-full relative h-screen overflow-hidden flex items-start justify-center pt-2 px-8">
+        <div
+          className="relative w-[80%] h-[80%] rounded-lg overflow-hidden shadow-2xl border-4 border-gray-800"
           style={{ imageRendering: "pixelated" }}
-        />
-      </div>
-      <div className="absolute w-full flex flex-col items-center justify-center h-full pointer-events-none">
-        <h2 className="font-bold text-7xl font-game text-white z-10">
-          <span className="text-purple-500">Start </span>Your
-        </h2>
-        <h2
-          className="font-bold text-7xl font-game text-gray-400 z-10"
-          style={{
-            textShadow: "2px 2px #000,-2px -2px 0 #000 , -2px 2px 0 #000",
-          }}
         >
-          coding adventure
-        </h2>
-        <h2 className="m-t-5 font-game text-3xl text-gray-300">
-          Beginner friendly coidng courses and projects
-        </h2>
-        {!user ? (
-          <SignInButton mode="modal" fallbackRedirectUrl="/">
-            <Button
-              className="text-black font-game rounded-md pt-3 mt-6 pointer-events-auto"
-              variant={"pixel"}
-            >
-              Get Started
-            </Button>
-          </SignInButton>
-        ) : (
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="pointer-events-auto">
+          <Image
+            src={bg}
+            alt="Background"
+            width={1000}
+            height={1000}
+            className="w-full h-full object-cover"
+            style={{ imageRendering: "pixelated" }}
+          />
+        </div>
+        <div className="absolute w-full flex flex-col items-center justify-center h-full pointer-events-none">
+          <h2 className="font-bold text-7xl font-game text-white z-10">
+            <span className="text-purple-500">Start </span>Your
+          </h2>
+          <h2
+            className="font-bold text-7xl font-game text-gray-400 z-10"
+            style={{
+              textShadow: "2px 2px #000,-2px -2px 0 #000 , -2px 2px 0 #000",
+            }}
+          >
+            coding adventure
+          </h2>
+          <h2 className="m-t-5 font-game text-3xl text-gray-300">
+            Beginner friendly coidng courses and projects
+          </h2>
+          {!user ? (
+            <SignInButton mode="modal" fallbackRedirectUrl="/">
               <Button
+                className="text-black font-game rounded-md pt-3 mt-6 pointer-events-auto"
                 variant={"pixel"}
-                className="rounded-md font-game text-black pt-3 mt-6"
               >
-                go to Dashboard
+                Get Started
               </Button>
-            </Link>
-          </div>
-        )}
+            </SignInButton>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link href="/dashboard" className="pointer-events-auto">
+                <Button
+                  variant={"pixel"}
+                  className="rounded-md font-game text-black pt-3 mt-6"
+                >
+                  go to Dashboard
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
