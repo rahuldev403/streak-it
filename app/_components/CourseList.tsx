@@ -46,7 +46,7 @@ const CourseList = () => {
           {courseList.map((course) => (
             <div
               key={course.id}
-              className="border-4 border-gray-800 rounded-md w-[90%] mx-auto box-shadow-lg bg-gray-200 "
+              className="border-4 border-gray-800 rounded-md w-[90%] mx-auto box-shadow-lg bg-gray-200 relative"
             >
               <div className="p-2 ">
                 <Image
@@ -62,7 +62,7 @@ const CourseList = () => {
                 <p>{course.description}</p>
               </div>
               <div className="p-2 flex justify-between items-center">
-                <span className="px-3 py-1 text-xs font-bold bg-yellow-400 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <span className="absolute bottom-0 right-0 px-3 py-1 text-xs font-bold bg-yellow-400 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-game rounded-br-md rounded-tl-md">
                   {course.level}
                 </span>
               </div>
