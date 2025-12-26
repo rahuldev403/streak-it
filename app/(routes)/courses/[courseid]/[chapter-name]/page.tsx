@@ -9,7 +9,8 @@ import ProblemStatement from "./_components/ProblemStatement";
 import PreviewPane from "./_components/PreviewPane";
 import { useParams, useRouter } from "next/navigation";
 import { MonitorIcon } from "lucide-react";
-
+import Image from "next/image";
+import editor from "@/public/code-challange/code-editor.png";
 const Page = () => {
   const params = useParams();
   const router = useRouter();
@@ -185,19 +186,27 @@ const Page = () => {
             <div className="h-full flex flex-col">
               {/* Header with buttons */}
               <div className="border-b-4 border-gray-800 bg-gray-800 p-2 flex items-center justify-between">
-                <h2 className="font-game text-white text-lg">💻 Code Editor</h2>
+                <h2 className="font-game text-white text-lg">
+                  {" "}
+                  <Image
+                    src={editor}
+                    alt="Code Editor"
+                    className="w-5 h-5 inline-block mr-2"
+                  />{" "}
+                  Code Editor
+                </h2>
                 <div className="flex gap-2">
                   <button
                     onClick={handleRunCode}
                     className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 border-2 border-black font-game text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000] transition-all"
                   >
-                    [RUN] Run
+                    Run
                   </button>
                   <button
                     onClick={handleSubmit}
                     className="px-3 py-1 bg-green-400 hover:bg-green-500 border-2 border-black font-game text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000] transition-all"
                   >
-                    [OK] Submit
+                    Submit
                   </button>
                 </div>
               </div>

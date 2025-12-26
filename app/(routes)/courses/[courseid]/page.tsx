@@ -10,7 +10,7 @@ import CourseStatus from "./_components/CourseStatus";
 import UpgradeToPro from "@/app/_components/UpgradeToPro";
 import { CommunityHelp } from "./_components/CommunityHelp";
 import { useUser } from "@clerk/nextjs";
-import { MonitorIcon } from "lucide-react";
+import { MonitorIcon, AlertTriangle, ArrowLeft } from "lucide-react";
 
 type Chapter = {
   id: number;
@@ -176,8 +176,9 @@ const CourseDetail = () => {
             <div className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
               <div className="max-w-md text-center border-4 border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-[8px_8px_0_0_#000] dark:shadow-[8px_8px_0_0_#fff]">
                 <MonitorIcon className="w-20 h-20 mx-auto mb-6 text-blue-600" />
-                <h2 className="font-game text-2xl mb-4 text-gray-900 dark:text-white">
-                  [!] Desktop Required
+                <h2 className="font-game text-2xl mb-4 text-gray-900 dark:text-white flex items-center justify-center gap-2">
+                  <AlertTriangle className="w-6 h-6" />
+                  Desktop Required
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
                   Course content and exercises are best viewed on a larger
@@ -189,9 +190,10 @@ const CourseDetail = () => {
                 </p>
                 <button
                   onClick={() => router.push("/courses")}
-                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white border-2 border-black font-game shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all"
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white border-2 border-black font-game shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all flex items-center gap-2 mx-auto"
                 >
-                  [←] Back to Courses
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Courses
                 </button>
               </div>
             </div>
@@ -209,6 +211,8 @@ const CourseDetail = () => {
       course?.isEnrolled,
       courseid,
       fetchCourse,
+      isSmallDevice,
+      router,
     ]
   );
 

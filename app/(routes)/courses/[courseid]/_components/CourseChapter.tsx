@@ -12,7 +12,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Play, Lock } from "lucide-react";
+import {
+  Loader2,
+  Play,
+  Lock,
+  Rocket,
+  Dumbbell,
+  Sparkles,
+  Flag,
+} from "lucide-react";
 import Link from "next/link";
 import { PricingModal } from "@/components/PricingModal";
 
@@ -173,7 +181,7 @@ const CourseChapter = ({
                   : status === "up-next"
                   ? "Up Next"
                   : status === "premium-locked"
-                  ? "🔒 Premium"
+                  ? "Premium"
                   : "Locked";
               const isLockedState =
                 !isEnrolled ||
@@ -235,9 +243,10 @@ const CourseChapter = ({
                           <Button
                             variant="pixel"
                             onClick={() => setIsPricingModalOpen(true)}
-                            className="font-game bg-yellow-500 hover:bg-yellow-600 border-4 border-yellow-700"
+                            className="font-game bg-yellow-500 hover:bg-yellow-600 border-4 border-yellow-700 flex items-center gap-2"
                           >
-                            🚀 Upgrade to Premium
+                            <Rocket className="w-4 h-4" />
+                            Upgrade to Premium
                           </Button>
                         </div>
                       </div>
@@ -252,8 +261,9 @@ const CourseChapter = ({
 
                         {chapter.exercise && (
                           <div className="bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 rounded-none p-3 sm:p-4 shadow-[4px_4px_0_0_#d97706]">
-                            <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg">
-                              💪 Exercise Challenge
+                            <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg flex items-center gap-2">
+                              <Dumbbell className="w-5 h-5" />
+                              Exercise Challenge
                             </h4>
                             <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-mono">
                               {chapter.exercise}
@@ -385,14 +395,26 @@ const CourseChapter = ({
                         </div>
 
                         <div className="mt-2 p-3 border-2 rounded-none bg-orange-100 dark:bg-orange-900/30 border-orange-400">
-                          <p className="text-xs font-mono">
-                            {isEnrolled
-                              ? completedCount >= totalChapters
-                                ? "🏁 You finished every chapter in this course!"
-                                : `✨ ${
-                                    totalChapters - completedCount
-                                  } chapters left. Keep going!`
-                              : "🔒 Enroll to unlock chapter content."}
+                          <p className="text-xs font-mono flex items-center gap-2">
+                            {isEnrolled ? (
+                              completedCount >= totalChapters ? (
+                                <>
+                                  <Flag className="w-4 h-4" /> You finished
+                                  every chapter in this course!
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="w-4 h-4" />{" "}
+                                  {totalChapters - completedCount} chapters
+                                  left. Keep going!
+                                </>
+                              )
+                            ) : (
+                              <>
+                                <Lock className="w-4 h-4" /> Enroll to unlock
+                                chapter content.
+                              </>
+                            )}
                           </p>
                         </div>
                       </div>

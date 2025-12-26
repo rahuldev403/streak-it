@@ -2,11 +2,13 @@
 
 import { ChapterContentData } from "@/types/chapter-content";
 import ReactMarkdown from "react-markdown";
-
+import Image from "next/image";
 interface ProblemStatementProps {
   content: ChapterContentData;
 }
-
+import idea from "@/public/code-challange/idea.png";
+import pr from "@/public/code-challange/magnifying-glass.png";
+import test from "@/public/code-challange/exam-time.png";
 export default function ProblemStatement({ content }: ProblemStatementProps) {
   return (
     <div className="h-full overflow-auto">
@@ -19,7 +21,8 @@ export default function ProblemStatement({ content }: ProblemStatementProps) {
           {/* Problem Statement */}
           <div className="border-4 border-gray-800 bg-yellow-100 dark:bg-yellow-900/30 p-4 shadow-[4px_4px_0_0_#000]">
             <h2 className="font-game text-lg mb-2 flex items-center gap-2">
-              [📝] Problem Statement
+             <Image src={pr} alt="Problem Statement" className="w-5 h-5" />
+             Problem Statement
             </h2>
             <div className="font-mono text-sm prose dark:prose-invert max-w-none">
               <ReactMarkdown>{content.problemStatement}</ReactMarkdown>
@@ -29,7 +32,8 @@ export default function ProblemStatement({ content }: ProblemStatementProps) {
           {/* Instructions */}
           <div className="border-4 border-gray-800 bg-blue-100 dark:bg-blue-900/30 p-4 shadow-[4px_4px_0_0_#000]">
             <h2 className="font-game text-lg mb-2 flex items-center gap-2">
-              [💡] Instructions
+              <Image src={idea} alt="Instructions" className="w-5 h-5" />
+              Instructions
             </h2>
             <div className="font-mono text-sm prose dark:prose-invert max-w-none">
               <ReactMarkdown>{content.instructions}</ReactMarkdown>
@@ -62,7 +66,8 @@ export default function ProblemStatement({ content }: ProblemStatementProps) {
           {content.testCases && content.testCases.length > 0 && (
             <div className="border-4 border-gray-800 bg-orange-100 dark:bg-orange-900/30 p-4 shadow-[4px_4px_0_0_#000]">
               <h2 className="font-game text-lg mb-3 flex items-center gap-2">
-                [TEST] Test Cases
+                <Image src={test} alt="Test Cases" className="w-5 h-5" />
+                Test Cases
               </h2>
               <div className="space-y-2">
                 {content.testCases.map((testCase, index) => (
