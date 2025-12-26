@@ -129,6 +129,11 @@
     @apply bg-background text-foreground;
   }
 
+  /* Apply font-normal globally to font-game */
+  .font-game {
+    font-weight: 400;
+  }
+
   /* Pixel-styled scrollbars */
   * {
     scrollbar-width: thin;

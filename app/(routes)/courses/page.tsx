@@ -27,12 +27,12 @@ const page = () => {
       <div className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-md text-center border-4 border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-[8px_8px_0_0_#000] dark:shadow-[8px_8px_0_0_#fff]">
           <MonitorIcon className="w-20 h-20 mx-auto mb-6 text-purple-600" />
-          <h2 className="font-game text-2xl mb-4 text-gray-900 dark:text-white">
+          <h2 className="font-game font-normal text-2xl mb-4 text-gray-900 dark:text-white">
             [!] Desktop Required
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
             Go to a bigger screen to enjoy the{" "}
-            <span className="font-game text-purple-600 dark:text-purple-400">
+            <span className="font-game font-normal text-purple-600 dark:text-purple-400">
               next gen - coding adventure
             </span>
           </p>
@@ -42,7 +42,7 @@ const page = () => {
           </p>
           <button
             onClick={() => router.push("/")}
-            className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white border-2 border-black font-game shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all"
+            className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white border-2 border-black font-game font-normal shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all"
           >
             [←] Back to Home
           </button>
@@ -61,10 +61,10 @@ const page = () => {
           className="border-4 border-gray-800 w-full h-full object-cover"
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center bg-black/40 pointer-events-none">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-game font-bold text-white drop-shadow-lg">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-game font-normal font-bold text-white drop-shadow-lg">
             Explore Our Courses
           </h1>
-          <p className="text-sm sm:text-base md:text-lg font-game text-white drop-shadow-lg mt-2 px-4 text-center">
+          <p className="text-sm sm:text-base md:text-lg font-game font-normal text-white drop-shadow-lg mt-2 px-4 text-center">
             Dive into a variety of courses designed to enhance your skills and
             knowledge.
           </p>

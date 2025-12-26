@@ -82,7 +82,7 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
         <div className="w-full max-w-7xl h-40 sm:h-48 md:h-56 lg:h-64 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
-            <p className="font-game text-sm sm:text-base md:text-xl">
+            <p className="font-game font-normal text-sm sm:text-base md:text-xl">
               Loading course banner...
             </p>
           </div>
@@ -96,7 +96,7 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
             objectFit="cover"
           />
           <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-start p-3 sm:p-4 md:p-6 lg:p-8">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2 font-game drop-shadow-lg">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2 font-game font-normal drop-shadow-lg">
               {courseDetail?.title}
             </h1>
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white mb-2 sm:mb-3 md:mb-4 font-comfortaa max-w-2xl line-clamp-2 sm:line-clamp-3 drop-shadow-lg text-start">
@@ -105,7 +105,7 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-4">
               {!courseDetail?.isEnrolled ? (
                 <Button
-                  className="font-game rounded-md text-xs sm:text-sm md:text-base lg:text-lg px-3 sm:px-4 md:px-6 w-full sm:w-auto"
+                  className="font-game font-normal rounded-md text-xs sm:text-sm md:text-base lg:text-lg px-3 sm:px-4 md:px-6 w-full sm:w-auto"
                   onClick={EnrollCourse}
                   disabled={!canEnroll}
                   variant={"pixel"}
@@ -122,10 +122,10 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
               ) : (
                 <Button
                   variant={"pixel"}
-                  className="font-game rounded-md px-3 sm:px-4 md:px-6 w-full sm:w-auto"
+                  className="font-game font-normal rounded-md px-3 sm:px-4 md:px-6 w-full sm:w-auto"
                   onClick={handleContinueScroll}
                 >
-                  <span className="font-game text-xs sm:text-sm md:text-base lg:text-lg">
+                  <span className="font-game font-normal text-xs sm:text-sm md:text-base lg:text-lg">
                     continue to course &rarr;
                   </span>
                 </Button>

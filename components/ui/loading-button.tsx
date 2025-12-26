@@ -1,11 +1,16 @@
 import React from "react";
-import { Button, ButtonProps } from "./button";
+import { Button } from "./button";
 import { LottieLoader } from "./lottie-loader";
 import { cn } from "@/lib/utils";
+import { VariantProps } from "class-variance-authority";
+import { buttonVariants } from "./button";
 
-interface LoadingButtonProps extends ButtonProps {
+interface LoadingButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
   loading?: boolean;
   loadingText?: string;
+  children?: React.ReactNode;
 }
 
 const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(

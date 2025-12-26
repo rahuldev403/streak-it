@@ -36,11 +36,11 @@ const CourseList = () => {
 
   return (
     <div className="flex flex-col justify-center items-center mt-5 p-4 border-2 h-auto pointer-events-auto">
-      <h2 className="font-game text-black font-bold text-3xl">All Courses</h2>
+      <h2 className="font-game font-normal text-black font-bold text-3xl">All Courses</h2>
       {loading ? (
         <div className="flex flex-col items-center justify-center py-12">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mb-4"></div>
-          <p className="font-game text-xl">Loading courses...</p>
+          <p className="font-game font-normal text-xl">Loading courses...</p>
         </div>
       ) : (
         <div
@@ -69,11 +69,11 @@ const CourseList = () => {
                     />
                   </div>
                   <div className="p-2">
-                    <h3 className="font-game">{course.title}</h3>
+                    <h3 className="font-game font-normal">{course.title}</h3>
                     <p>{course.description}</p>
                   </div>
                   <div className="p-2 flex justify-between items-center">
-                    <span className="absolute bottom-0 right-0 px-3 py-1 text-xs font-bold bg-yellow-400 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-game rounded-br-md rounded-tl-md">
+                    <span className="absolute bottom-0 right-0 px-3 py-1 text-xs font-bold bg-yellow-400 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-game font-normal rounded-br-md rounded-tl-md">
                       {course.level}
                     </span>
                   </div>

@@ -205,7 +205,7 @@ const AdminPage = () => {
     <div className="container mx-auto p-4 md:p-8 max-w-6xl">
       <div className="space-y-8">
         <div className="text-center border-4 border-black p-6 bg-gradient-to-r from-purple-400/20 to-pink-400/20">
-          <h1 className="text-4xl font-bold font-game text-primary mb-4">
+          <h1 className="text-4xl font-bold font-game font-normal text-primary mb-4">
             🔧 Admin Dashboard
           </h1>
           <p className="text-lg font-comfortaa">
@@ -214,7 +214,7 @@ const AdminPage = () => {
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 font-game">
+          <TabsList className="grid w-full grid-cols-4 font-game font-normal">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="chapters">Chapters</TabsTrigger>
@@ -224,7 +224,7 @@ const AdminPage = () => {
           {/* USER MANAGEMENT TAB */}
           <TabsContent value="users" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game mb-4">
+              <h2 className="text-2xl font-bold font-game font-normal mb-4">
                 👥 User Subscription Management
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -233,7 +233,7 @@ const AdminPage = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     User Email
                   </label>
                   <Input
@@ -246,11 +246,11 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Subscription Plan
                   </label>
                   <Select value={subscription} onValueChange={setSubscription}>
-                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game">
+                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
                       <SelectValue placeholder="Select plan" />
                     </SelectTrigger>
                     <SelectContent>
@@ -262,9 +262,8 @@ const AdminPage = () => {
 
                 <LoadingButton
                   onClick={handleUpdateSubscription}
-                  isLoading={isLoading}
-                  variant="pixel"
-                  className="w-full font-game"
+                  loading={isLoading}
+                  className="w-full font-game font-normal"
                 >
                   Update Subscription
                 </LoadingButton>
@@ -275,7 +274,7 @@ const AdminPage = () => {
           {/* COURSE MANAGEMENT TAB */}
           <TabsContent value="courses" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game mb-4">
+              <h2 className="text-2xl font-bold font-game font-normal mb-4">
                 📚 Add New Course
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -284,7 +283,7 @@ const AdminPage = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Course ID (URL slug) *
                   </label>
                   <Input
@@ -298,7 +297,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Course Title *
                   </label>
                   <Input
@@ -312,7 +311,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Description *
                   </label>
                   <Textarea
@@ -329,7 +328,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Banner Image URL
                   </label>
                   <Input
@@ -346,14 +345,16 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">Level</label>
+                  <label className="font-game font-normal text-sm mb-2 block">
+                    Level
+                  </label>
                   <Select
                     value={courseData.level}
                     onValueChange={(value) =>
                       setCourseData({ ...courseData, level: value })
                     }
                   >
-                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game">
+                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -365,7 +366,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Tags (comma separated)
                   </label>
                   <Input
@@ -380,9 +381,8 @@ const AdminPage = () => {
 
                 <LoadingButton
                   onClick={handleAddCourse}
-                  isLoading={isLoading}
-                  variant="pixel"
-                  className="w-full font-game"
+                  loading={isLoading}
+                  className="w-full font-game font-normal"
                 >
                   Add Course
                 </LoadingButton>
@@ -393,7 +393,7 @@ const AdminPage = () => {
           {/* CHAPTER MANAGEMENT TAB */}
           <TabsContent value="chapters" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game mb-4">
+              <h2 className="text-2xl font-bold font-game font-normal mb-4">
                 📖 Add New Chapter
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -402,7 +402,7 @@ const AdminPage = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Course ID *
                   </label>
                   <Input
@@ -419,7 +419,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Chapter Name *
                   </label>
                   <Input
@@ -433,7 +433,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Description *
                   </label>
                   <Textarea
@@ -447,7 +447,7 @@ const AdminPage = () => {
                 </div>
 
                 <div>
-                  <label className="font-game text-sm mb-2 block">
+                  <label className="font-game font-normal text-sm mb-2 block">
                     Exercise (optional)
                   </label>
                   <Textarea
@@ -465,9 +465,8 @@ const AdminPage = () => {
 
                 <LoadingButton
                   onClick={handleAddChapter}
-                  isLoading={isLoading}
-                  variant="pixel"
-                  className="w-full font-game"
+                  loading={isLoading}
+                  className="w-full font-game font-normal"
                 >
                   Add Chapter
                 </LoadingButton>
@@ -475,7 +474,7 @@ const AdminPage = () => {
             </div>
 
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game mb-4">
+              <h2 className="text-2xl font-bold font-game font-normal mb-4">
                 📦 Bulk Load Chapters
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -484,9 +483,8 @@ const AdminPage = () => {
 
               <LoadingButton
                 onClick={handleSaveChapters}
-                isLoading={isLoading}
-                variant="pixel"
-                className="w-full font-game"
+                loading={isLoading}
+                className="w-full font-game font-normal"
               >
                 Load Sample Chapters
               </LoadingButton>
@@ -496,7 +494,7 @@ const AdminPage = () => {
           {/* CONTENT MANAGEMENT TAB */}
           <TabsContent value="content" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game mb-4">
+              <h2 className="text-2xl font-bold font-game font-normal mb-4">
                 💾 Chapter Content (HTML/CSS/JS)
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -514,9 +512,8 @@ const AdminPage = () => {
 
               <LoadingButton
                 onClick={handleSeedContent}
-                isLoading={isLoading}
-                variant="pixel"
-                className="w-full font-game"
+                loading={isLoading}
+                className="w-full font-game font-normal"
               >
                 Seed Chapter Content
               </LoadingButton>

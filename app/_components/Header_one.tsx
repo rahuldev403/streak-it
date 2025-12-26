@@ -58,7 +58,7 @@ const Header_one = () => {
   return (
     <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-gray-800 b-shadow-md">
       <Link href="/" className="flex-shrink-0">
-        <h2 className="font-bold font-game bg-gradient-to-r from-[#af38cd] via-[#210125] to-[#8713e6] bg-clip-text text-transparent text-xl sm:text-2xl lg:text-3xl">
+        <h2 className="font-bold font-game font-normal bg-gradient-to-r from-[#af38cd] via-[#210125] to-[#8713e6] bg-clip-text text-transparent text-xl sm:text-2xl lg:text-3xl">
           streak-setter
         </h2>
       </Link>
@@ -66,7 +66,7 @@ const Header_one = () => {
       {/* Chapter name in center - hide on small screens */}
       {chapterName && (
         <div className="hidden md:flex flex-1 text-center mx-4">
-          <h3 className="font-game text-lg lg:text-xl text-gray-800 dark:text-gray-200 truncate">
+          <h3 className="font-game font-normal text-lg lg:text-xl text-gray-800 dark:text-gray-200 truncate">
             {chapterName}
           </h3>
         </div>
@@ -77,7 +77,7 @@ const Header_one = () => {
           <DropdownMenuTrigger asChild>
             <Button
               variant="pixel"
-              className="font-game text-black rounded-md text-xs sm:text-sm px-3 sm:px-4"
+              className="font-game font-normal text-black rounded-md text-xs sm:text-sm px-3 sm:px-4"
             >
               <span className="hidden sm:inline">Menu</span>
               <span className="sm:hidden">☰</span>
@@ -94,7 +94,7 @@ const Header_one = () => {
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="font-game w-screen sm:w-auto max-w-[calc(100vw-2rem)]">
+          <DropdownMenuContent className="font-game font-normal w-screen sm:w-auto max-w-[calc(100vw-2rem)]">
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Link href="/courses">Courses</Link>
@@ -122,7 +122,7 @@ const Header_one = () => {
                         href={`/courses/${course.courseId}`}
                         className="flex flex-col items-start gap-1 p-3 rounded-md hover:bg-accent transition-colors w-full"
                       >
-                        <span className="font-game text-sm font-semibold text-foreground">
+                        <span className="font-game font-normal text-sm font-semibold text-foreground">
                           {course.title}
                         </span>
                         <span className="font-comfortaa text-xs text-muted-foreground leading-relaxed">
@@ -151,7 +151,7 @@ const Header_one = () => {
         {!user ? (
           <SignInButton mode="modal" fallbackRedirectUrl="/">
             <Button
-              className="text-black font-game rounded-md text-xs sm:text-sm px-3 sm:px-4"
+              className="text-black font-game font-normal rounded-md text-xs sm:text-sm px-3 sm:px-4"
               variant={"pixel"}
             >
               <span className="hidden sm:inline">Sign Up</span>
@@ -163,7 +163,7 @@ const Header_one = () => {
             <Link href="/dashboard">
               <Button
                 variant={"pixel"}
-                className="rounded-md text-black font-game text-xs sm:text-sm px-3 sm:px-4"
+                className="rounded-md text-black font-game font-normal text-xs sm:text-sm px-3 sm:px-4"
               >
                 <span className="hidden sm:inline">Dashboard</span>
                 <LayoutDashboard className="sm:hidden w-4 h-4" />
@@ -173,7 +173,7 @@ const Header_one = () => {
               <Link href="/admin">
                 <Button
                   variant={"pixel"}
-                  className="rounded-md text-black font-game text-xs sm:text-sm px-3 sm:px-4"
+                  className="rounded-md text-black font-game font-normal text-xs sm:text-sm px-3 sm:px-4"
                 >
                   <span className="hidden sm:inline">Admin</span>
                   <Settings className="sm:hidden w-4 h-4" />

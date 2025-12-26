@@ -66,7 +66,7 @@ const CourseStatus = ({
       <div className="p-4 sm:p-6 bg-gray-200 dark:bg-gray-800 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] min-h-60 sm:min-h-80 rounded-md">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <Image src={progress} alt="Progress" width={24} height={24} />
-          <h3 className="font-bold font-game text-lg sm:text-xl md:text-2xl text-black dark:text-white">
+          <h3 className="font-bold font-game font-normal text-lg sm:text-xl md:text-2xl text-black dark:text-white">
             Course Progress
           </h3>
         </div>
@@ -92,10 +92,10 @@ const CourseStatus = ({
 
         <div className="space-y-2 sm:space-y-3">
           <div className="flex justify-between items-center">
-            <span className="font-game text-xs sm:text-sm font-bold">
+            <span className="font-game font-normal text-xs sm:text-sm font-bold">
               Exercises Completed
             </span>
-            <span className="font-game text-xs sm:text-sm font-bold">
+            <span className="font-game font-normal text-xs sm:text-sm font-bold">
               {safeCompleted} / {totalExercises}
             </span>
           </div>
@@ -122,17 +122,17 @@ const CourseStatus = ({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <div className="px-2 sm:px-3 py-1 bg-yellow-400 text-yellow-800 border-2 border-yellow-600 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#d97706] whitespace-nowrap">
+          <div className="px-2 sm:px-3 py-1 bg-yellow-400 text-yellow-800 border-2 border-yellow-600 rounded-none text-[10px] sm:text-xs font-bold font-game font-normal shadow-[2px_2px_0_0_#d97706] whitespace-nowrap">
             {courseDetail?.level?.toUpperCase() || "LEVEL"}
           </div>
-          <div className="px-2 sm:px-3 py-1 bg-blue-400 text-blue-800 border-2 border-blue-600 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#1d4ed8] whitespace-nowrap">
+          <div className="px-2 sm:px-3 py-1 bg-blue-400 text-blue-800 border-2 border-blue-600 rounded-none text-[10px] sm:text-xs font-bold font-game font-normal shadow-[2px_2px_0_0_#1d4ed8] whitespace-nowrap">
             {totalChapters} CHAPTERS
           </div>
-          <div className="px-2 sm:px-3 py-1 bg-green-400 text-green-900 border-2 border-green-600 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#15803d] whitespace-nowrap">
+          <div className="px-2 sm:px-3 py-1 bg-green-400 text-green-900 border-2 border-green-600 rounded-none text-[10px] sm:text-xs font-bold font-game font-normal shadow-[2px_2px_0_0_#15803d] whitespace-nowrap">
             {safeCompleted} EXERCISES
           </div>
           {enrolledDate && (
-            <div className="px-2 sm:px-3 py-1 bg-white text-gray-900 border-2 border-gray-800 rounded-none text-[10px] sm:text-xs font-bold font-game shadow-[2px_2px_0_0_#111] whitespace-nowrap">
+            <div className="px-2 sm:px-3 py-1 bg-white text-gray-900 border-2 border-gray-800 rounded-none text-[10px] sm:text-xs font-bold font-game font-normal shadow-[2px_2px_0_0_#111] whitespace-nowrap">
               Enrolled {enrolledDate}
             </div>
           )}

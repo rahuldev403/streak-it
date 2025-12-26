@@ -29,12 +29,12 @@ const Enrolledcourses = ({
   if (loading) {
     return (
       <div className="mt-8">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-game">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-game font-normal">
           Enrolled Courses
         </h2>
         <div className="flex flex-col items-center justify-center p-12 bg-muted/50 border-4 border-dotted border-muted rounded-lg mt-2">
           <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 dark:border-white mb-4"></div>
-          <p className="font-game text-lg">Loading courses...</p>
+          <p className="font-game font-normal text-lg">Loading courses...</p>
         </div>
       </div>
     );
@@ -42,7 +42,7 @@ const Enrolledcourses = ({
 
   return (
     <div className="mt-4 sm:mt-6 lg:mt-8">
-      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-game">
+      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-game font-normal">
         Enrolled Courses
       </h2>
       <div className="max-h-[400px] overflow-y-auto">
@@ -61,7 +61,7 @@ const Enrolledcourses = ({
             <Link href="/courses">
               <Button
                 variant={"pixel"}
-                className="mt-4 rounded-md text-black font-game text-xs sm:text-sm md:text-base"
+                className="mt-4 rounded-md text-black font-game font-normal text-xs sm:text-sm md:text-base"
               >
                 Browse Courses
               </Button>
@@ -94,7 +94,7 @@ const Enrolledcourses = ({
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-game text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
+                        <h3 className="font-game font-normal text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
                           {course.title}
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
@@ -102,11 +102,11 @@ const Enrolledcourses = ({
                         </p>
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center justify-between text-xs sm:text-sm">
-                            <span className="font-game text-gray-700 dark:text-gray-300">
+                            <span className="font-game font-normal text-gray-700 dark:text-gray-300">
                               Progress: {course.completedChapters} /{" "}
                               {course.totalChapters} chapters
                             </span>
-                            <span className="font-game text-blue-600 dark:text-blue-400 font-bold">
+                            <span className="font-game font-normal text-blue-600 dark:text-blue-400 font-bold">
                               {progressPercent}%
                             </span>
                           </div>

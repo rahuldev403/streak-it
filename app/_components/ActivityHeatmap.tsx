@@ -82,7 +82,7 @@ const ActivityHeatmap = () => {
 
   return (
     <div className="mt-4 sm:mt-6 w-full">
-      <h3 className="font-game text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-4 text-center">
+      <h3 className="font-game font-normal text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-4 text-center">
         Your Activity - {getCurrentMonthName()}
       </h3>
       <div className="overflow-x-auto pb-2">
@@ -107,7 +107,7 @@ const ActivityHeatmap = () => {
         </div>
       </div>
       <div className="flex justify-center items-center gap-1 sm:gap-2 mt-3 sm:mt-4">
-        <span className="font-game text-[10px] sm:text-xs">Less</span>
+        <span className="font-game font-normal text-[10px] sm:text-xs">Less</span>
         <div className="flex gap-1">
           {[0, 1, 3, 5, 7].map((level) => (
             <div
@@ -119,7 +119,7 @@ const ActivityHeatmap = () => {
             />
           ))}
         </div>
-        <span className="font-game text-xs">More</span>
+        <span className="font-game font-normal text-xs">More</span>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import crown from "@/public/crown.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,7 +46,10 @@ const UpgradeToPro = () => {
 
   if (hasPremiumAccess) {
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
         className="flex flex-col justify-center items-center border-4 border-black p-6 rounded-lg shadow-2xl bg-linear-to-br from-green-400/30 to-emerald-500/30"
         style={{
           imageRendering: "pixelated",
@@ -53,27 +57,53 @@ const UpgradeToPro = () => {
             "repeating-linear-gradient(90deg, #000 0, #000 4px, transparent 4px, transparent 8px) 4",
         }}
       >
-        <Image src={crown} alt="Premium" width={50} height={50} />
-        <h2 className="font-bold mt-4 font-comfortaa text-green-700 dark:text-green-300">
-          Premium Member
-        </h2>
-        <h5 className="font-comfortaa font-bold text-center mb-2 text-green-600 dark:text-green-400 flex items-center gap-2">
-          You have unlimited access to all courses!
-        </h5>
-        <Button
-          variant={"pixel"}
-          size="lg"
-          className="font-game font-bold bg-green-500 hover:bg-green-600 border-green-700"
-          disabled
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          Active Premium
-        </Button>
-      </div>
+          <Image src={crown} alt="Premium" width={50} height={50} />
+        </motion.div>
+        <motion.h2
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="font-bold mt-4 font-comfortaa text-green-700 dark:text-green-300"
+        >
+          Premium Member
+        </motion.h2>
+        <motion.h5
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="font-comfortaa font-bold text-center mb-2 text-green-600 dark:text-green-400 flex items-center gap-2"
+        >
+          You have unlimited access to all courses!
+        </motion.h5>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <Button
+            variant={"pixel"}
+            size="lg"
+            className="font-game font-normal font-bold bg-green-500 hover:bg-green-600 border-green-700"
+            disabled
+          >
+            Active Premium
+          </Button>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.02 }}
       className="flex flex-col justify-center items-center border-4 border-black p-6  rounded-lg shadow-2xl bg-yellow-400/20"
       style={{
         imageRendering: "pixelated",
@@ -81,17 +111,51 @@ const UpgradeToPro = () => {
           "repeating-linear-gradient(90deg, #000 0, #000 4px, transparent 4px, transparent 8px) 4",
       }}
     >
-      <Image src={crown} alt="Crown" width={50} height={50} />
-      <h2 className=" font-bold mt-4 font-comfortaa">Upgrade to Pro</h2>
-      <h5 className="font-comfortaa font-bold text-center mb-2">
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
+        whileHover={{
+          rotate: [0, -10, 10, -10, 0],
+          transition: { duration: 0.5 },
+        }}
+      >
+        <Image src={crown} alt="Crown" width={50} height={50} />
+      </motion.div>
+      <motion.h2
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className=" font-bold mt-4 font-comfortaa"
+      >
+        Upgrade to Pro
+      </motion.h2>
+      <motion.h5
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="font-comfortaa font-bold text-center mb-2"
+      >
         join membership and get all course access
-      </h5>
-      <Link href="/pricing">
-        <Button variant={"pixel"} size="lg" className="font-game font-bold">
-          Upgrade Now
-        </Button>
-      </Link>
-    </div>
+      </motion.h5>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Link href="/pricing">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant={"pixel"}
+              size="lg"
+              className="font-game font-normal font-bold"
+            >
+              Upgrade Now
+            </Button>
+          </motion.div>
+        </Link>
+      </motion.div>
+    </motion.div>
   );
 };
 

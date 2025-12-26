@@ -79,10 +79,10 @@ const ExploreMore = () => {
   return (
     <div className="w-full py-6 sm:py-8 md:py-12 px-2 sm:px-4 md:px-8">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-game text-center mb-2 sm:mb-3 text-black dark:text-white">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-game font-normal text-center mb-2 sm:mb-3 text-black dark:text-white">
           Coming Soon
         </h2>
-        <p className="text-center text-gray-400 mb-4 sm:mb-6 md:mb-8 font-game text-xs sm:text-sm md:text-base">
+        <p className="text-center text-gray-400 mb-4 sm:mb-6 md:mb-8 font-game font-normal text-xs sm:text-sm md:text-base">
           Exciting new features and learning opportunities on the horizon
         </p>
 
@@ -107,10 +107,10 @@ const ExploreMore = () => {
                         />
                       </div>
                       <div className="flex flex-col gap-1 sm:gap-2 text-center sm:text-left">
-                        <CardTitle className="font-game text-base sm:text-lg md:text-xl lg:text-2xl text-black dark:text-white">
+                        <CardTitle className="font-game font-normal text-base sm:text-lg md:text-xl lg:text-2xl text-black dark:text-white">
                           {card.title}
                         </CardTitle>
-                        <CardDescription className="font-game text-xs sm:text-sm md:text-base text-gray-700 dark:text-gray-300">
+                        <CardDescription className="font-game font-normal text-xs sm:text-sm md:text-base text-gray-700 dark:text-gray-300">
                           {card.description}
                         </CardDescription>
                       </div>

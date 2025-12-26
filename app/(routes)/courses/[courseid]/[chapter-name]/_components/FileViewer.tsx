@@ -33,7 +33,7 @@ export default function FileViewer({
           <button
             key={file.name}
             onClick={() => setActiveFileIndex(index)}
-            className={`px-4 py-2 font-game text-sm whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 font-game font-normal text-sm whitespace-nowrap transition-colors ${
               activeFileIndex === index
                 ? "bg-[#1e1e1e] text-yellow-400 border-b-4 border-yellow-400"
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"

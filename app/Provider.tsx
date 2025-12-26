@@ -21,7 +21,7 @@ const GlobalLoadingScreen = React.memo(() => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="text-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
-        <p className="font-game text-xl">{loadingMessage || "Loading..."}</p>
+        <p className="font-game font-normal text-xl">{loadingMessage || "Loading..."}</p>
       </div>
     </div>
   );

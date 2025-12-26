@@ -24,18 +24,20 @@ export const GET = async (req: NextRequest) => {
       }
 
       let isEnrolled = false;
+      let enrolledCourse: any[] = [];
 
-      const enrolledCourse = await db
-        .select()
-        .from(EnrolledCourseTable)
-        .where(
-          and(
-            eq(EnrolledCourseTable.courseId, courseId),
-
-            eq(EnrolledCourseTable.userId, user?.id)
-          )
-        );
-      isEnrolled = enrolledCourse.length > 0;
+      if (user?.id) {
+        enrolledCourse = await db
+          .select()
+          .from(EnrolledCourseTable)
+          .where(
+            and(
+              eq(EnrolledCourseTable.courseId, courseId),
+              eq(EnrolledCourseTable.userId, user.id)
+            )
+          );
+        isEnrolled = enrolledCourse.length > 0;
+      }
 
       return NextResponse.json({
         ...result[0],

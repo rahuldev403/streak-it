@@ -19,7 +19,7 @@ export const CommunityHelp = ({ courseId }: CommunityHelpProps) => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-black dark:text-white" />
-          <CardTitle className="text-base sm:text-lg md:text-xl font-game">
+          <CardTitle className="text-base sm:text-lg md:text-xl font-game font-normal">
             Ask Question in Community
           </CardTitle>
         </div>
@@ -35,7 +35,7 @@ export const CommunityHelp = ({ courseId }: CommunityHelpProps) => {
         </p>
         <Link href={`/community?course=${courseId}`}>
           <Button
-            className="w-full font-game rounded-md text-xs sm:text-sm"
+            className="w-full font-game font-normal rounded-md text-xs sm:text-sm"
             variant={"pixel"}
           >
             Go to Community

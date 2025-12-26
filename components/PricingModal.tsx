@@ -24,7 +24,7 @@ export function PricingModal({ open, onOpenChange }: PricingModalProps) {
         }}
       >
         <DialogHeader>
-          <DialogTitle className="font-game text-3xl border-b-4 border-black pb-4 mb-4">
+          <DialogTitle className="font-game font-normal text-3xl border-b-4 border-black pb-4 mb-4">
             🚀 Upgrade to Premium
           </DialogTitle>
           <DialogDescription className="font-comfortaa text-lg">

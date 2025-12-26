@@ -37,12 +37,12 @@ export default function PreviewPane({
     <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
       <div className="border-b-4 border-gray-800 bg-gray-800 p-2 flex items-center justify-between">
-        <h2 className="font-game text-white text-lg flex items-center gap-2">
+        <h2 className="font-game font-normal text-white text-lg flex items-center gap-2">
           [VIEW] Live Preview
         </h2>
         <button
           onClick={onClose}
-          className="px-3 py-1 bg-red-400 hover:bg-red-500 border-2 border-black font-game text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000]"
+          className="px-3 py-1 bg-red-400 hover:bg-red-500 border-2 border-black font-game font-normal text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000]"
         >
           Close Preview
         </button>
@@ -62,7 +62,7 @@ export default function PreviewPane({
         {questionType === "react" && (
           <div className="flex items-center justify-center h-full p-8 text-center">
             <div>
-              <p className="text-xl font-game mb-4">[REACT] React Preview</p>
+              <p className="text-xl font-game font-normal mb-4">[REACT] React Preview</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 React preview coming soon!
                 <br />
@@ -75,7 +75,7 @@ export default function PreviewPane({
         {questionType === "nodejs" && (
           <div className="flex items-center justify-center h-full p-8 text-center">
             <div>
-              <p className="text-xl font-game mb-4">[NODE] Node.js API</p>
+              <p className="text-xl font-game font-normal mb-4">[NODE] Node.js API</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Server-side preview not available.
                 <br />
@@ -88,7 +88,7 @@ export default function PreviewPane({
         {questionType === "typescript" && (
           <div className="flex items-center justify-center h-full p-8 text-center">
             <div>
-              <p className="text-xl font-game mb-4">[TS] TypeScript</p>
+              <p className="text-xl font-game font-normal mb-4">[TS] TypeScript</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 TypeScript preview coming soon!
                 <br />
