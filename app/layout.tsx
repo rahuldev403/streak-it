@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   icons: {
     icon: `${favicon.src}`,
   },
-  metadataBase: new URL("https://streak-it.vercel.app/"),
+  metadataBase: new URL("https://streak-it-e.vercel.app/"),
 };
 
 // const GameFont = Rubik_Gemstones({
