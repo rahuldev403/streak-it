@@ -6,7 +6,6 @@ import crown from "@/public/crown.png";
 import Image from "next/image";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -103,7 +102,6 @@ const UpgradeToPro = () => {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ scale: 1.02 }}
       className="flex flex-col justify-center items-center border-4 border-black p-6  rounded-lg shadow-2xl bg-yellow-400/20"
       style={{
         imageRendering: "pixelated",
@@ -115,10 +113,6 @@ const UpgradeToPro = () => {
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
-        whileHover={{
-          rotate: [0, -10, 10, -10, 0],
-          transition: { duration: 0.5 },
-        }}
       >
         <Image src={crown} alt="Crown" width={50} height={50} />
       </motion.div>
