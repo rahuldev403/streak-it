@@ -45,7 +45,7 @@ const Enrolledcourses = ({
       <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-game font-normal">
         Enrolled Courses
       </h2>
-      <div className="max-h-[400px] overflow-y-auto">
+      <div className="max-h-100 overflow-y-auto">
         {enrolledCourses.length === 0 ? (
           <div className="flex flex-col items-center p-4 sm:p-7 bg-muted/50 border-4 border-dotted border-muted rounded-lg mt-2">
             <Image
@@ -68,7 +68,7 @@ const Enrolledcourses = ({
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 mt-4">
+          <div className="grid grid-cols-1 gap-4 mt-4 border-2 border-black dark:border-gray-700 p-4 rounded-lg overflow-auto">
             {enrolledCourses.map((course) => {
               const progressPercent =
                 course.totalChapters > 0
@@ -106,7 +106,7 @@ const Enrolledcourses = ({
                               Progress: {course.completedChapters} /{" "}
                               {course.totalChapters} chapters
                             </span>
-                            <span className="font-game font-normal text-blue-600 dark:text-blue-400 font-bold">
+                            <span className="font-game font-normal text-blue-600 dark:text-blue-400 ">
                               {progressPercent}%
                             </span>
                           </div>
