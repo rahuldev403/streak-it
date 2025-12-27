@@ -22,7 +22,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative overflow-hidden border-t-4 border-gray-800 bg-black">
+    <footer className="relative overflow-hidden border-gray-800 bg-black">
       <div className="absolute inset-0 pointer-events-none">
         <Image
           src={bg}
@@ -73,8 +73,9 @@ const Footer = () => {
                     PIXEL PERFECT CODE
                   </h3>
                   <p className="text-gray-300 text-sm sm:text-base font-comfortaa leading-relaxed max-w-md">
-                    Building 8-bit dreams with modern tech. Level up your skills
-                    with hands-on projects and retro-inspired learning.
+                    Hey I&apos;m Rahul Swain. Building 8-bit dreams with modern
+                    tech. Level up your skills with hands-on projects and
+                    retro-inspired learning.
                   </p>
                 </div>
               </div>
@@ -124,7 +125,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6 flex-col md:flex-row">
               <p className="text-gray-400 text-xs sm:text-sm text-center md:text-left font-comfortaa">
-                © {new Date().getFullYear()} Rahul Swain. ALL RIGHTS RESERVED.
+                © {new Date().getFullYear()} streak-it . ALL RIGHTS RESERVED.
               </p>
 
               {/* Made with love */}
@@ -137,7 +138,7 @@ const Footer = () => {
                 >
                   ❤
                 </motion.div>
-                <span>& Lemonade</span>
+                <span>& LEMONADE</span>
               </div>
             </div>
             <Button

@@ -27,10 +27,10 @@ const Description = () => {
             Code Like a Pro
           </h2>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-comfortaa font-normal leading-relaxed">
-            Master programming with hands-on projects and real-world challenges.
-            From beginner basics to advanced techniques, level up your skills
-            one line of code at a time. Join thousands of developers building
-            their future through interactive learning.
+            Master Web Development with hands-on projects and real-world
+            challenges. From beginner basics to advanced techniques, level up
+            your skills one line of code at a time. Join thousands of developers
+            building their future through interactive learning.
           </p>
         </motion.div>
 

@@ -7,7 +7,8 @@ import Link from "next/link";
 import herobg from "@/public/hero-bg.gif";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import bg from "@/public/bg.jpg";
-
+import logo from "@/public/logo.jpeg";
+import Image from "next/image";
 const Hero = () => {
   const { user } = useUser();
 
@@ -35,7 +36,7 @@ const Hero = () => {
             className="w-[90%] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[55%] max-w-4xl"
           >
             <div
-              className="border-4 border-purple-600 bg-black/50 p-6 sm:p-8 md:p-10 lg:p-12 "
+              className="border-4 border-purple-600 bg-black/50 p-6 sm:p-8 md:p-10 lg:p-12 rounded-md"
               style={{ imageRendering: "pixelated" }}
             >
               <h2 className="font-normal text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-game text-white text-center mb-3">
@@ -49,16 +50,24 @@ const Hero = () => {
                   Your
                 </span>
               </h2>
-              <h2
-                className="font-normal text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-game text-yellow-400 text-center mb-6"
-                style={{
-                  textShadow: "3px 3px #000, -2px -2px 0 #000, -2px 2px 0 #000",
-                }}
-              >
-                WEB DEV ADVENTURE
-              </h2>
-
-              <div className="h-1 w-50 bg-gray-400 mx-auto mb-4" />
+              <div className="flex flex-col items-center justify-center">
+                <h2
+                  className="font-normal text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-game text-yellow-400 text-center "
+                  style={{
+                    textShadow:
+                      "3px 3px #000, -2px -2px 0 #000, -2px 2px 0 #000",
+                  }}
+                >
+                  WEB DEV ADVENTURE WITH
+                </h2>
+                <Image
+                  src={logo}
+                  alt="Hero Decoration"
+                  width={200}
+                  className="md:h-12 h-20 mb-2 rounded-lg"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              </div>
 
               <p className="font-comfortaa text-xs sm:text-sm md:text-base text-gray-200 text-center mb-2 leading-relaxed">
                 Beginner friendly courses and interactive projects
@@ -71,12 +80,9 @@ const Hero = () => {
               <div className="flex justify-center mb-6">
                 {!user ? (
                   <SignInButton mode="modal" fallbackRedirectUrl="/">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
+                    <motion.div>
                       <Button
-                        className="text-black font-game font-normal text-xs sm:text-sm"
+                        className="text-black font-game font-normal text-xs sm:text-sm rounded-md"
                         variant={"pixel"}
                       >
                         Get Started →
@@ -85,17 +91,14 @@ const Hero = () => {
                   </SignInButton>
                 ) : (
                   <Link href="/dashboard">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
+                    <div>
                       <Button
                         variant={"pixel"}
-                        className="font-game font-normal text-black text-xs sm:text-sm"
+                        className="font-game font-normal text-black text-xs sm:text-sm rounded-md"
                       >
                         go to Dashboard →
                       </Button>
-                    </motion.div>
+                    </div>
                   </Link>
                 )}
               </div>
