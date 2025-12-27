@@ -9,7 +9,7 @@ A gamified web development learning platform where users can learn from basics t
 - **Course Management** - Structured courses with chapters and exercises
 - **Premium Access** - Free tier (4 chapters) with unlimited premium subscription
 - **Progress Tracking** - Track completed exercises and course completion
--  **Invite Friends** - Email invitations with beautiful templates
+- **Invite Friends** - Email invitations with beautiful templates
 
 ## Tech Stack
 
