@@ -11,12 +11,12 @@ const Hero = () => {
   const { user } = useUser();
 
   return (
-    <div className="flex flex-col items-center justify-center mt-1">
+    <div className="flex flex-col items-center justify-center mt-1 ">
       <motion.h3
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="font-inter text-sm sm:text-base md:text-xl lg:text-2xl bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent hidden sm:block px-4 text-center"
+        className="font-inter text-sm sm:text-base md:text-xl lg:text-2xl bg-linear-to-r from-pink-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent hidden sm:block px-4 text-center"
         style={{
           textShadow: "1px 1px 0 #000, 2px 2px 0 #fff, 3px 3px 0 #000",
           fontFamily: "'Press Start 2P', 'Pixel', monospace",
@@ -25,7 +25,7 @@ const Hero = () => {
       >
         create the momentum you ever dreamed
       </motion.h3>
-      <div className="w-full relative h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-screen overflow-hidden flex items-start justify-center pt-2 px-2 sm:px-4 md:px-8">
+      <div className="w-full relative h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-screen overflow-hidden flex items-start justify-center pt-2 px-2 ">
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -104,7 +104,7 @@ const Hero = () => {
                   >
                     <Button
                       variant={"pixel"}
-                      className="rounded-md font-game font-normal text-black pt-2 sm:pt-3 mt-4 sm:mt-6 text-xs sm:text-sm md:text-base"
+                      className="rounded-md font-game font-normal text-black text-xs sm:text-sm md:text-base pt-2 sm:pt-3 mt-4 sm:mt-6"
                     >
                       go to Dashboard
                     </Button>

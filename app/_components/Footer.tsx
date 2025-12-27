@@ -1,207 +1,191 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { Github, Twitter, Linkedin, Mail, Heart } from "lucide-react";
-
-const footerLinks = {
-  product: [
-    { name: "Courses", href: "/courses" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "Dashboard", href: "/dashboard" },
-  ],
-  resources: [
-    { name: "Documentation", href: "#" },
-    { name: "Blog", href: "#" },
-    { name: "Community", href: "#" },
-  ],
-  company: [
-    { name: "About", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "Contact", href: "#" },
-  ],
-  legal: [
-    { name: "Privacy", href: "#" },
-    { name: "Terms", href: "#" },
-    { name: "License", href: "#" },
-  ],
-};
-
-const socialLinks = [
-  { icon: Github, href: "#", label: "GitHub" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Mail, href: "#", label: "Email" },
-];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 12,
-    },
-  },
-};
+import GithubLogo from "@/public/github.png";
+import LinkedinLogo from "@/public/linkedin.png";
+import Image from "next/image";
 
 const Footer = () => {
+  const socialLinks = [
+    {
+      name: "GitHub",
+      icon: GithubLogo,
+      url: "https://github.com/rahuldev403",
+    },
+    {
+      name: "LinkedIn",
+      icon: LinkedinLogo,
+      url: "https://www.linkedin.com/in/rahul-swain-268484306/",
+    },
+  ];
+
   return (
-    <footer className="bg-gray-900 text-white border-t-4 border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
-        {/* Main Footer Content */}
+    <footer className="relative overflow-hidden border-t-4 border-black bg-gradient-to-b from-gray-900 to-black">
+      {/* Pixelated grid background */}
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage:
+            'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="4" height="4" fill="%23A78BFA"/><rect x="8" y="0" width="4" height="4" fill="%23F472B6"/><rect x="16" y="0" width="4" height="4" fill="%23FBBF24"/><rect x="0" y="8" width="4" height="4" fill="%239CA3AF"/><rect x="8" y="8" width="4" height="4" fill="%236EE7B7"/><rect x="16" y="8" width="4" height="4" fill="%23A78BFA"/><rect x="0" y="16" width="4" height="4" fill="%23F472B6"/><rect x="8" y="16" width="4" height="4" fill="%23FBBF24"/><rect x="16" y="16" width="4" height="4" fill="%239CA3AF"/></svg>\')',
+          backgroundRepeat: "repeat",
+          backgroundSize: "20px 20px",
+          imageRendering: "pixelated",
+        }}
+      />
+
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(15)].map((_, i) => {
+          const colors = [
+            "bg-purple-500",
+            "bg-pink-500",
+            "bg-yellow-400",
+            "bg-cyan-400",
+          ];
+          return (
+            <motion.div
+              key={i}
+              className={`absolute w-3 h-3 ${
+                colors[Math.floor(Math.random() * colors.length)]
+              }`}
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                imageRendering: "pixelated",
+                boxShadow: "2px 2px 0px rgba(0,0,0,0.8)",
+              }}
+              animate={{
+                y: [-20, 0, -20],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "linear",
+                delay: i * 0.4,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <div className="container mx-auto px-6 py-16 relative z-10">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12"
+          initial={{ y: 60, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="border-4 border-purple-600 p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+          style={{ imageRendering: "pixelated" }}
         >
-          {/* Brand Section */}
+          {/* Top decorative line */}
           <motion.div
-            variants={itemVariants}
-            className="col-span-2 md:col-span-4 lg:col-span-1"
-          >
-            <Link href="/" className="inline-block mb-4">
-              <h2 className="font-bold font-game font-normal bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent text-2xl sm:text-3xl">
-                streak-setter
-              </h2>
-            </Link>
-            <p className="text-gray-400 text-sm sm:text-base font-comfortaa mb-6">
-              Gamified learning platform for aspiring developers. Level up your
-              coding skills! 🚀
-            </p>
+            className="h-1 bg-linear-to-r from-purple-600 via-pink-500 to-yellow-400 mb-8"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          />
+
+          {/* Main footer content */}
+          <div className="grid md:grid-cols-2 gap-12 mb-8">
+            {/* Brand section */}
+            <div className="text-center md:text-left">
+              <div className="mb-6 flex flex-col items-center md:items-start gap-4">
+                <motion.div style={{ imageRendering: "pixelated" }}>
+                  <Image
+                    src="/dev.png"
+                    alt="RahulDev Logo"
+                    width={96}
+                    height={96}
+                    className="h-24 w-auto"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                </motion.div>
+                <div>
+                  <h3
+                    className="text-purple-400 text-lg sm:text-xl font-game font-normal mb-3 tracking-wider"
+                    style={{ textShadow: "3px 3px 0 #000, -1px -1px 0 #000" }}
+                  >
+                    PIXEL PERFECT CODE
+                  </h3>
+                  <p className="text-gray-300 text-sm sm:text-base font-comfortaa leading-relaxed max-w-md">
+                    Building 8-bit dreams with modern tech. Level up your skills
+                    with hands-on projects and retro-inspired learning.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Social Links */}
-            <div className="flex gap-4">
-              {socialLinks.map((social, index) => {
-                const Icon = social.icon;
-                return (
-                  <motion.a
-                    key={index}
-                    href={social.href}
-                    aria-label={social.label}
-                    whileHover={{ scale: 1.2, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-10 h-10 bg-gray-800 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-600 rounded-lg border-2 border-gray-700 hover:border-gray-600 flex items-center justify-center transition-all duration-200 shadow-[2px_2px_0_0_#374151] hover:shadow-[4px_4px_0_0_#374151] hover:translate-x-[-2px] hover:translate-y-[-2px]"
-                  >
-                    <Icon className="w-5 h-5" />
-                  </motion.a>
-                );
-              })}
+            <div className="text-center md:text-right">
+              <h4
+                className="text-xl sm:text-2xl font-game font-normal text-yellow-400 mb-6"
+                style={{ textShadow: "2px 2px 0 #000, -1px -1px 0 #000" }}
+              >
+                CONNECT
+              </h4>
+              <div className="flex justify-center md:justify-end gap-4">
+                {socialLinks.map((social) => {
+                  const source = social.icon;
+                  return (
+                    <motion.a
+                      key={social.name}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-14 h-14 border-4 border-purple-600 bg-black flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(147,51,234,0.5)]"
+                      title={social.name}
+                      whileHover={{ scale: 1.1, y: -4 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                      style={{ imageRendering: "pixelated" }}
+                    >
+                      <Image
+                        src={source}
+                        alt={social.name}
+                        className="w-7 h-7"
+                        style={{ imageRendering: "pixelated" }}
+                      />
+                    </motion.a>
+                  );
+                })}
+              </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Product Links */}
-          <motion.div variants={itemVariants}>
-            <h3 className="font-bold font-game font-normal text-lg mb-4 text-white">
-              Product
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.product.map((link, index) => (
-                <li key={index}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors duration-200 text-sm sm:text-base font-comfortaa hover:translate-x-1 inline-block"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {/* Divider */}
+          <div className="h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent my-6" />
 
-          {/* Resources Links */}
-          <motion.div variants={itemVariants}>
-            <h3 className="font-bold font-game font-normal text-lg mb-4 text-white">
-              Resources
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.resources.map((link, index) => (
-                <li key={index}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors duration-200 text-sm sm:text-base font-comfortaa hover:translate-x-1 inline-block"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {/* Bottom section */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6 flex-col md:flex-row">
+              <p className="text-gray-400 text-xs sm:text-sm text-center md:text-left font-comfortaa">
+                © {new Date().getFullYear()} Rahul Swain. ALL RIGHTS RESERVED.
+              </p>
 
-          {/* Company Links */}
-          <motion.div variants={itemVariants}>
-            <h3 className="font-bold font-game font-normal text-lg mb-4 text-white">
-              Company
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link, index) => (
-                <li key={index}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors duration-200 text-sm sm:text-base font-comfortaa hover:translate-x-1 inline-block"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+              {/* Made with love */}
+              <div className="flex items-center gap-2 text-pink-400 text-xs sm:text-sm font-game font-normal">
+                <span>MADE WITH</span>
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="text-red-500"
+                >
+                  ❤
+                </motion.div>
+                <span>& COFFEE</span>
+              </div>
+            </div>
 
-          {/* Legal Links */}
-          <motion.div variants={itemVariants}>
-            <h3 className="font-bold font-game font-normal text-lg mb-4 text-white">
-              Legal
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link, index) => (
-                <li key={index}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-purple-400 transition-colors duration-200 text-sm sm:text-base font-comfortaa hover:translate-x-1 inline-block"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </motion.div>
-
-        {/* Bottom Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="pt-8 border-t border-gray-800"
-        >
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm font-comfortaa text-center sm:text-left">
-              © {new Date().getFullYear()} Streak Setter. All rights reserved.
-            </p>
-            <motion.p
-              className="text-gray-400 text-sm font-comfortaa flex items-center gap-2"
-              whileHover={{ scale: 1.05 }}
+            <motion.button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="px-6 py-3 border-4 border-yellow-400 bg-purple-600 text-white font-game font-normal text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(234,179,8,0.5)]"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              style={{ imageRendering: "pixelated" }}
             >
-              Made with{" "}
-              <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />{" "}
-              by developers, for developers
-            </motion.p>
+              ↑ BACK TO TOP
+            </motion.button>
           </div>
         </motion.div>
       </div>
