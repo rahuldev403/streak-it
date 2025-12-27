@@ -5,7 +5,6 @@ import GithubLogo from "@/public/github.png";
 import LinkedinLogo from "@/public/linkedin.png";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import bg from "@/public/footer-bg.webp";
 
 const Footer = () => {
   const socialLinks = [
@@ -22,16 +21,18 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative overflow-hidden border-t-4 border-gray-800 bg-black">
-      <div className="absolute inset-0 pointer-events-none">
-        <Image
-          src={bg}
-          alt="Footer Background"
-          fill
-          className="object-cover opacity-20"
-          style={{ imageRendering: "pixelated" }}
-        />
-      </div>
+    <footer className="relative overflow-hidden border-t-4 border-gray-800 bg-black/90">
+      {/* Pixelated grid background */}
+      <div
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          backgroundImage:
+            'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="4" height="4" fill="%23A78BFA"/><rect x="8" y="0" width="4" height="4" fill="%23F472B6"/><rect x="16" y="0" width="4" height="4" fill="%23FBBF24"/><rect x="0" y="8" width="4" height="4" fill="%239CA3AF"/><rect x="8" y="8" width="4" height="4" fill="%236EE7B7"/><rect x="16" y="8" width="4" height="4" fill="%23A78BFA"/><rect x="0" y="16" width="4" height="4" fill="%23F472B6"/><rect x="8" y="16" width="4" height="4" fill="%23FBBF24"/><rect x="16" y="16" width="4" height="4" fill="%239CA3AF"/></svg>\')',
+          backgroundRepeat: "repeat",
+          backgroundSize: "20px 20px",
+          imageRendering: "pixelated",
+        }}
+      />
 
       <div className="container mx-auto px-6 py-16 relative z-10">
         <motion.div
@@ -39,11 +40,12 @@ const Footer = () => {
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="border-4 border-gray-800 bg-black/40 p-8 shadow-[8px_8px_0px_0px_rgba(107,114,128,0.3)] "
+          className="border-4 border-gray-800 bg-linear-to-b from-gray-950 to-black p-8 shadow-[8px_8px_0px_0px_rgba(107,114,128,0.3)] "
           style={{ imageRendering: "pixelated" }}
         >
+          {/* Top decorative line */}
           <motion.div
-            className="h-1 bg-linear-to-r from-purple-600 via-pink-300 to-yellow-400 mb-8"
+            className="h-1 bg-linear-to-r from-purple-600 via-pink-500 to-yellow-400 mb-8"
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -140,13 +142,19 @@ const Footer = () => {
                 <span>& Lemonade</span>
               </div>
             </div>
-            <Button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              variant="pixel"
-              className="font-game font-normal text-sm rounded-md"
+
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              ↑ BACK TO TOP
-            </Button>
+              <Button
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                variant="pixel"
+                className="font-game font-normal text-sm"
+              >
+                ↑ BACK TO TOP
+              </Button>
+            </motion.div>
           </div>
         </motion.div>
       </div>

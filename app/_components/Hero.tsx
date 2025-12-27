@@ -1,120 +1,162 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
-import bg from "@/public/bg.jpg";
 import { Button } from "@/components/ui/button";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import herobg from "@/public/hero-bg.gif";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import bg from "@/public/bg.jpg";
 
 const Hero = () => {
   const { user } = useUser();
 
   return (
-    <div className="flex flex-col items-center justify-center mt-1 ">
-      <motion.h3
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="font-inter text-sm sm:text-base md:text-xl lg:text-2xl bg-linear-to-r from-pink-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent hidden sm:block px-4 text-center"
-        style={{
-          textShadow: "1px 1px 0 #000, 2px 2px 0 #fff, 3px 3px 0 #000",
-          fontFamily: "'Press Start 2P', 'Pixel', monospace",
-          letterSpacing: "2px",
-        }}
-      >
-        create the momentum you ever dreamed
-      </motion.h3>
-      <div className="w-full relative h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-screen overflow-hidden flex items-start justify-center pt-2 px-2 ">
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] h-[90%] sm:h-[85%] md:h-[80%] rounded-lg overflow-hidden shadow-2xl border-2 sm:border-4 border-gray-800"
-          style={{ imageRendering: "pixelated" }}
+    <div className="flex flex-col overflow-hidden">
+      {/* Full-screen GIF Hero Section */}
+      <div className="relative w-full h-screen">
+        <div
+          className="absolute inset-0 w-full h-full"
+          style={{
+            backgroundImage: `url(${herobg.src})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            imageRendering: "pixelated",
+          }}
         >
-          <Image
-            src={bg}
-            alt="Background"
-            width={1000}
-            height={1000}
-            className="w-full h-full object-cover opacity-[0.8]"
-            style={{ imageRendering: "pixelated" }}
-          />
-        </motion.div>
-        <div className="absolute w-full flex flex-col items-center justify-center h-full pointer-events-none px-4">
-          <motion.h2
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="font-normal text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-game text-white z-10 text-center border-2 p-2 sm:p-3 md:p-4 rounded-md pointer-events-auto bg-black/50"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="w-[90%] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[55%] max-w-4xl"
           >
-            <span
-              className="text-purple-500 font-bold "
-              style={{ textShadow: "2px 2px 4px rgba(0,0,0,1)" }}
+            <div
+              className="border-4 border-purple-600 bg-black/50 p-6 sm:p-8 md:p-10 lg:p-12 "
+              style={{ imageRendering: "pixelated" }}
             >
-              Start{" "}
-            </span>
-            Your
-          </motion.h2>
-          <motion.h2
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-game font-normal text-gray-400 z-10 text-center"
-            style={{
-              textShadow: "2px 2px #000,-2px -2px 0 #000 , -2px 2px 0 #000",
-            }}
-          >
-            coding adventure
-          </motion.h2>
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-2 sm:mt-3 md:mt-5 font-game font-normal text-sm sm:text-lg md:text-2xl lg:text-3xl text-gray-300 text-center px-4"
-          >
-            Beginner friendly coding courses and projects
-          </motion.h2>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-          >
-            {!user ? (
-              <SignInButton mode="modal" fallbackRedirectUrl="/">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+              <h2 className="font-normal text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-game text-white text-center mb-3">
+                <span
+                  className="text-purple-500 font-bold"
+                  style={{ textShadow: "3px 3px 0 #000, -1px -1px 0 #000" }}
                 >
-                  <Button
-                    className="text-black font-game font-normal rounded-md pt-2 sm:pt-3 mt-4 sm:mt-6 pointer-events-auto text-xs sm:text-sm md:text-base"
-                    variant={"pixel"}
-                  >
-                    Get Started
-                  </Button>
-                </motion.div>
-              </SignInButton>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="pointer-events-auto">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant={"pixel"}
-                      className="rounded-md font-game font-normal text-black text-xs sm:text-sm md:text-base pt-2 sm:pt-3 mt-4 sm:mt-6"
+                  Start{" "}
+                </span>
+                <span style={{ textShadow: "2px 2px #000, -2px -2px 0 #000" }}>
+                  Your
+                </span>
+              </h2>
+              <h2
+                className="font-normal text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-game text-yellow-400 text-center mb-6"
+                style={{
+                  textShadow: "3px 3px #000, -2px -2px 0 #000, -2px 2px 0 #000",
+                }}
+              >
+                WEB DEV ADVENTURE
+              </h2>
+
+              <div className="h-1 w-24 bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400 mx-auto mb-4" />
+
+              <p className="font-comfortaa text-xs sm:text-sm md:text-base text-gray-200 text-center mb-2 leading-relaxed">
+                Beginner friendly courses and interactive projects
+              </p>
+              <p className="font-comfortaa text-xs sm:text-sm text-gray-300 text-center mb-6">
+                Master web development from scratch with hands-on tutorials and
+                real-world projects!
+              </p>
+
+              <div className="flex justify-center mb-6">
+                {!user ? (
+                  <SignInButton mode="modal" fallbackRedirectUrl="/">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      go to Dashboard
-                    </Button>
-                  </motion.div>
-                </Link>
+                      <Button
+                        className="text-black font-game font-normal text-xs sm:text-sm"
+                        variant={"pixel"}
+                      >
+                        Get Started →
+                      </Button>
+                    </motion.div>
+                  </SignInButton>
+                ) : (
+                  <Link href="/dashboard">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Button
+                        variant={"pixel"}
+                        className="font-game font-normal text-black text-xs sm:text-sm"
+                      >
+                        go to Dashboard →
+                      </Button>
+                    </motion.div>
+                  </Link>
+                )}
               </div>
-            )}
+
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 1,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 0.5,
+                }}
+                className="flex flex-col items-center gap-2"
+              >
+                <p className="text-gray-400 text-xs font-game">SCROLL DOWN</p>
+                <motion.div
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="w-5 h-8 border-2 border-purple-500 rounded-full flex items-start justify-center p-1"
+                >
+                  <div className="w-1 h-1 bg-purple-500 rounded-full" />
+                </motion.div>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
+
+      {/* Container Scroll Animation Section */}
+      <ContainerScroll
+        titleComponent={
+          <div className="flex flex-col items-center justify-center">
+            <h2
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-game font-normal text-white text-center mb-4"
+              style={{ textShadow: "3px 3px 0 #000, -1px -1px 0 #000" }}
+            >
+              <span className="text-purple-500">EXPLORE</span> THE JOURNEY
+            </h2>
+            <p className="font-comfortaa text-sm sm:text-base text-gray-300 text-center max-w-2xl">
+              Scroll to see our interactive learning experience in action
+            </p>
+          </div>
+        }
+      >
+        <motion.img
+          src={bg.src}
+          alt="coding experience"
+          height={720}
+          width={1400}
+          className="mx-auto rounded-2xl object-cover h-full object-center border-4 border-purple-600 "
+          style={{ imageRendering: "pixelated" }}
+          draggable={false}
+        />
+      </ContainerScroll>
     </div>
   );
 };
