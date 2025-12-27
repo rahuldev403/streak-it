@@ -32,6 +32,7 @@ const Page = () => {
   const [chapterId, setChapterId] = useState<number | null>(null);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
 
   // Check if device is small (mobile/tablet)
   useEffect(() => {
@@ -172,8 +173,54 @@ const Page = () => {
       return;
     }
 
+    if (!content) {
+      toast.error("Content not loaded. Please refresh the page.");
+      return;
+    }
+
     try {
       setIsMarkingComplete(true);
+
+      // Validate code with Mistral AI if there are test cases
+      if (content.testCases && content.testCases.length > 0) {
+        setIsValidating(true);
+        toast.info("Validating your code with AI...");
+
+        const validationResponse = await fetch("/api/validate-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            code: fileContents,
+            testCases: content.testCases,
+            questionType: content.questionType,
+            problemStatement: content.problemStatement,
+          }),
+        });
+
+        const validationResult = await validationResponse.json();
+        setIsValidating(false);
+
+        if (!validationResult.success) {
+          toast.error("Failed to validate code. Please try again.");
+          setIsMarkingComplete(false);
+          return;
+        }
+
+        // Show validation results
+        if (validationResult.allPassed) {
+          toast.success(
+            `🎉 All ${validationResult.totalCount} test cases passed!`
+          );
+        } else {
+          toast.error(
+            `❌ ${validationResult.passedCount}/${validationResult.totalCount} test cases passed. Please fix your code.`
+          );
+          setIsMarkingComplete(false);
+          return;
+        }
+      }
 
       // Get current chapter index
       const response = await fetch(`/api/chapters?courseId=${courseId}`);
@@ -221,7 +268,7 @@ const Page = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800"
+        className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-linear-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800"
       >
         <motion.div
           initial={{ scale: 0.9, y: 20 }}
@@ -384,15 +431,17 @@ const Page = () => {
                   </button>
                   <button
                     onClick={handleMarkComplete}
-                    disabled={isMarkingComplete}
+                    disabled={isMarkingComplete || isValidating}
                     className="px-3 py-1 bg-green-400 hover:bg-green-500 border-2 border-black font-game font-normal text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
-                    {isMarkingComplete ? (
+                    {isValidating ? (
+                      "Validating..."
+                    ) : isMarkingComplete ? (
                       "Saving..."
                     ) : (
                       <>
                         <CheckCircle className="w-3 h-3" />
-                        Mark Complete
+                        Submit & Complete
                       </>
                     )}
                   </button>
