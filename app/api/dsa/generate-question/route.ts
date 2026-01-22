@@ -71,8 +71,8 @@ export async function POST(req: NextRequest) {
 
     // Determine category based on weak areas or variety
     const category = determineCategory(
-      progress.weakCategories,
-      progress.preferredCategories,
+      progress.weakCategories || "",
+      progress.preferredCategories || "",
     );
 
     // Call OpenAI API to generate question

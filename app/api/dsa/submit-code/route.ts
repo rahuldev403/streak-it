@@ -269,16 +269,16 @@ async function updateUserProgress(userId: string, difficulty: string) {
   if (!progress) return;
 
   const updates: any = {
-    totalQuestionsSolved: progress.totalQuestionsSolved + 1,
+    totalQuestionsSolved: (progress.totalQuestionsSolved || 0) + 1,
     lastActivityDate: new Date().toISOString(),
   };
 
   if (difficulty === "easy") {
-    updates.easyQuestionsSolved = progress.easyQuestionsSolved + 1;
+    updates.easyQuestionsSolved = (progress.easyQuestionsSolved || 0) + 1;
   } else if (difficulty === "medium") {
-    updates.mediumQuestionsSolved = progress.mediumQuestionsSolved + 1;
+    updates.mediumQuestionsSolved = (progress.mediumQuestionsSolved || 0) + 1;
   } else if (difficulty === "hard") {
-    updates.hardQuestionsSolved = progress.hardQuestionsSolved + 1;
+    updates.hardQuestionsSolved = (progress.hardQuestionsSolved || 0) + 1;
   }
 
   // Update skill level based on questions solved

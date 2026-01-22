@@ -61,21 +61,22 @@ export async function POST(req: NextRequest) {
     if (progress) {
       // Update existing progress
       const updates: any = {
-        totalQuestionsSolved: progress.totalQuestionsSolved + 1,
+        totalQuestionsSolved: (progress.totalQuestionsSolved || 0) + 1,
         lastActivityDate: currentTimestamp,
       };
 
       if (isCorrect) {
-        updates.correctAnswers = progress.correctAnswers + 1;
+        updates.correctAnswers = (progress.correctAnswers || 0) + 1;
       }
 
       // Update difficulty-specific counts
       if (question.difficulty === "easy") {
-        updates.easyQuestionsSolved = progress.easyQuestionsSolved + 1;
+        updates.easyQuestionsSolved = (progress.easyQuestionsSolved || 0) + 1;
       } else if (question.difficulty === "medium") {
-        updates.mediumQuestionsSolved = progress.mediumQuestionsSolved + 1;
+        updates.mediumQuestionsSolved =
+          (progress.mediumQuestionsSolved || 0) + 1;
       } else if (question.difficulty === "hard") {
-        updates.hardQuestionsSolved = progress.hardQuestionsSolved + 1;
+        updates.hardQuestionsSolved = (progress.hardQuestionsSolved || 0) + 1;
       }
 
       await db

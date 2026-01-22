@@ -44,7 +44,10 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
       setQuestion(response.question);
 
       // Parse starter code and set initial code
-      const starterCode = JSON.parse(response.question.starterCode);
+      const starterCode =
+        typeof response.question.starterCode === "string"
+          ? JSON.parse(response.question.starterCode)
+          : response.question.starterCode;
       setCode(starterCode[language] || "");
     } catch (error) {
       console.error("Error generating question:", error);
@@ -143,41 +146,47 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
 
               <div>
                 <h3 className="font-semibold mb-2">Examples</h3>
-                {JSON.parse(question.examples).map(
-                  (example: any, idx: number) => (
-                    <div key={idx} className="bg-muted p-3 rounded-md mb-2">
-                      <div className="text-sm">
-                        <strong>Input:</strong> {example.input}
-                      </div>
-                      <div className="text-sm">
-                        <strong>Output:</strong> {example.output}
-                      </div>
-                      {example.explanation && (
-                        <div className="text-sm text-muted-foreground mt-1">
-                          <strong>Explanation:</strong> {example.explanation}
-                        </div>
-                      )}
+                {(typeof question.examples === "string"
+                  ? JSON.parse(question.examples)
+                  : question.examples
+                ).map((example: any, idx: number) => (
+                  <div key={idx} className="bg-muted p-3 rounded-md mb-2">
+                    <div className="text-sm">
+                      <strong>Input:</strong> {example.input}
                     </div>
-                  ),
-                )}
+                    <div className="text-sm">
+                      <strong>Output:</strong> {example.output}
+                    </div>
+                    {example.explanation && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        <strong>Explanation:</strong> {example.explanation}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {question.hints && JSON.parse(question.hints).length > 0 && (
-                <details>
-                  <summary className="font-semibold cursor-pointer">
-                    💡 Hints (click to reveal)
-                  </summary>
-                  <ul className="mt-2 space-y-1 ml-4 list-disc">
-                    {JSON.parse(question.hints).map(
-                      (hint: string, idx: number) => (
+              {question.hints &&
+                (typeof question.hints === "string"
+                  ? JSON.parse(question.hints)
+                  : question.hints
+                ).length > 0 && (
+                  <details>
+                    <summary className="font-semibold cursor-pointer">
+                      💡 Hints (click to reveal)
+                    </summary>
+                    <ul className="mt-2 space-y-1 ml-4 list-disc">
+                      {(typeof question.hints === "string"
+                        ? JSON.parse(question.hints)
+                        : question.hints
+                      ).map((hint: string, idx: number) => (
                         <li key={idx} className="text-sm text-muted-foreground">
                           {hint}
                         </li>
-                      ),
-                    )}
-                  </ul>
-                </details>
-              )}
+                      ))}
+                    </ul>
+                  </details>
+                )}
             </CardContent>
           </Card>
 
@@ -198,7 +207,10 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
                     size="sm"
                     onClick={() => {
                       setLanguage(lang);
-                      const starterCode = JSON.parse(question.starterCode);
+                      const starterCode =
+                        typeof question.starterCode === "string"
+                          ? JSON.parse(question.starterCode)
+                          : question.starterCode;
                       setCode(starterCode[lang] || "");
                     }}
                   >

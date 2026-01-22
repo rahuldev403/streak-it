@@ -24,8 +24,9 @@ export async function GET(req: NextRequest) {
     // Calculate overall stats
     const overallStats = progress.reduce(
       (acc, p) => ({
-        totalQuestionsSolved: acc.totalQuestionsSolved + p.totalQuestionsSolved,
-        correctAnswers: acc.correctAnswers + p.correctAnswers,
+        totalQuestionsSolved:
+          acc.totalQuestionsSolved + (p.totalQuestionsSolved || 0),
+        correctAnswers: acc.correctAnswers + (p.correctAnswers || 0),
         accuracy: 0,
       }),
       { totalQuestionsSolved: 0, correctAnswers: 0, accuracy: 0 },

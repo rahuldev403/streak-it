@@ -76,7 +76,10 @@ export default function DsaPracticePage() {
   };
 
   const loadQuestion = (question: DsaQuestion) => {
-    const starterCode = JSON.parse(question.starterCode);
+    const starterCode =
+      typeof question.starterCode === "string"
+        ? JSON.parse(question.starterCode)
+        : question.starterCode;
     setCode(starterCode[language] || "");
     setResult(null);
   };
@@ -84,7 +87,10 @@ export default function DsaPracticePage() {
   const handleLanguageChange = (newLang: string) => {
     setLanguage(newLang);
     if (questions.length > 0) {
-      const starterCode = JSON.parse(questions[currentIndex].starterCode);
+      const starterCode =
+        typeof questions[currentIndex].starterCode === "string"
+          ? JSON.parse(questions[currentIndex].starterCode)
+          : questions[currentIndex].starterCode;
       setCode(starterCode[newLang] || "");
     }
   };
@@ -161,8 +167,15 @@ export default function DsaPracticePage() {
   }
 
   const currentQuestion = questions[currentIndex];
-  const examples = JSON.parse(currentQuestion.examples);
-  const hints = currentQuestion.hints ? JSON.parse(currentQuestion.hints) : [];
+  const examples =
+    typeof currentQuestion.examples === "string"
+      ? JSON.parse(currentQuestion.examples)
+      : currentQuestion.examples;
+  const hints = currentQuestion.hints
+    ? typeof currentQuestion.hints === "string"
+      ? JSON.parse(currentQuestion.hints)
+      : currentQuestion.hints
+    : [];
 
   return (
     <div className="h-screen flex flex-col">
