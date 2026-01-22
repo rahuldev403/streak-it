@@ -63,3 +63,93 @@ export const UserActivityTable = pgTable("user_activity", {
   date: varchar({ length: 100 }).notNull(), // YYYY-MM-DD format
   activitiesCount: integer().default(0).notNull(),
 });
+
+// DSA Question Tables for personalized learning
+export const DsaQuestionTable = pgTable("dsa_questions", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 100 }).notNull(), // Personalized per user
+  title: varchar({ length: 255 }).notNull(),
+  description: text().notNull(),
+  difficulty: varchar({ length: 50 }).notNull(), // easy, medium, hard
+  category: varchar({ length: 100 }).notNull(), // arrays, strings, trees, graphs, etc.
+  constraints: text(),
+  examples: text().notNull(), // JSON string
+  testCases: text().notNull(), // JSON string with hidden test cases
+  starterCode: text().notNull(), // JSON string with code templates for multiple languages
+  hints: text(), // JSON array of hints
+  generatedAt: varchar({ length: 100 }).notNull(),
+  tags: varchar({ length: 500 }),
+  timeComplexity: varchar({ length: 100 }),
+  spaceComplexity: varchar({ length: 100 }),
+});
+
+export const DsaSubmissionTable = pgTable("dsa_submissions", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 100 }).notNull(),
+  questionId: integer().notNull(),
+  code: text().notNull(),
+  language: varchar({ length: 50 }).notNull(), // python, javascript, java, cpp
+  status: varchar({ length: 50 }).notNull(), // accepted, wrong_answer, runtime_error, time_limit_exceeded
+  executionTime: varchar({ length: 50 }),
+  memory: varchar({ length: 50 }),
+  submittedAt: varchar({ length: 100 }).notNull(),
+  testCasesPassed: integer().default(0),
+  totalTestCases: integer().default(0),
+});
+
+export const UserDsaProgressTable = pgTable("user_dsa_progress", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 100 }).notNull(),
+  totalQuestionsSolved: integer().default(0),
+  easyQuestionsSolved: integer().default(0),
+  mediumQuestionsSolved: integer().default(0),
+  hardQuestionsSolved: integer().default(0),
+  skillLevel: varchar({ length: 50 }).default("beginner").notNull(), // beginner, intermediate, advanced, expert
+  preferredCategories: text(), // JSON array of categories user is strong in
+  weakCategories: text(), // JSON array of categories user needs improvement
+  lastActivityDate: varchar({ length: 100 }),
+});
+
+// CS Fundamentals MCQ Tables (DBMS, OS, Network, OOPS)
+export const CsFundamentalsQuestionTable = pgTable(
+  "cs_fundamentals_questions",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    userId: varchar({ length: 100 }).notNull(), // Personalized per user
+    category: varchar({ length: 100 }).notNull(), // dbms, os, network, oops
+    question: text().notNull(),
+    options: text().notNull(), // JSON string array of options
+    correctAnswer: varchar({ length: 10 }).notNull(), // A, B, C, or D
+    explanation: text().notNull(),
+    difficulty: varchar({ length: 50 }).notNull(), // easy, medium, hard
+    generatedAt: varchar({ length: 100 }).notNull(),
+    tags: varchar({ length: 500 }),
+  },
+);
+
+export const CsFundamentalsSubmissionTable = pgTable(
+  "cs_fundamentals_submissions",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    userId: varchar({ length: 100 }).notNull(),
+    questionId: integer().notNull(),
+    selectedAnswer: varchar({ length: 10 }).notNull(), // A, B, C, or D
+    isCorrect: integer().notNull(), // 1 for correct, 0 for incorrect (using integer as boolean)
+    submittedAt: varchar({ length: 100 }).notNull(),
+  },
+);
+
+export const UserCsFundamentalsProgressTable = pgTable(
+  "user_cs_fundamentals_progress",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    userId: varchar({ length: 100 }).notNull(),
+    category: varchar({ length: 100 }).notNull(), // dbms, os, network, oops
+    totalQuestionsSolved: integer().default(0),
+    correctAnswers: integer().default(0),
+    easyQuestionsSolved: integer().default(0),
+    mediumQuestionsSolved: integer().default(0),
+    hardQuestionsSolved: integer().default(0),
+    lastActivityDate: varchar({ length: 100 }),
+  },
+);

@@ -24,7 +24,7 @@ interface DashboardData {
 const Page = () => {
   const router = useRouter();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
@@ -146,6 +146,33 @@ const Page = () => {
               enrolledCourses={dashboardData?.enrolledCourses || []}
               loading={loading}
             />
+
+            {/* AI Interview Prep Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-6 p-6 border-4 border-black dark:border-purple-700 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-game font-normal text-black dark:text-purple-300 mb-2">
+                    AI Interview Prep
+                  </h3>
+                  <p className="text-sm font-comfortaa text-gray-600 dark:text-gray-400">
+                    Generate personalized DSA problems and CS fundamentals
+                    questions
+                  </p>
+                </div>
+                <button
+                  onClick={() => router.push("/interview-prep")}
+                  className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white border-4 border-black dark:border-white font-game font-normal rounded shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#fff] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] dark:hover:shadow-[2px_2px_0_0_#fff] transition-all"
+                >
+                  Generate Questions
+                </button>
+              </div>
+            </motion.div>
+
             <ExploreMore />
           </motion.div>
           <motion.div

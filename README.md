@@ -10,6 +10,14 @@ A gamified web development learning platform where users can learn from basics t
 - **Premium Access** - Free tier (4 chapters) with unlimited premium subscription
 - **Progress Tracking** - Track completed exercises and course completion
 - **Invite Friends** - Email invitations with beautiful templates
+- **🆕 Personalized DSA Practice** - AI-generated Data Structures & Algorithms questions tailored to each user
+  - OpenAI-powered question generation based on skill level
+  - Judge0 code compilation in 8+ programming languages
+  - Adaptive difficulty and weakness-focused learning
+  - Real-time code execution with test cases
+  - Comprehensive progress tracking
+
+> **📘 NEW Feature:** Check out [DSA_FEATURE_README.md](./DSA_FEATURE_README.md) for complete documentation on the personalized DSA system!
 
 ## Tech Stack
 
