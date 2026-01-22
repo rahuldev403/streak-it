@@ -138,6 +138,16 @@ const Header_one = () => {
                 )}
               </DropdownMenuSubContent>
             </DropdownMenuSub>
+            <DropdownMenuItem asChild>
+              <Link href="/interview-prep" className="cursor-pointer">
+                <span className="flex items-center gap-2">
+                  AI Interview Prep
+                  <span className="text-xs bg-purple-500 text-white px-2 py-0.5 border-2 border-black dark:border-white font-game font-bold shadow-[2px_2px_0_0_#000] dark:shadow-[2px_2px_0_0_#fff]">
+                    NEW
+                  </span>
+                </span>
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem disabled>
               <div className="flex items-center justify-between w-full">
                 <span>Problems</span>

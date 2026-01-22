@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const MISTRAL_API_KEY = "zFXYgKOUKnw2A3oL5D26c81wukCXNzCn";
-const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
+const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "";
+const MISTRAL_API_URL =
+  process.env.MISTRAL_API_URL || "https://api.mistral.ai/v1/chat/completions";
 
 interface TestCase {
   id: string;
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (!code || !testCases || testCases.length === 0) {
       return NextResponse.json(
         { error: "Code and test cases are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -107,7 +108,7 @@ IMPORTANT: Respond with ONLY "true" or "false" (lowercase, no quotes, no explana
             error: "Validation error",
           };
         }
-      })
+      }),
     );
 
     // Check if all test cases passed
@@ -126,7 +127,7 @@ IMPORTANT: Respond with ONLY "true" or "false" (lowercase, no quotes, no explana
     console.error("Error in validate-code API:", error);
     return NextResponse.json(
       { error: "Failed to validate code" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
