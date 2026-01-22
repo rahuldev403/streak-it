@@ -171,7 +171,7 @@ export default function InterviewPrepPage() {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-4 border-purple-200 dark:border-purple-800 rounded p-6 mb-8">
+      <div className="bg-linear-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-4 border-purple-200 dark:border-purple-800 rounded p-6 mb-8">
         <div className="flex items-start gap-4">
           {/* TODO: Replace with custom icon/image */}
           <div className="h-6 w-6 bg-gray-300 dark:bg-gray-700 rounded mt-1 flex-shrink-0" />

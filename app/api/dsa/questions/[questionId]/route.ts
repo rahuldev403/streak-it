@@ -6,7 +6,7 @@ import { eq, and } from "drizzle-orm";
 // GET: Get a specific DSA question by ID
 export async function GET(
   req: NextRequest,
-  { params }: { params: { questionId: string } },
+  { params }: { params: Promise<{ questionId: string }> },
 ) {
   try {
     const { searchParams } = new URL(req.url);
@@ -19,7 +19,8 @@ export async function GET(
       );
     }
 
-    const questionId = parseInt(params.questionId);
+    const resolvedParams = await params;
+    const questionId = parseInt(resolvedParams.questionId);
 
     const [question] = await db
       .select()
