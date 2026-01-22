@@ -5,7 +5,12 @@ import OpenAI from "openai";
 import { eq } from "drizzle-orm";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.AZURE_OPENAI_API_KEY,
+  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o"}`,
+  defaultQuery: {
+    "api-version": process.env.AZURE_OPENAI_API_VERSION || "2024-08-01-preview",
+  },
+  defaultHeaders: { "api-key": process.env.AZURE_OPENAI_API_KEY },
 });
 
 export async function POST(req: NextRequest) {
@@ -48,7 +53,7 @@ export async function POST(req: NextRequest) {
     );
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o",
       messages: [
         {
           role: "system",
@@ -60,7 +65,6 @@ export async function POST(req: NextRequest) {
           content: prompt,
         },
       ],
-      temperature: 0.8,
       response_format: { type: "json_object" },
     });
 

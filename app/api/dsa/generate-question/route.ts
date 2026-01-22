@@ -75,9 +75,8 @@ export async function POST(req: NextRequest) {
       progress.preferredCategories || "",
     );
 
-    // Call OpenAI API to generate question
-    const questionData = await generateQuestionWithOpenAI(
-      openaiApiKey,
+    // Call Azure OpenAI API to generate question
+    const questionData = await generateQuestionWithAzureOpenAI(
       difficulty,
       category,
       progress.skillLevel,
@@ -173,13 +172,21 @@ function determineCategory(
 }
 
 // Helper function to call OpenAI API
-async function generateQuestionWithOpenAI(
-  apiKey: string,
+async function generateQuestionWithAzureOpenAI(
   difficulty: string,
   category: string,
   skillLevel: string,
   recentSubmissions: any[],
 ): Promise<any> {
+  const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
+  const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
+  const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o";
+  const apiVersion =
+    process.env.AZURE_OPENAI_API_VERSION || "2024-08-01-preview";
+
+  if (!azureApiKey || !azureEndpoint) {
+    throw new Error("Azure OpenAI API configuration missing");
+  }
   const submissionContext =
     recentSubmissions.length > 0
       ? `The user has recently worked on ${recentSubmissions.length} problems. Consider their progress.`
@@ -232,14 +239,15 @@ Return a JSON object with the following structure:
 
 Make sure the question is ORIGINAL and not copied from existing platforms. Focus on teaching the concept.`;
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const azureUrl = `${azureEndpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+
+  const response = await fetch(azureUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      "api-key": azureApiKey,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -252,12 +260,14 @@ Make sure the question is ORIGINAL and not copied from existing platforms. Focus
         },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.9, // Higher temperature for more unique questions
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(
+      `Azure OpenAI API error: ${response.statusText} - ${errorText}`,
+    );
   }
 
   const data = await response.json();
