@@ -2,10 +2,21 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Play, RotateCw } from "lucide-react";
-import { dsaApi, getDifficultyBadgeColor, formatStatus, getStatusBadgeColor } from "@/lib/dsa-client";
+import {
+  dsaApi,
+  getDifficultyBadgeColor,
+  formatStatus,
+  getStatusBadgeColor,
+} from "@/lib/dsa-client";
 import type { DsaQuestion, SubmitCodeResponse } from "@/types/dsa";
 
 interface DSAPracticeProps {
@@ -31,7 +42,7 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
     try {
       const response = await dsaApi.generateQuestion(userId);
       setQuestion(response.question);
-      
+
       // Parse starter code and set initial code
       const starterCode = JSON.parse(response.question.starterCode);
       setCode(starterCode[language] || "");
@@ -46,7 +57,7 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
   // Submit code for execution
   const submitCode = async () => {
     if (!question) return;
-    
+
     setSubmitting(true);
     try {
       const response = await dsaApi.submitCode({
@@ -68,10 +79,7 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">DSA Practice (Personalized)</h1>
-        <Button 
-          onClick={generateQuestion} 
-          disabled={loading}
-        >
+        <Button onClick={generateQuestion} disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -90,7 +98,8 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-muted-foreground">
-              Click "Generate New Question" to get a personalized DSA question based on your skill level and progress.
+              Click "Generate New Question" to get a personalized DSA question
+              based on your skill level and progress.
             </div>
           </CardContent>
         </Card>
@@ -105,7 +114,9 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
                 <div>
                   <CardTitle className="text-2xl">{question.title}</CardTitle>
                   <CardDescription>
-                    Category: {question.category} | Complexity: {question.timeComplexity} time, {question.spaceComplexity} space
+                    Category: {question.category} | Complexity:{" "}
+                    {question.timeComplexity} time, {question.spaceComplexity}{" "}
+                    space
                   </CardDescription>
                 </div>
                 <Badge className={getDifficultyBadgeColor(question.difficulty)}>
@@ -116,44 +127,54 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Problem Description</h3>
-                <p className="text-sm whitespace-pre-wrap">{question.description}</p>
+                <p className="text-sm whitespace-pre-wrap">
+                  {question.description}
+                </p>
               </div>
 
               {question.constraints && (
                 <div>
                   <h3 className="font-semibold mb-2">Constraints</h3>
-                  <p className="text-sm text-muted-foreground">{question.constraints}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {question.constraints}
+                  </p>
                 </div>
               )}
 
               <div>
                 <h3 className="font-semibold mb-2">Examples</h3>
-                {JSON.parse(question.examples).map((example: any, idx: number) => (
-                  <div key={idx} className="bg-muted p-3 rounded-md mb-2">
-                    <div className="text-sm">
-                      <strong>Input:</strong> {example.input}
-                    </div>
-                    <div className="text-sm">
-                      <strong>Output:</strong> {example.output}
-                    </div>
-                    {example.explanation && (
-                      <div className="text-sm text-muted-foreground mt-1">
-                        <strong>Explanation:</strong> {example.explanation}
+                {JSON.parse(question.examples).map(
+                  (example: any, idx: number) => (
+                    <div key={idx} className="bg-muted p-3 rounded-md mb-2">
+                      <div className="text-sm">
+                        <strong>Input:</strong> {example.input}
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <div className="text-sm">
+                        <strong>Output:</strong> {example.output}
+                      </div>
+                      {example.explanation && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          <strong>Explanation:</strong> {example.explanation}
+                        </div>
+                      )}
+                    </div>
+                  ),
+                )}
               </div>
 
               {question.hints && JSON.parse(question.hints).length > 0 && (
                 <details>
-                  <summary className="font-semibold cursor-pointer">💡 Hints (click to reveal)</summary>
+                  <summary className="font-semibold cursor-pointer">
+                    💡 Hints (click to reveal)
+                  </summary>
                   <ul className="mt-2 space-y-1 ml-4 list-disc">
-                    {JSON.parse(question.hints).map((hint: string, idx: number) => (
-                      <li key={idx} className="text-sm text-muted-foreground">
-                        {hint}
-                      </li>
-                    ))}
+                    {JSON.parse(question.hints).map(
+                      (hint: string, idx: number) => (
+                        <li key={idx} className="text-sm text-muted-foreground">
+                          {hint}
+                        </li>
+                      ),
+                    )}
                   </ul>
                 </details>
               )}
@@ -193,8 +214,8 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
                 placeholder="Write your code here..."
               />
 
-              <Button 
-                onClick={submitCode} 
+              <Button
+                onClick={submitCode}
                 disabled={submitting || !code.trim()}
                 className="w-full"
               >
@@ -227,15 +248,23 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted p-3 rounded-md">
-                    <div className="text-sm font-semibold">Test Cases Passed</div>
+                    <div className="text-sm font-semibold">
+                      Test Cases Passed
+                    </div>
                     <div className="text-2xl font-bold">
-                      {result.summary.passedTestCases}/{result.summary.totalTestCases}
+                      {result.summary.passedTestCases}/
+                      {result.summary.totalTestCases}
                     </div>
                   </div>
                   <div className="bg-muted p-3 rounded-md">
                     <div className="text-sm font-semibold">Success Rate</div>
                     <div className="text-2xl font-bold">
-                      {Math.round((result.summary.passedTestCases / result.summary.totalTestCases) * 100)}%
+                      {Math.round(
+                        (result.summary.passedTestCases /
+                          result.summary.totalTestCases) *
+                          100,
+                      )}
+                      %
                     </div>
                   </div>
                 </div>
@@ -250,7 +279,9 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
                       }`}
                     >
                       <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold">Test Case {idx + 1}</span>
+                        <span className="font-semibold">
+                          Test Case {idx + 1}
+                        </span>
                         <Badge
                           className={
                             testResult.passed
@@ -269,7 +300,8 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
                           <strong>Expected:</strong> {testResult.expectedOutput}
                         </div>
                         <div>
-                          <strong>Got:</strong> {testResult.actualOutput || "(no output)"}
+                          <strong>Got:</strong>{" "}
+                          {testResult.actualOutput || "(no output)"}
                         </div>
                         {testResult.stderr && (
                           <div className="text-red-600">

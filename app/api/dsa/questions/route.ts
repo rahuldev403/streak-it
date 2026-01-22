@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching DSA questions:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch questions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -46,7 +46,7 @@ export async function DELETE(req: NextRequest) {
     if (!questionId || !userId) {
       return NextResponse.json(
         { error: "Question ID and User ID are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -55,8 +55,8 @@ export async function DELETE(req: NextRequest) {
       .where(
         and(
           eq(DsaQuestionTable.id, parseInt(questionId)),
-          eq(DsaQuestionTable.userId, userId)
-        )
+          eq(DsaQuestionTable.userId, userId),
+        ),
       );
 
     return NextResponse.json({
@@ -67,7 +67,7 @@ export async function DELETE(req: NextRequest) {
     console.error("Error deleting DSA question:", error);
     return NextResponse.json(
       { error: error.message || "Failed to delete question" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

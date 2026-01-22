@@ -19,12 +19,10 @@ export const dsaApi = {
   /**
    * Generate a new personalized DSA question for the user
    */
-  async generateQuestion(
-    userId: string
-  ): Promise<GenerateQuestionResponse> {
+  async generateQuestion(userId: string): Promise<GenerateQuestionResponse> {
     const response = await axios.post<GenerateQuestionResponse>(
       `${API_BASE}/generate-question`,
-      { userId }
+      { userId },
     );
     return response.data;
   },
@@ -32,12 +30,10 @@ export const dsaApi = {
   /**
    * Submit code for execution against test cases
    */
-  async submitCode(
-    request: SubmitCodeRequest
-  ): Promise<SubmitCodeResponse> {
+  async submitCode(request: SubmitCodeRequest): Promise<SubmitCodeResponse> {
     const response = await axios.post<SubmitCodeResponse>(
       `${API_BASE}/submit-code`,
-      request
+      request,
     );
     return response.data;
   },
@@ -55,26 +51,17 @@ export const dsaApi = {
   /**
    * Get a specific question by ID
    */
-  async getQuestion(
-    questionId: number,
-    userId: string
-  ): Promise<DsaQuestion> {
-    const response = await axios.get(
-      `${API_BASE}/questions/${questionId}`,
-      {
-        params: { userId },
-      }
-    );
+  async getQuestion(questionId: number, userId: string): Promise<DsaQuestion> {
+    const response = await axios.get(`${API_BASE}/questions/${questionId}`, {
+      params: { userId },
+    });
     return response.data.question;
   },
 
   /**
    * Delete a question
    */
-  async deleteQuestion(
-    questionId: number,
-    userId: string
-  ): Promise<void> {
+  async deleteQuestion(questionId: number, userId: string): Promise<void> {
     await axios.delete(`${API_BASE}/questions`, {
       params: { questionId, userId },
     });
@@ -88,7 +75,7 @@ export const dsaApi = {
       `${API_BASE}/progress`,
       {
         params: { userId },
-      }
+      },
     );
     return response.data;
   },
@@ -96,9 +83,7 @@ export const dsaApi = {
   /**
    * Update user's weak/preferred categories
    */
-  async updateProgress(
-    request: UpdateProgressRequest
-  ): Promise<void> {
+  async updateProgress(request: UpdateProgressRequest): Promise<void> {
     await axios.put(`${API_BASE}/progress`, request);
   },
 
@@ -117,7 +102,7 @@ export const dsaApi = {
    */
   async getQuestionSubmissions(
     userId: string,
-    questionId: number
+    questionId: number,
   ): Promise<any[]> {
     const response = await axios.get(`${API_BASE}/submissions`, {
       params: { userId, questionId },
@@ -152,7 +137,7 @@ export function formatMemory(memory: string | number): string {
  * Get difficulty color for UI
  */
 export function getDifficultyColor(
-  difficulty: "easy" | "medium" | "hard"
+  difficulty: "easy" | "medium" | "hard",
 ): string {
   const colors = {
     easy: "text-green-600",
@@ -166,7 +151,7 @@ export function getDifficultyColor(
  * Get difficulty badge color for UI
  */
 export function getDifficultyBadgeColor(
-  difficulty: "easy" | "medium" | "hard"
+  difficulty: "easy" | "medium" | "hard",
 ): string {
   const colors = {
     easy: "bg-green-100 text-green-800",
@@ -230,7 +215,7 @@ export function calculateSuccessRate(submissions: DsaSubmission[]): number {
  */
 export function getSkillLevelProgress(
   skillLevel: string,
-  totalSolved: number
+  totalSolved: number,
 ): number {
   const milestones = {
     beginner: { min: 0, max: 10 },
@@ -240,8 +225,7 @@ export function getSkillLevelProgress(
   };
 
   const milestone =
-    milestones[skillLevel as keyof typeof milestones] ||
-    milestones.beginner;
+    milestones[skillLevel as keyof typeof milestones] || milestones.beginner;
   const progress =
     ((totalSolved - milestone.min) / (milestone.max - milestone.min)) * 100;
   return Math.min(Math.max(progress, 0), 100);
@@ -252,7 +236,7 @@ export function getSkillLevelProgress(
  */
 export function getNextMilestone(
   skillLevel: string,
-  totalSolved: number
+  totalSolved: number,
 ): number {
   const milestones = {
     beginner: 10,

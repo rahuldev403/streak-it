@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/config/db";
-import { DsaQuestionTable, UserDsaProgressTable, DsaSubmissionTable } from "@/app/config/schema";
+import {
+  DsaQuestionTable,
+  UserDsaProgressTable,
+  DsaSubmissionTable,
+} from "@/app/config/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -54,21 +58,21 @@ export async function POST(req: NextRequest) {
 
     // Generate personalized question using OpenAI
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    
+
     if (!openaiApiKey) {
       return NextResponse.json(
         { error: "OpenAI API key not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Determine difficulty based on user's skill level
     const difficulty = determineDifficulty(progress.skillLevel, progress);
-    
+
     // Determine category based on weak areas or variety
     const category = determineCategory(
       progress.weakCategories,
-      progress.preferredCategories
+      progress.preferredCategories,
     );
 
     // Call OpenAI API to generate question
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
       difficulty,
       category,
       progress.skillLevel,
-      recentSubmissions
+      recentSubmissions,
     );
 
     // Save the generated question to database
@@ -109,7 +113,7 @@ export async function POST(req: NextRequest) {
     console.error("Error generating DSA question:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate question" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -117,7 +121,7 @@ export async function POST(req: NextRequest) {
 // Helper function to determine difficulty
 function determineDifficulty(skillLevel: string, progress: any): string {
   const solvedCount = progress.totalQuestionsSolved;
-  
+
   if (skillLevel === "beginner" || solvedCount < 10) {
     return "easy";
   } else if (skillLevel === "intermediate" || solvedCount < 50) {
@@ -132,7 +136,10 @@ function determineDifficulty(skillLevel: string, progress: any): string {
 }
 
 // Helper function to determine category
-function determineCategory(weakCategories: string, preferredCategories: string): string {
+function determineCategory(
+  weakCategories: string,
+  preferredCategories: string,
+): string {
   const categories = [
     "arrays",
     "strings",
@@ -171,7 +178,7 @@ async function generateQuestionWithOpenAI(
   difficulty: string,
   category: string,
   skillLevel: string,
-  recentSubmissions: any[]
+  recentSubmissions: any[],
 ): Promise<any> {
   const submissionContext =
     recentSubmissions.length > 0

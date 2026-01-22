@@ -10,21 +10,21 @@ JUDGE0_HOST=judge0-ce.p.rapidapi.com
 
 ## 📡 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/dsa/generate-question` | Generate personalized question |
-| POST | `/api/dsa/submit-code` | Submit code for execution |
-| GET | `/api/dsa/questions?userId=X` | List user's questions |
-| GET | `/api/dsa/questions/[id]?userId=X` | Get specific question |
-| DELETE | `/api/dsa/questions?questionId=X&userId=Y` | Delete question |
-| GET | `/api/dsa/progress?userId=X` | Get user progress |
-| PUT | `/api/dsa/progress` | Update progress |
-| GET | `/api/dsa/submissions?userId=X` | Get submissions |
+| Method | Endpoint                                   | Description                    |
+| ------ | ------------------------------------------ | ------------------------------ |
+| POST   | `/api/dsa/generate-question`               | Generate personalized question |
+| POST   | `/api/dsa/submit-code`                     | Submit code for execution      |
+| GET    | `/api/dsa/questions?userId=X`              | List user's questions          |
+| GET    | `/api/dsa/questions/[id]?userId=X`         | Get specific question          |
+| DELETE | `/api/dsa/questions?questionId=X&userId=Y` | Delete question                |
+| GET    | `/api/dsa/progress?userId=X`               | Get user progress              |
+| PUT    | `/api/dsa/progress`                        | Update progress                |
+| GET    | `/api/dsa/submissions?userId=X`            | Get submissions                |
 
 ## 💻 Client Usage
 
 ```typescript
-import { dsaApi } from '@/lib/dsa-client';
+import { dsaApi } from "@/lib/dsa-client";
 
 // Generate question
 const { question } = await dsaApi.generateQuestion(userId);
@@ -34,7 +34,7 @@ const result = await dsaApi.submitCode({
   userId,
   questionId: 1,
   code: "def solution():\n    pass",
-  language: "python"
+  language: "python",
 });
 
 // Get progress
@@ -44,12 +44,12 @@ const { progress } = await dsaApi.getUserProgress(userId);
 ## 🎨 UI Helper Functions
 
 ```typescript
-import { 
+import {
   getDifficultyBadgeColor,
   getStatusBadgeColor,
   formatExecutionTime,
   formatMemory,
-  formatStatus 
+  formatStatus
 } from '@/lib/dsa-client';
 
 // Usage in components

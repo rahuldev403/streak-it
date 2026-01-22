@@ -1,6 +1,7 @@
 # 🚀 Quick Setup Guide - DSA Question System
 
 ## Prerequisites
+
 - Node.js 18+ installed
 - PostgreSQL database (or using Neon/Supabase)
 - OpenAI API account
@@ -11,6 +12,7 @@
 ### 1️⃣ Get Your API Keys
 
 #### OpenAI API Key
+
 1. Visit https://platform.openai.com/api-keys
 2. Sign in or create account
 3. Click "Create new secret key"
@@ -21,6 +23,7 @@
 **Cost Estimate**: ~$0.01-0.05 per question generated
 
 #### Judge0 API Key (via RapidAPI)
+
 1. Visit https://rapidapi.com/judge0-official/api/judge0-ce
 2. Sign up/Sign in to RapidAPI
 3. Click "Subscribe to Test" or choose a plan:
@@ -45,7 +48,7 @@ Edit `.env.local` and add your keys:
 # OpenAI Configuration
 OPENAI_API_KEY=sk-proj-your-actual-key-here
 
-# Judge0 Configuration  
+# Judge0 Configuration
 JUDGE0_API_KEY=your-rapidapi-key-here
 JUDGE0_HOST=judge0-ce.p.rapidapi.com
 
@@ -71,6 +74,7 @@ npx drizzle-kit push
 ```
 
 **New tables created:**
+
 - `dsa_questions` - User-specific DSA questions
 - `dsa_submissions` - Code submission history
 - `user_dsa_progress` - User progress tracking
@@ -88,6 +92,7 @@ Visit http://localhost:3000
 ### 5️⃣ Test the APIs
 
 #### Test Question Generation
+
 ```bash
 curl -X POST http://localhost:3000/api/dsa/generate-question \
   -H "Content-Type: application/json" \
@@ -95,6 +100,7 @@ curl -X POST http://localhost:3000/api/dsa/generate-question \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -109,6 +115,7 @@ curl -X POST http://localhost:3000/api/dsa/generate-question \
 ```
 
 #### Test Code Submission
+
 ```bash
 curl -X POST http://localhost:3000/api/dsa/submit-code \
   -H "Content-Type: application/json" \
@@ -121,6 +128,7 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -138,33 +146,39 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ### OpenAI API Issues
 
 **Error: "OpenAI API key not configured"**
+
 - ✅ Check `.env.local` file exists
 - ✅ Verify `OPENAI_API_KEY` is set correctly
 - ✅ Restart dev server after adding env vars
 - ✅ No quotes around the key value
 
 **Error: "Incorrect API key provided"**
+
 - ✅ Key should start with `sk-proj-`
 - ✅ Copy-paste the entire key
 - ✅ Check for extra spaces
 
 **Error: "You exceeded your current quota"**
+
 - ⚠️ Add payment method to OpenAI account
 - ⚠️ Check billing limits at https://platform.openai.com/account/billing
 
 ### Judge0 API Issues
 
 **Error: "Judge0 API key not configured"**
+
 - ✅ Check `.env.local` has `JUDGE0_API_KEY`
 - ✅ Verify `JUDGE0_HOST=judge0-ce.p.rapidapi.com`
 - ✅ Restart dev server
 
 **Error: 403 Forbidden**
+
 - ✅ Verify you're subscribed to Judge0 on RapidAPI
 - ✅ Check subscription is active
 - ✅ API key is correct (from RapidAPI dashboard)
 
 **Error: 429 Too Many Requests**
+
 - ⚠️ You've hit the daily limit
 - ⚠️ Upgrade your RapidAPI plan
 - ⚠️ Wait until next day for reset
@@ -172,6 +186,7 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ### Database Issues
 
 **Error: "relation 'dsa_questions' does not exist"**
+
 ```bash
 # Run migrations again
 npx drizzle-kit generate
@@ -179,6 +194,7 @@ npx drizzle-kit migrate
 ```
 
 **Error: "column does not exist"**
+
 ```bash
 # Drop all tables and recreate (⚠️ DEVELOPMENT ONLY)
 npx drizzle-kit drop
@@ -188,30 +204,35 @@ npx drizzle-kit push
 ## 📊 Usage Limits & Costs
 
 ### OpenAI API
+
 - **Free Trial**: $5 credit (usually ~500 questions)
 - **Pay-as-you-go**: ~$0.01-0.05 per question
 - **Monthly Budget**: Set limits in OpenAI dashboard
 
 ### Judge0 (RapidAPI)
-| Plan | Cost | Requests/Day | Best For |
-|------|------|--------------|----------|
-| Free | $0 | 50 | Testing |
-| Basic | $5/mo | 500 | Small projects |
-| Pro | $15/mo | 5000 | Production |
+
+| Plan  | Cost   | Requests/Day | Best For       |
+| ----- | ------ | ------------ | -------------- |
+| Free  | $0     | 50           | Testing        |
+| Basic | $5/mo  | 500          | Small projects |
+| Pro   | $15/mo | 5000         | Production     |
 
 **Cost per submission**: 1 request per test case
+
 - 5 test cases = 5 requests
 - Plan accordingly!
 
 ## 🎯 Next Steps
 
 ### For Development
+
 1. Test all API endpoints
 2. Verify question generation quality
 3. Test code execution with different languages
 4. Check user progress tracking
 
 ### For Production
+
 1. Set up API monitoring
 2. Configure rate limiting
 3. Add error tracking (Sentry, etc.)
@@ -219,7 +240,9 @@ npx drizzle-kit push
 5. Implement caching for repeated submissions
 
 ### Building the UI
+
 Example components to create:
+
 - `QuestionGenerator.tsx` - Generate new questions
 - `CodeEditor.tsx` - Monaco editor for coding
 - `TestResults.tsx` - Display submission results
@@ -227,8 +250,9 @@ Example components to create:
 - `QuestionList.tsx` - Browse user's questions
 
 **Use the helper client:**
+
 ```typescript
-import { dsaApi } from '@/lib/dsa-client';
+import { dsaApi } from "@/lib/dsa-client";
 
 // Generate question
 const { question } = await dsaApi.generateQuestion(userId);
@@ -238,7 +262,7 @@ const result = await dsaApi.submitCode({
   userId,
   questionId,
   code,
-  language: 'python'
+  language: "python",
 });
 ```
 
@@ -260,7 +284,8 @@ A: Yes! Modify `/api/dsa/submit-code/route.ts` to use alternatives like Piston A
 A: Yes! The code uses OpenAI but can be adapted for Claude, Gemini, or local models like Llama.
 
 **Q: How do I limit API costs?**
-A: 
+A:
+
 - Set monthly budgets in OpenAI dashboard
 - Use RapidAPI free tier for testing
 - Cache generated questions

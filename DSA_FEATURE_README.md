@@ -1,23 +1,27 @@
 # DSA Question Generation & Code Compilation System
 
 ## Overview
+
 This system provides **personalized** Data Structures and Algorithms (DSA) questions for each user, utilizing OpenAI API for question generation and Judge0 API for code compilation and execution.
 
 ## Key Features
 
 ### 🎯 Personalization
+
 - **User-Specific Questions**: Each question is generated and stored per user
 - **Skill-Based Difficulty**: Questions adapt to user's skill level (beginner → intermediate → advanced → expert)
 - **Weakness Focus**: 70% of questions target user's weak areas
 - **Progress Tracking**: Comprehensive tracking of solved questions by difficulty
 
 ### 🤖 AI-Powered Generation
+
 - Uses OpenAI GPT-4 to generate unique, original DSA questions
 - Questions are NOT copied from LeetCode or other platforms
 - Includes examples, test cases, hints, and complexity analysis
 - Provides starter code templates for multiple languages
 
 ### 💻 Code Execution
+
 - Real-time code compilation and execution using Judge0
 - Supports multiple languages: Python, JavaScript, Java, C++, TypeScript, Go, Rust
 - Runs against hidden test cases
@@ -28,7 +32,9 @@ This system provides **personalized** Data Structures and Algorithms (DSA) quest
 ### Tables Created
 
 #### 1. `dsa_questions`
+
 Stores user-specific generated DSA questions
+
 - `userId` - Links question to specific user
 - `title`, `description`, `difficulty`, `category`
 - `testCases` - Hidden test cases (JSON)
@@ -37,7 +43,9 @@ Stores user-specific generated DSA questions
 - `timeComplexity`, `spaceComplexity` - Expected complexities
 
 #### 2. `dsa_submissions`
+
 Tracks all code submissions
+
 - `userId`, `questionId` - User and question references
 - `code`, `language` - Submitted code and language
 - `status` - accepted, wrong_answer, runtime_error, etc.
@@ -45,7 +53,9 @@ Tracks all code submissions
 - `testCasesPassed`, `totalTestCases` - Success rate
 
 #### 3. `user_dsa_progress`
+
 Maintains user progress and personalization data
+
 - `totalQuestionsSolved` - Overall count
 - `easyQuestionsSolved`, `mediumQuestionsSolved`, `hardQuestionsSolved` - By difficulty
 - `skillLevel` - Current skill level (auto-updated)
@@ -55,6 +65,7 @@ Maintains user progress and personalization data
 ## API Endpoints
 
 ### 1. Generate Personalized Question
+
 **POST** `/api/dsa/generate-question`
 
 ```json
@@ -64,6 +75,7 @@ Maintains user progress and personalization data
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -73,13 +85,14 @@ Maintains user progress and personalization data
     "title": "Find Missing Number in Array",
     "description": "...",
     "difficulty": "easy",
-    "category": "arrays",
+    "category": "arrays"
     // ... other fields
   }
 }
 ```
 
 ### 2. Submit Code for Execution
+
 **POST** `/api/dsa/submit-code`
 
 ```json
@@ -92,6 +105,7 @@ Maintains user progress and personalization data
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -124,16 +138,19 @@ Maintains user progress and personalization data
 ```
 
 ### 3. Get User Questions
+
 **GET** `/api/dsa/questions?userId=user_123`
 
 Returns all questions generated for the user.
 
 ### 4. Get Specific Question
+
 **GET** `/api/dsa/questions/[questionId]?userId=user_123`
 
 Returns detailed question with parsed JSON fields.
 
 ### 5. Get User Progress
+
 **GET** `/api/dsa/progress?userId=user_123`
 
 ```json
@@ -153,6 +170,7 @@ Returns detailed question with parsed JSON fields.
 ```
 
 ### 6. Update User Progress
+
 **PUT** `/api/dsa/progress`
 
 ```json
@@ -164,17 +182,21 @@ Returns detailed question with parsed JSON fields.
 ```
 
 ### 7. Get Submissions
+
 **GET** `/api/dsa/submissions?userId=user_123&questionId=1`
 
 Returns submission history with question details.
 
 ### 8. Delete Question
+
 **DELETE** `/api/dsa/questions?questionId=1&userId=user_123`
 
 ## Setup Instructions
 
 ### 1. Install Dependencies
+
 The project already has required dependencies. If needed:
+
 ```bash
 npm install
 ```
@@ -195,11 +217,13 @@ JUDGE0_HOST=judge0-ce.p.rapidapi.com
 **Getting API Keys:**
 
 #### OpenAI API Key:
+
 1. Go to https://platform.openai.com/api-keys
 2. Create a new API key
 3. Copy and paste into `.env.local`
 
 #### Judge0 API Key:
+
 1. Go to https://rapidapi.com/judge0-official/api/judge0-ce
 2. Subscribe to a plan (free tier available)
 3. Copy your RapidAPI key
@@ -224,8 +248,9 @@ npm run dev
 ## How Personalization Works
 
 ### Question Generation Algorithm
+
 1. **Fetch User Progress**: Get current skill level and question history
-2. **Determine Difficulty**: 
+2. **Determine Difficulty**:
    - Beginner (0-10 solved): Easy questions
    - Intermediate (10-50 solved): 70% easy, 30% medium
    - Advanced (50-100 solved): 50% medium, 50% hard
@@ -235,7 +260,7 @@ npm run dev
    - 70% chance: Focus on weak categories
    - 30% chance: Random category for variety
 
-4. **Generate with OpenAI**: 
+4. **Generate with OpenAI**:
    - Uses high temperature (0.9) for unique questions
    - Instructs to create original problems
    - Includes educational hints and examples
@@ -243,7 +268,9 @@ npm run dev
 5. **Save to Database**: Question is linked to specific user
 
 ### Progress Updates
+
 When a user solves a question (all test cases pass):
+
 - Increment difficulty-specific counter
 - Update total questions solved
 - Auto-upgrade skill level based on milestones
@@ -252,7 +279,7 @@ When a user solves a question (all test cases pass):
 ## Supported Languages
 
 | Language   | Judge0 ID | File Extension |
-|------------|-----------|----------------|
+| ---------- | --------- | -------------- |
 | Python 3   | 71        | .py            |
 | JavaScript | 63        | .js            |
 | Java       | 62        | .java          |
@@ -287,6 +314,7 @@ sequenceDiagram
 ## Testing the APIs
 
 ### 1. Generate a Question
+
 ```bash
 curl -X POST http://localhost:3000/api/dsa/generate-question \
   -H "Content-Type: application/json" \
@@ -294,6 +322,7 @@ curl -X POST http://localhost:3000/api/dsa/generate-question \
 ```
 
 ### 2. Submit Code
+
 ```bash
 curl -X POST http://localhost:3000/api/dsa/submit-code \
   -H "Content-Type: application/json" \
@@ -308,23 +337,27 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ## Important Notes
 
 ### Security
+
 - Questions are user-specific - users can only access their own questions
 - API validates userId ownership before returning or executing questions
 - Test cases include both visible examples and hidden cases
 
 ### Personalization Features
+
 - Each user gets unique questions tailored to their level
 - System learns from submission history
 - Questions adapt as user progresses
 - Focus on weak areas for targeted improvement
 
 ### Performance
+
 - Uses GPT-4o-mini for cost-effective generation
 - Judge0 provides fast code execution (< 1 second typically)
 - Results include execution time and memory usage
 - Database indexes on userId for fast queries
 
 ## Future Enhancements
+
 - [ ] Add more DSA categories (bit manipulation, math, etc.)
 - [ ] Implement difficulty progression based on success rate
 - [ ] Add social features (share questions, leaderboards)
@@ -337,16 +370,19 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ## Troubleshooting
 
 ### OpenAI API Errors
+
 - Check API key is valid and has credits
 - Verify key has proper permissions
 - Check rate limits (RPM/RPD)
 
 ### Judge0 API Errors
+
 - Verify RapidAPI subscription is active
 - Check daily request limits
 - Ensure JUDGE0_HOST is correct
 
 ### Database Issues
+
 - Run migrations: `npx drizzle-kit migrate`
 - Check database connection in `app/config/db.tsx`
 - Verify table creation in database
@@ -354,17 +390,21 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ## API Rate Limits
 
 ### OpenAI
+
 - Free tier: Limited requests
 - Pay-as-you-go: Based on tokens used
 - Recommended: Set up billing alerts
 
 ### Judge0 (RapidAPI)
+
 - Free tier: 50 requests/day
 - Basic plan: 100-500 requests/day
 - Pro plans: Higher limits available
 
 ## Support
+
 For issues or questions:
+
 1. Check this documentation
 2. Review API error messages
 3. Check environment variable configuration

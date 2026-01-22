@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       .from(DsaSubmissionTable)
       .leftJoin(
         DsaQuestionTable,
-        eq(DsaSubmissionTable.questionId, DsaQuestionTable.id)
+        eq(DsaSubmissionTable.questionId, DsaQuestionTable.id),
       )
       .where(eq(DsaSubmissionTable.userId, userId))
       .orderBy(desc(DsaSubmissionTable.submittedAt));
@@ -41,13 +41,13 @@ export async function GET(req: NextRequest) {
         .from(DsaSubmissionTable)
         .leftJoin(
           DsaQuestionTable,
-          eq(DsaSubmissionTable.questionId, DsaQuestionTable.id)
+          eq(DsaSubmissionTable.questionId, DsaQuestionTable.id),
         )
         .where(
           and(
             eq(DsaSubmissionTable.userId, userId),
-            eq(DsaSubmissionTable.questionId, parseInt(questionId))
-          )
+            eq(DsaSubmissionTable.questionId, parseInt(questionId)),
+          ),
         )
         .orderBy(desc(DsaSubmissionTable.submittedAt));
     }
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching submissions:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch submissions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

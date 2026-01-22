@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching DSA progress:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch progress" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -108,7 +108,7 @@ export async function PUT(req: NextRequest) {
     console.error("Error updating DSA progress:", error);
     return NextResponse.json(
       { error: error.message || "Failed to update progress" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

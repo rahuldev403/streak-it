@@ -156,7 +156,7 @@ export const DSA_CATEGORIES = [
   "binary-search",
 ] as const;
 
-export type DsaCategory = typeof DSA_CATEGORIES[number];
+export type DsaCategory = (typeof DSA_CATEGORIES)[number];
 
 // Languages
 export const SUPPORTED_LANGUAGES = [
@@ -170,7 +170,7 @@ export const SUPPORTED_LANGUAGES = [
   "rust",
 ] as const;
 
-export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 // Language Display Names
 export const LANGUAGE_DISPLAY_NAMES: Record<SupportedLanguage, string> = {

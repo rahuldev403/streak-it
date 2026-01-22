@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/config/db";
-import { DsaSubmissionTable, DsaQuestionTable, UserDsaProgressTable } from "@/app/config/schema";
+import {
+  DsaSubmissionTable,
+  DsaQuestionTable,
+  UserDsaProgressTable,
+} from "@/app/config/schema";
 import { eq, and } from "drizzle-orm";
 
 // Judge0 Language IDs
@@ -21,8 +25,10 @@ export async function POST(req: NextRequest) {
 
     if (!userId || !questionId || !code || !language) {
       return NextResponse.json(
-        { error: "Missing required fields: userId, questionId, code, language" },
-        { status: 400 }
+        {
+          error: "Missing required fields: userId, questionId, code, language",
+        },
+        { status: 400 },
       );
     }
 
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (!judge0ApiKey) {
       return NextResponse.json(
         { error: "Judge0 API key not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -43,15 +49,15 @@ export async function POST(req: NextRequest) {
       .where(
         and(
           eq(DsaQuestionTable.id, questionId),
-          eq(DsaQuestionTable.userId, userId)
-        )
+          eq(DsaQuestionTable.userId, userId),
+        ),
       )
       .limit(1);
 
     if (!question) {
       return NextResponse.json(
         { error: "Question not found or doesn't belong to this user" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -64,7 +70,7 @@ export async function POST(req: NextRequest) {
       language,
       testCases,
       judge0ApiKey,
-      judge0Host
+      judge0Host,
     );
 
     // Determine overall status
@@ -131,7 +137,7 @@ export async function POST(req: NextRequest) {
     console.error("Error executing code:", error);
     return NextResponse.json(
       { error: error.message || "Failed to execute code" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -142,7 +148,7 @@ async function runTestCases(
   language: string,
   testCases: any[],
   apiKey: string,
-  host: string
+  host: string,
 ): Promise<any[]> {
   const languageId = LANGUAGE_IDS[language.toLowerCase()];
 
@@ -160,7 +166,7 @@ async function runTestCases(
         testCase.input,
         testCase.expectedOutput,
         apiKey,
-        host
+        host,
       );
       results.push(result);
     } catch (error: any) {
@@ -187,7 +193,7 @@ async function executeCode(
   input: string,
   expectedOutput: string,
   apiKey: string,
-  host: string
+  host: string,
 ): Promise<any> {
   // Submit the code for execution
   const submissionResponse = await fetch(
@@ -205,7 +211,7 @@ async function executeCode(
         stdin: input,
         expected_output: expectedOutput,
       }),
-    }
+    },
   );
 
   if (!submissionResponse.ok) {
@@ -226,7 +232,10 @@ async function executeCode(
   } else if (submissionData.status.id === 6) {
     // Compilation Error
     status = "compilation_error";
-  } else if (submissionData.status.id === 11 || submissionData.status.id === 12) {
+  } else if (
+    submissionData.status.id === 11 ||
+    submissionData.status.id === 12
+  ) {
     // Runtime Error
     status = "runtime_error";
   } else if (submissionData.status.id === 5) {

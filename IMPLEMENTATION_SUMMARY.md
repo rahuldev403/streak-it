@@ -3,7 +3,9 @@
 ## ✅ What Has Been Implemented
 
 ### 1. Database Schema (schema.tsx)
+
 ✅ **3 new tables added:**
+
 - `dsa_questions` - Stores user-specific DSA questions
 - `dsa_submissions` - Tracks all code submissions with results
 - `user_dsa_progress` - Maintains personalization data per user
@@ -13,7 +15,9 @@
 ### 2. API Endpoints Created
 
 #### Core Functionality
+
 ✅ **POST `/api/dsa/generate-question`**
+
 - Generates personalized DSA questions using OpenAI GPT-4
 - Adapts difficulty based on user's skill level
 - Focuses 70% on weak areas, 30% on variety
@@ -21,6 +25,7 @@
 - Includes test cases, hints, examples, and starter code
 
 ✅ **POST `/api/dsa/submit-code`**
+
 - Executes code against test cases using Judge0
 - Supports 8 programming languages
 - Returns detailed results for each test case
@@ -28,6 +33,7 @@
 - Tracks execution time and memory usage
 
 #### Management Endpoints
+
 ✅ **GET `/api/dsa/questions`** - List all user's questions
 ✅ **GET `/api/dsa/questions/[questionId]`** - Get specific question
 ✅ **DELETE `/api/dsa/questions`** - Delete a question
@@ -36,13 +42,17 @@
 ✅ **GET `/api/dsa/submissions`** - Get submission history
 
 ### 3. Type Definitions (types/dsa.ts)
+
 ✅ Complete TypeScript interfaces for:
+
 - Questions, submissions, progress
 - API requests/responses
 - Enums for categories, languages, statuses
 
 ### 4. Client Library (lib/dsa-client.ts)
+
 ✅ Helper functions for:
+
 - Easy API calls with proper typing
 - UI formatting (colors, badges, time/memory)
 - Progress calculations
@@ -51,12 +61,14 @@
 ### 5. Example Components
 
 ✅ **DSAPracticeExample.tsx**
+
 - Full working example of question generation
 - Code editor with language selection
 - Test execution and results display
 - Demonstrates complete user flow
 
 ✅ **DSAProgressDashboard.tsx**
+
 - Shows user stats and skill level
 - Progress tracking with visual progress bar
 - Strength/weakness categories display
@@ -71,11 +83,13 @@
 ## 🎨 Personalization Features Implemented
 
 ### 1. User-Specific Questions
+
 - Every question has a `userId` field
 - Users can only access their own questions
 - Questions are generated based on individual progress
 
 ### 2. Adaptive Difficulty
+
 ```
 Beginner (0-10 solved) → Easy questions
 Intermediate (10-50 solved) → 70% easy, 30% medium
@@ -84,18 +98,22 @@ Expert (100+ solved) → 30% medium, 70% hard
 ```
 
 ### 3. Weakness-Focused Learning
+
 - System tracks weak vs. strong categories
 - 70% of questions target weak areas
 - 30% provide variety to prevent boredom
 
 ### 4. Progress Tracking
+
 - Total questions solved
 - Breakdown by difficulty (easy/medium/hard)
 - Auto-upgrading skill levels
 - Last activity tracking
 
 ### 5. Smart Question Generation
+
 OpenAI prompt includes:
+
 - User's current skill level
 - Recent submission history
 - Target difficulty and category
@@ -104,27 +122,29 @@ OpenAI prompt includes:
 
 ## 🛠️ Technologies Used
 
-| Component | Technology |
-|-----------|------------|
-| AI Generation | OpenAI GPT-4o-mini |
-| Code Execution | Judge0 (via RapidAPI) |
-| Database | PostgreSQL + Drizzle ORM |
-| Backend | Next.js 14 API Routes |
-| Frontend | React + TypeScript |
-| UI Components | shadcn/ui |
-| Styling | Tailwind CSS |
+| Component      | Technology               |
+| -------------- | ------------------------ |
+| AI Generation  | OpenAI GPT-4o-mini       |
+| Code Execution | Judge0 (via RapidAPI)    |
+| Database       | PostgreSQL + Drizzle ORM |
+| Backend        | Next.js 14 API Routes    |
+| Frontend       | React + TypeScript       |
+| UI Components  | shadcn/ui                |
+| Styling        | Tailwind CSS             |
 
 ## 📋 Setup Checklist
 
 To get started, you need to:
 
 ### Required
+
 - [ ] Get OpenAI API key from https://platform.openai.com/api-keys
 - [ ] Get Judge0 API key from https://rapidapi.com/judge0-official/api/judge0-ce
 - [ ] Create `.env.local` with both API keys
 - [ ] Run database migrations: `npx drizzle-kit generate && npx drizzle-kit migrate`
 
 ### Recommended
+
 - [ ] Test API endpoints with curl or Postman
 - [ ] Build UI using provided example components
 - [ ] Set up billing limits on OpenAI
@@ -133,16 +153,18 @@ To get started, you need to:
 ## 📊 API Usage & Costs
 
 ### OpenAI (Question Generation)
+
 - **Cost per question:** ~$0.01-0.05
 - **Free tier:** $5 credit (~100-500 questions)
 - **Recommended:** Set monthly budget limits
 
 ### Judge0 (Code Execution)
-| Plan | Cost | Requests/Day |
-|------|------|--------------|
-| Free | $0 | 50 |
-| Basic | $5/mo | 500 |
-| Pro | $15/mo | 5,000 |
+
+| Plan  | Cost   | Requests/Day |
+| ----- | ------ | ------------ |
+| Free  | $0     | 50           |
+| Basic | $5/mo  | 500          |
+| Pro   | $15/mo | 5,000        |
 
 **Note:** Each submission uses 1 request per test case (typically 5-10 test cases per question).
 
@@ -178,12 +200,14 @@ To get started, you need to:
 ## 🚀 Next Steps
 
 ### For Frontend Development
+
 1. Integrate example components into your app
 2. Add routing for DSA practice page
 3. Connect to your authentication system (Clerk)
 4. Customize styling to match your theme
 
 ### Example Integration:
+
 ```typescript
 // app/(routes)/dsa-practice/page.tsx
 import DSAPracticeExample from "@/app/_components/DSAPracticeExample";
@@ -191,16 +215,17 @@ import { auth } from "@clerk/nextjs";
 
 export default async function DSAPracticePage() {
   const { userId } = auth();
-  
+
   if (!userId) {
     return <div>Please sign in</div>;
   }
-  
+
   return <DSAPracticeExample userId={userId} />;
 }
 ```
 
 ### For Advanced Features
+
 - [ ] Add code quality analysis
 - [ ] Implement mock interview mode
 - [ ] Add social features (share questions)
@@ -221,6 +246,7 @@ export default async function DSAPracticePage() {
 ## 🧪 Testing
 
 ### Test Question Generation
+
 ```bash
 curl -X POST http://localhost:3000/api/dsa/generate-question \
   -H "Content-Type: application/json" \
@@ -228,6 +254,7 @@ curl -X POST http://localhost:3000/api/dsa/generate-question \
 ```
 
 ### Test Code Submission
+
 ```bash
 curl -X POST http://localhost:3000/api/dsa/submit-code \
   -H "Content-Type: application/json" \
@@ -240,6 +267,7 @@ curl -X POST http://localhost:3000/api/dsa/submit-code \
 ```
 
 ### Test Progress Fetch
+
 ```bash
 curl "http://localhost:3000/api/dsa/progress?userId=test_user"
 ```
@@ -247,18 +275,21 @@ curl "http://localhost:3000/api/dsa/progress?userId=test_user"
 ## ⚠️ Important Notes
 
 ### Personalization
+
 - Questions are UNIQUE per user
 - Each user gets their own learning path
 - System adapts to individual progress
 - No shared question pool
 
 ### Question Quality
+
 - AI generates original problems
 - Not copied from LeetCode/HackerRank
 - Educational focus with hints
 - Appropriate complexity analysis
 
 ### Cost Management
+
 - Monitor OpenAI usage in dashboard
 - Set billing alerts
 - Use Judge0 free tier for testing
@@ -326,6 +357,7 @@ The entire personalized DSA system is now implemented and ready to use. Just:
 5. Integrate the example components
 
 **Need help?** Check the detailed guides:
+
 - [DSA_FEATURE_README.md](./DSA_FEATURE_README.md) - Technical details
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md) - Setup walkthrough
 

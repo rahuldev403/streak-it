@@ -6,7 +6,7 @@ import { eq, and } from "drizzle-orm";
 // GET: Get a specific DSA question by ID
 export async function GET(
   req: NextRequest,
-  { params }: { params: { questionId: string } }
+  { params }: { params: { questionId: string } },
 ) {
   try {
     const { searchParams } = new URL(req.url);
@@ -15,7 +15,7 @@ export async function GET(
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,15 +27,15 @@ export async function GET(
       .where(
         and(
           eq(DsaQuestionTable.id, questionId),
-          eq(DsaQuestionTable.userId, userId)
-        )
+          eq(DsaQuestionTable.userId, userId),
+        ),
       )
       .limit(1);
 
     if (!question) {
       return NextResponse.json(
         { error: "Question not found or doesn't belong to this user" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function GET(
     console.error("Error fetching DSA question:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch question" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
