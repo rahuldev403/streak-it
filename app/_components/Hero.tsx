@@ -7,7 +7,7 @@ import Link from "next/link";
 import herobg from "@/public/hero-bg.gif";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import bg from "@/public/bg.jpg";
-import logo from "@/public/logo.jpeg";
+import logo from "@/public/logo.png";
 import Image from "next/image";
 const Hero = () => {
   const { user } = useUser();
@@ -63,20 +63,13 @@ const Hero = () => {
                 <Image
                   src={logo}
                   alt="Hero Decoration"
-                  width={200}
-                  className="md:h-12 h-20 mb-2 rounded-lg"
+                  width={500}
+                  className="md:h-72 h-30 mb-2 rounded-lg"
                   style={{ imageRendering: "pixelated" }}
                 />
               </div>
 
-              <p className="font-comfortaa text-xs sm:text-sm md:text-base text-gray-200 text-center mb-2 leading-relaxed">
-                Beginner friendly courses and interactive projects
-              </p>
-              <p className="font-comfortaa text-xs sm:text-sm text-gray-300 text-center mb-6">
-                Master web development from scratch with hands-on tutorials and
-                real-world projects!
-              </p>
-
+              
               <div className="flex justify-center mb-6">
                 {!user ? (
                   <SignInButton mode="modal" fallbackRedirectUrl="/">
