@@ -58,7 +58,9 @@ const ProviderContent = ({ children, ...props }: ProviderProps) => {
     <NextThemesProvider {...props}>
       <UserDeatailContext.Provider value={{ userDetail, setUserDetail }}>
         <GlobalLoadingScreen />
-        {pathname !== "/" && <Header_one />}
+        {pathname !== "/" && pathname !== "/interview-prep/dsa" && (
+          <Header_one />
+        )}
         {children}
       </UserDeatailContext.Provider>
     </NextThemesProvider>
