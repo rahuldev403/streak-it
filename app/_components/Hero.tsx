@@ -6,7 +6,7 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import herobg from "@/public/hero-bg.gif";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
-import bg from "@/public/bg.jpg";
+import bg from "@/public/bg.png";
 import logo from "@/public/logo.png";
 import Image from "next/image";
 const Hero = () => {
@@ -58,18 +58,17 @@ const Hero = () => {
                       "3px 3px #000, -2px -2px 0 #000, -2px 2px 0 #000",
                   }}
                 >
-                  WEB DEV ADVENTURE WITH
+                  DEV ADVENTURE WITH
                 </h2>
-                <Image
-                  src={logo}
-                  alt="Hero Decoration"
-                  width={500}
-                  className="md:h-72 h-30 mb-2 rounded-lg"
+                <div
+                  className="font-game text-2xl md:text-3xl font-normal border-4 border-purple-600 px-4 rounded-md flex items-center justify-between mb-4"
                   style={{ imageRendering: "pixelated" }}
-                />
+                >
+                  <span className="text-pink-500">Streak</span>
+                  <span className="text-gray-500">{"-"}IT</span>
+                </div>
               </div>
 
-              
               <div className="flex justify-center mb-6">
                 {!user ? (
                   <SignInButton mode="modal" fallbackRedirectUrl="/">
