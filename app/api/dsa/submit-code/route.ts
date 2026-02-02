@@ -369,10 +369,6 @@ const cleanInput = input.trim().replace(/\\[|\\]|n\\s*=\\s*|num\\s*=\\s*/g, '').
 const num = parseInt(cleanInput);`;
     functionCall = `${functionName}(num)`;
   }
-const cleanInput = input.trim().replace(/\\[|\\]|n\\s*=\\s*|num\\s*=\\s*/g, '').trim();
-const num = parseInt(cleanInput);`;
-    functionCall = `${functionName}(num)`;
-  }
 
   const wrappedCode = `${userCode}
 
@@ -449,11 +445,6 @@ function wrapCppCode(userCode: string, input: string): string {
     // Clean input: remove brackets, prefixes
     line.erase(remove(line.begin(), line.end(), '['), line.end());
     line.erase(remove(line.begin(), line.end(), ']'), line.end());
-    size_t pos = line.find("=");
-    if (pos != string::npos) line = line.substr(pos + 1);
-    int num = stoi(line);`;
-    functionCall = `${functionName}(num)`;
-  }
     size_t pos = line.find("=");
     if (pos != string::npos) line = line.substr(pos + 1);
     int num = stoi(line);`;
