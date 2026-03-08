@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -30,8 +31,12 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import Editor from "@monaco-editor/react";
+import ReactMarkdown from "react-markdown";
+import { motion } from "framer-motion";
 import { DsaQuestion } from "@/types/dsa";
 import { CourseStyleLoader } from "@/components/ui/course-style-loader";
+import successBadge from "@/public/success.png";
+import failureBadge from "@/public/failure.png";
 
 export default function DsaPracticePage() {
   const { user } = useUser();
@@ -108,7 +113,8 @@ export default function DsaPracticePage() {
     if (!user) return;
 
     setRunning(true);
-    setShowResults(true);
+    setResult(null);
+    setShowResults(false);
     try {
       const response = await axios.post("/api/dsa/submit-code", {
         userId: user.id,
@@ -118,6 +124,7 @@ export default function DsaPracticePage() {
       });
 
       setResult(response.data);
+      setShowResults(true);
 
       if (response.data.summary.allPassed) {
         toast.success("All test cases passed!");
@@ -134,6 +141,7 @@ export default function DsaPracticePage() {
         results: [],
         error: errorMessage,
       });
+      setShowResults(true);
       toast.error(errorMessage);
     } finally {
       setRunning(false);
@@ -144,7 +152,8 @@ export default function DsaPracticePage() {
     if (!user) return;
 
     setSubmitting(true);
-    setShowResults(true);
+    setResult(null);
+    setShowResults(false);
     try {
       const response = await axios.post("/api/dsa/submit-code", {
         userId: user.id,
@@ -154,6 +163,7 @@ export default function DsaPracticePage() {
       });
 
       setResult(response.data);
+      setShowResults(true);
 
       if (response.data.summary.allPassed) {
         toast.success("Solution accepted! Question completed!");
@@ -171,6 +181,7 @@ export default function DsaPracticePage() {
         results: [],
         error: errorMessage,
       });
+      setShowResults(true);
       toast.error(`Error: ${error}`);
       toast.error("Failed to submit code");
     } finally {
@@ -214,6 +225,10 @@ export default function DsaPracticePage() {
       ? JSON.parse(currentQuestion.hints)
       : currentQuestion.hints
     : [];
+
+  const normalizedDescription = (currentQuestion.description || "")
+    .replace(/\\`/g, "`")
+    .replace(/\\n/g, "\n");
 
   return (
     <div className="h-screen flex flex-col bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
@@ -276,156 +291,180 @@ export default function DsaPracticePage() {
         <Allotment>
           {/* Left Panel - Problem Description */}
           <Allotment.Pane minSize={300}>
-            <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+            <div className="h-full relative flex flex-col overflow-hidden bg-white dark:bg-gray-900">
               {/* Question Content - Scrollable */}
-              <div
-                className={`overflow-y-auto p-6 transition-all duration-300 ${showResults ? "h-[50%]" : "h-full"}`}
-              >
-                <div className="max-w-3xl">
-                  {/* Title and Difficulty */}
-                  <div className="flex items-start justify-between mb-4">
-                    <h1 className="text-2xl font-normal font-game">
-                      {currentQuestion.title}
-                    </h1>
-                    <Badge
-                      className={`font-game border-2 border-gray-800 ${
-                        currentQuestion.difficulty === "easy"
-                          ? "bg-green-500 text-white"
-                          : currentQuestion.difficulty === "medium"
-                            ? "bg-yellow-500 text-black"
-                            : "bg-red-500 text-white"
-                      }`}
-                    >
-                      {currentQuestion.difficulty.toUpperCase()}
-                    </Badge>
-                  </div>
-
-                  {/* Category and Tags */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    <Badge
-                      variant="outline"
-                      className="font-game border-2 border-gray-800"
-                    >
-                      {currentQuestion.category}
-                    </Badge>
-                    {currentQuestion.tags &&
-                      JSON.parse(currentQuestion.tags).map((tag: string) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="font-game border border-gray-800"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                  </div>
-
-                  {/* Description */}
-                  <div className="mb-6">
-                    <h2 className="text-lg font-normal mb-2 font-game">
-                      Problem Statement
-                    </h2>
-                    <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                      {currentQuestion.description}
-                    </p>
-                  </div>
-
-                  {/* Examples */}
-                  <div className="mb-6">
-                    <h2 className="text-lg font-normal mb-2 font-game">
-                      Examples
-                    </h2>
-                    {examples.map((example: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="bg-linear-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg mb-3 border-2 border-gray-800"
+              {!showResults && (
+                <div className="flex-1 min-h-0 overflow-y-auto p-6">
+                  <div className="max-w-3xl">
+                    {/* Title and Difficulty */}
+                    <div className="flex items-start justify-between mb-4">
+                      <h1 className="text-2xl font-normal font-game">
+                        {currentQuestion.title}
+                      </h1>
+                      <Badge
+                        className={`font-game border-2 border-gray-800 ${
+                          currentQuestion.difficulty === "easy"
+                            ? "bg-green-500 text-white"
+                            : currentQuestion.difficulty === "medium"
+                              ? "bg-yellow-500 text-black"
+                              : "bg-red-500 text-white"
+                        }`}
                       >
+                        {currentQuestion.difficulty.toUpperCase()}
+                      </Badge>
+                    </div>
+
+                    {/* Category and Tags */}
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      <Badge
+                        variant="outline"
+                        className="font-game border-2 border-gray-800"
+                      >
+                        {currentQuestion.category}
+                      </Badge>
+                      {currentQuestion.tags &&
+                        JSON.parse(currentQuestion.tags).map((tag: string) => (
+                          <Badge
+                            key={tag}
+                            variant="secondary"
+                            className="font-game border border-gray-800"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                    </div>
+
+                    {/* Description */}
+                    <div className="mb-6">
+                      <h2 className="text-lg font-normal mb-2 font-game">
+                        Problem Statement
+                      </h2>
+                      <div className="text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono">
+                        <ReactMarkdown
+                          components={{
+                            code({ className, children }) {
+                              // Treat inline backtick text as strong emphasis for generated prompts.
+                              if (!className) {
+                                return (
+                                  <span className="font-bold text-foreground">
+                                    {children}
+                                  </span>
+                                );
+                              }
+
+                              return (
+                                <code className={className}>{children}</code>
+                              );
+                            },
+                          }}
+                        >
+                          {normalizedDescription}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+
+                    {/* Examples */}
+                    <div className="mb-6">
+                      <h2 className="text-lg font-normal mb-2 font-game">
+                        Examples
+                      </h2>
+                      {examples.map((example: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="bg-linear-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg mb-3 border-2 border-gray-800"
+                        >
+                          <div className="text-sm space-y-1">
+                            <div>
+                              <strong className="font-game">Input:</strong>{" "}
+                              <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded">
+                                {example.input}
+                              </code>
+                            </div>
+                            <div>
+                              <strong className="font-game">Output:</strong>{" "}
+                              <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded">
+                                {example.output}
+                              </code>
+                            </div>
+                            {example.explanation && (
+                              <div className="text-muted-foreground mt-2">
+                                <strong className="font-game">
+                                  Explanation:
+                                </strong>{" "}
+                                {example.explanation}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Constraints */}
+                    {currentQuestion.constraints && (
+                      <div className="mb-6">
+                        <h2 className="text-lg font-normal mb-2 font-game">
+                          ⚠️ Constraints
+                        </h2>
+                        <pre className="bg-muted p-4 rounded-lg text-sm whitespace-pre-wrap border-2 border-gray-800">
+                          {currentQuestion.constraints}
+                        </pre>
+                      </div>
+                    )}
+
+                    {/* Hints */}
+                    {hints.length > 0 && (
+                      <details className="mb-6">
+                        <summary className="text-lg font-normal cursor-pointer font-game">
+                          Hints
+                        </summary>
+                        <ul className="mt-3 space-y-2 ml-4 list-disc">
+                          {hints.map((hint: string, idx: number) => (
+                            <li
+                              key={idx}
+                              className="text-sm text-muted-foreground"
+                            >
+                              {hint}
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
+
+                    {/* Complexity */}
+                    {(currentQuestion.timeComplexity ||
+                      currentQuestion.spaceComplexity) && (
+                      <div className="bg-blue-100 dark:bg-blue-950 p-4 rounded-lg border-2 border-gray-800">
+                        <h2 className="text-lg font-normal mb-2 font-game">
+                          Expected Complexity
+                        </h2>
                         <div className="text-sm space-y-1">
-                          <div>
-                            <strong className="font-game">Input:</strong>{" "}
-                            <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded">
-                              {example.input}
-                            </code>
-                          </div>
-                          <div>
-                            <strong className="font-game">Output:</strong>{" "}
-                            <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded">
-                              {example.output}
-                            </code>
-                          </div>
-                          {example.explanation && (
-                            <div className="text-muted-foreground mt-2">
-                              <strong className="font-game">
-                                Explanation:
-                              </strong>{" "}
-                              {example.explanation}
+                          {currentQuestion.timeComplexity && (
+                            <div>
+                              <strong className="font-game">Time:</strong>{" "}
+                              {currentQuestion.timeComplexity}
+                            </div>
+                          )}
+                          {currentQuestion.spaceComplexity && (
+                            <div>
+                              <strong className="font-game">Space:</strong>{" "}
+                              {currentQuestion.spaceComplexity}
                             </div>
                           )}
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
-
-                  {/* Constraints */}
-                  {currentQuestion.constraints && (
-                    <div className="mb-6">
-                      <h2 className="text-lg font-normal mb-2 font-game">
-                        ⚠️ Constraints
-                      </h2>
-                      <pre className="bg-muted p-4 rounded-lg text-sm whitespace-pre-wrap border-2 border-gray-800">
-                        {currentQuestion.constraints}
-                      </pre>
-                    </div>
-                  )}
-
-                  {/* Hints */}
-                  {hints.length > 0 && (
-                    <details className="mb-6">
-                      <summary className="text-lg font-normal cursor-pointer font-game">
-                        Hints
-                      </summary>
-                      <ul className="mt-3 space-y-2 ml-4 list-disc">
-                        {hints.map((hint: string, idx: number) => (
-                          <li
-                            key={idx}
-                            className="text-sm text-muted-foreground"
-                          >
-                            {hint}
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
-
-                  {/* Complexity */}
-                  {(currentQuestion.timeComplexity ||
-                    currentQuestion.spaceComplexity) && (
-                    <div className="bg-blue-100 dark:bg-blue-950 p-4 rounded-lg border-2 border-gray-800">
-                      <h2 className="text-lg font-normal mb-2 font-game">
-                        Expected Complexity
-                      </h2>
-                      <div className="text-sm space-y-1">
-                        {currentQuestion.timeComplexity && (
-                          <div>
-                            <strong className="font-game">Time:</strong>{" "}
-                            {currentQuestion.timeComplexity}
-                          </div>
-                        )}
-                        {currentQuestion.spaceComplexity && (
-                          <div>
-                            <strong className="font-game">Space:</strong>{" "}
-                            {currentQuestion.spaceComplexity}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
+              )}
 
               {/* Results Panel - Slides up from bottom */}
               {showResults && (
-                <div className="h-[50%] border-t-4 border-gray-800 bg-linear-to-br from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900 overflow-y-auto animate-slide-up">
+                <motion.div
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.32, ease: "easeOut" }}
+                  className="absolute inset-0 z-20 border-t-4 border-gray-800 bg-linear-to-br from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900 overflow-y-auto"
+                >
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-normal text-lg font-game">
@@ -457,17 +496,33 @@ export default function DsaPracticePage() {
                       </div>
                     ) : result ? (
                       <>
-                        <div className="flex items-center justify-between mb-4">
-                          <Badge
-                            className={`text-lg px-4 py-2 font-game border-2 border-gray-800 ${
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                          <Image
+                            src={
                               result.summary.allPassed
-                                ? "bg-green-500 text-white"
-                                : "bg-red-500 text-white"
-                            }`}
-                          >
-                            {result.summary.passedTestCases}/
-                            {result.summary.totalTestCases} Passed
-                          </Badge>
+                                ? successBadge
+                                : failureBadge
+                            }
+                            alt={
+                              result.summary.allPassed
+                                ? "Success status"
+                                : "Failure status"
+                            }
+                            width={96}
+                            height={96}
+                            className="border-2 border-black dark:border-white rounded-lg bg-white dark:bg-gray-900 p-1"
+                          />
+                          <div className="rounded-lg border-2 border-black dark:border-white px-4 py-2 bg-white dark:bg-gray-900">
+                            <p className="text-lg font-game">
+                              {result.summary.passedTestCases}/
+                              {result.summary.totalTestCases} Passed
+                            </p>
+                            <p className="text-xs font-comfortaa text-muted-foreground">
+                              {result.summary.allPassed
+                                ? "All test cases passed"
+                                : "Partial/failed test cases"}
+                            </p>
+                          </div>
                         </div>
 
                         {result.summary.allPassed && (
@@ -539,7 +594,7 @@ export default function DsaPracticePage() {
                       </>
                     ) : null}
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           </Allotment.Pane>
