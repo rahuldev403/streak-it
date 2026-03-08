@@ -37,6 +37,9 @@ import { DsaQuestion } from "@/types/dsa";
 import { CourseStyleLoader } from "@/components/ui/course-style-loader";
 import successBadge from "@/public/success.png";
 import failureBadge from "@/public/failure.png";
+import problemIcon from "@/public/code-challange/magnifying-glass.png";
+import ideaIcon from "@/public/code-challange/idea.png";
+import testCasesIcon from "@/public/code-challange/exam-time.png";
 
 export default function DsaPracticePage() {
   const { user } = useUser();
@@ -225,6 +228,11 @@ export default function DsaPracticePage() {
       ? JSON.parse(currentQuestion.hints)
       : currentQuestion.hints
     : [];
+  const testCases = currentQuestion.testCases
+    ? typeof currentQuestion.testCases === "string"
+      ? JSON.parse(currentQuestion.testCases)
+      : currentQuestion.testCases
+    : [];
 
   const normalizedDescription = (currentQuestion.description || "")
     .replace(/\\`/g, "`")
@@ -335,11 +343,16 @@ export default function DsaPracticePage() {
                     </div>
 
                     {/* Description */}
-                    <div className="mb-6">
-                      <h2 className="text-lg font-normal mb-2 font-game">
+                    <div className="mb-6 border-4 border-gray-800 bg-yellow-100 dark:bg-yellow-900/30 p-4 shadow-[4px_4px_0_0_#000]">
+                      <h2 className="font-game font-normal text-lg mb-2 flex items-center gap-2">
+                        <Image
+                          src={problemIcon}
+                          alt="Problem Statement"
+                          className="w-5 h-5"
+                        />
                         Problem Statement
                       </h2>
-                      <div className="text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono">
+                      <div className="font-mono text-sm prose dark:prose-invert max-w-none">
                         <ReactMarkdown
                           components={{
                             code({ className, children }) {
@@ -364,30 +377,35 @@ export default function DsaPracticePage() {
                     </div>
 
                     {/* Examples */}
-                    <div className="mb-6">
-                      <h2 className="text-lg font-normal mb-2 font-game">
+                    <div className="mb-6 border-4 border-gray-800 bg-blue-100 dark:bg-blue-900/30 p-4 shadow-[4px_4px_0_0_#000]">
+                      <h2 className="font-game font-normal text-lg mb-3 flex items-center gap-2">
+                        <Image
+                          src={ideaIcon}
+                          alt="Examples"
+                          className="w-5 h-5"
+                        />
                         Examples
                       </h2>
                       {examples.map((example: any, idx: number) => (
                         <div
                           key={idx}
-                          className="bg-linear-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg mb-3 border-2 border-gray-800"
+                          className="bg-white/50 dark:bg-black/20 p-3 rounded border-2 border-gray-600 mb-3"
                         >
-                          <div className="text-sm space-y-1">
+                          <div className="font-mono text-sm space-y-2">
                             <div>
                               <strong className="font-game">Input:</strong>{" "}
-                              <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded">
+                              <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded border border-gray-400">
                                 {example.input}
                               </code>
                             </div>
                             <div>
                               <strong className="font-game">Output:</strong>{" "}
-                              <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded">
+                              <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded border border-gray-400">
                                 {example.output}
                               </code>
                             </div>
                             {example.explanation && (
-                              <div className="text-muted-foreground mt-2">
+                              <div className="text-gray-700 dark:text-gray-300 mt-2">
                                 <strong className="font-game">
                                   Explanation:
                                 </strong>{" "}
@@ -401,27 +419,61 @@ export default function DsaPracticePage() {
 
                     {/* Constraints */}
                     {currentQuestion.constraints && (
-                      <div className="mb-6">
-                        <h2 className="text-lg font-normal mb-2 font-game">
-                          ⚠️ Constraints
+                      <div className="mb-6 border-4 border-gray-800 bg-green-100 dark:bg-green-900/30 p-4 shadow-[4px_4px_0_0_#000]">
+                        <h2 className="font-game font-normal text-lg mb-2 flex items-center gap-2">
+                          [!] Constraints
                         </h2>
-                        <pre className="bg-muted p-4 rounded-lg text-sm whitespace-pre-wrap border-2 border-gray-800">
+                        <pre className="font-mono text-sm whitespace-pre-wrap bg-white/60 dark:bg-black/20 p-3 rounded border-2 border-gray-600">
                           {currentQuestion.constraints}
                         </pre>
                       </div>
                     )}
 
+                    {/* Test Cases */}
+                    {testCases.length > 0 && (
+                      <div className="mb-6 border-4 border-gray-800 bg-orange-100 dark:bg-orange-900/30 p-4 shadow-[4px_4px_0_0_#000]">
+                        <h2 className="font-game font-normal text-lg mb-3 flex items-center gap-2">
+                          <Image
+                            src={testCasesIcon}
+                            alt="Test Cases"
+                            className="w-5 h-5"
+                          />
+                          Test Cases
+                        </h2>
+                        <div className="space-y-2">
+                          {testCases
+                            .filter((testCase: any) => !testCase.isHidden)
+                            .map((testCase: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="bg-white/50 dark:bg-black/20 p-3 rounded border-2 border-gray-600"
+                              >
+                                <p className="font-semibold text-sm font-game">
+                                  Test {idx + 1}
+                                </p>
+                                <p className="font-mono text-xs mt-1">
+                                  Input: {testCase.input}
+                                </p>
+                                <p className="font-mono text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                  Expected: {testCase.expectedOutput}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Hints */}
                     {hints.length > 0 && (
-                      <details className="mb-6">
-                        <summary className="text-lg font-normal cursor-pointer font-game">
-                          Hints
+                      <details className="mb-6 border-4 border-gray-800 bg-purple-100 dark:bg-purple-900/30 p-4 shadow-[4px_4px_0_0_#000]">
+                        <summary className="font-game font-normal text-lg cursor-pointer hover:text-purple-600">
+                          [?] Hints (Click to reveal)
                         </summary>
-                        <ul className="mt-3 space-y-2 ml-4 list-disc">
+                        <ul className="font-mono text-sm mt-3 space-y-2 ml-4 list-disc">
                           {hints.map((hint: string, idx: number) => (
                             <li
                               key={idx}
-                              className="text-sm text-muted-foreground"
+                              className="text-gray-700 dark:text-gray-300"
                             >
                               {hint}
                             </li>
@@ -463,25 +515,27 @@ export default function DsaPracticePage() {
                   initial={{ y: "100%", opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.32, ease: "easeOut" }}
-                  className="absolute inset-0 z-20 border-t-4 border-gray-800 bg-linear-to-br from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900 overflow-y-auto"
+                  className="absolute inset-0 z-20 border-t-4 border-gray-800 bg-white dark:bg-gray-900 overflow-y-auto"
                 >
                   <div className="p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-normal text-lg font-game">
-                        Test Results
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowResults(false)}
-                        className="font-game"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                    <div className="mb-4 border-4 border-gray-800 bg-orange-100 dark:bg-orange-900/30 p-3 shadow-[4px_4px_0_0_#000]">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-normal text-lg font-game">
+                          Test Results
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowResults(false)}
+                          className="font-game"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     {result?.error ? (
-                      <div className="bg-red-100 dark:bg-red-900 p-4 rounded-lg border-2 border-red-600">
+                      <div className="border-4 border-red-700 bg-red-100 dark:bg-red-900/30 p-4 shadow-[4px_4px_0_0_#000]">
                         <div className="flex items-start gap-2">
                           <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-300 mt-0.5" />
                           <div>
@@ -496,37 +550,39 @@ export default function DsaPracticePage() {
                       </div>
                     ) : result ? (
                       <>
-                        <div className="flex flex-wrap items-center gap-3 mb-4">
-                          <Image
-                            src={
-                              result.summary.allPassed
-                                ? successBadge
-                                : failureBadge
-                            }
-                            alt={
-                              result.summary.allPassed
-                                ? "Success status"
-                                : "Failure status"
-                            }
-                            width={96}
-                            height={96}
-                            className="border-2 border-black dark:border-white rounded-lg bg-white dark:bg-gray-900 p-1"
-                          />
-                          <div className="rounded-lg border-2 border-black dark:border-white px-4 py-2 bg-white dark:bg-gray-900">
-                            <p className="text-lg font-game">
-                              {result.summary.passedTestCases}/
-                              {result.summary.totalTestCases} Passed
-                            </p>
-                            <p className="text-xs font-comfortaa text-muted-foreground">
-                              {result.summary.allPassed
-                                ? "All test cases passed"
-                                : "Partial/failed test cases"}
-                            </p>
+                        <div className="mb-4 border-4 border-gray-800 bg-yellow-100 dark:bg-yellow-900/30 p-4 shadow-[4px_4px_0_0_#000]">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <Image
+                              src={
+                                result.summary.allPassed
+                                  ? successBadge
+                                  : failureBadge
+                              }
+                              alt={
+                                result.summary.allPassed
+                                  ? "Success status"
+                                  : "Failure status"
+                              }
+                              width={96}
+                              height={96}
+                              className="border-2 border-black dark:border-white bg-white dark:bg-gray-900 p-1"
+                            />
+                            <div className="border-2 border-black dark:border-white px-4 py-2 bg-white dark:bg-gray-900">
+                              <p className="text-lg font-game">
+                                {result.summary.passedTestCases}/
+                                {result.summary.totalTestCases} Passed
+                              </p>
+                              <p className="text-xs font-comfortaa text-muted-foreground">
+                                {result.summary.allPassed
+                                  ? "All test cases passed"
+                                  : "Partial/failed test cases"}
+                              </p>
+                            </div>
                           </div>
                         </div>
 
                         {result.summary.allPassed && (
-                          <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg text-center mb-4 border-2 border-green-600">
+                          <div className="border-4 border-green-700 bg-green-100 dark:bg-green-900/30 p-4 text-center mb-4 shadow-[4px_4px_0_0_#000]">
                             <Trophy className="h-8 w-8 mx-auto mb-2 text-green-600 dark:text-green-300" />
                             <p className="font-normal text-green-800 dark:text-green-200 font-game text-lg">
                               All test cases passed!
@@ -538,10 +594,10 @@ export default function DsaPracticePage() {
                           {result.results.map((test: any, idx: number) => (
                             <div
                               key={idx}
-                              className={`p-3 rounded-lg border-2 ${
+                              className={`p-3 border-4 shadow-[4px_4px_0_0_#000] ${
                                 test.passed
-                                  ? "bg-green-50 dark:bg-green-950 border-green-600"
-                                  : "bg-red-50 dark:bg-red-950 border-red-600"
+                                  ? "bg-green-100 dark:bg-green-900/30 border-green-700"
+                                  : "bg-red-100 dark:bg-red-900/30 border-red-700"
                               }`}
                             >
                               <div className="flex justify-between items-center mb-2">
@@ -563,22 +619,22 @@ export default function DsaPracticePage() {
                                 </Badge>
                               </div>
                               <div className="text-xs space-y-1 font-mono">
-                                <div className="bg-white dark:bg-gray-800 p-2 rounded">
+                                <div className="bg-white/60 dark:bg-black/20 p-2 border border-gray-600">
                                   <strong className="font-game">Input:</strong>{" "}
                                   {test.input}
                                 </div>
-                                <div className="bg-white dark:bg-gray-800 p-2 rounded">
+                                <div className="bg-white/60 dark:bg-black/20 p-2 border border-gray-600">
                                   <strong className="font-game">
                                     Expected:
                                   </strong>{" "}
                                   {test.expectedOutput}
                                 </div>
-                                <div className="bg-white dark:bg-gray-800 p-2 rounded">
+                                <div className="bg-white/60 dark:bg-black/20 p-2 border border-gray-600">
                                   <strong className="font-game">Got:</strong>{" "}
                                   {test.actualOutput || "(no output)"}
                                 </div>
                                 {test.stderr && (
-                                  <div className="bg-red-100 dark:bg-red-900 p-2 rounded mt-1">
+                                  <div className="bg-red-200/70 dark:bg-red-900/50 p-2 border border-red-700 mt-1">
                                     <strong className="font-game text-red-800 dark:text-red-200">
                                       Error:
                                     </strong>
@@ -650,7 +706,7 @@ export default function DsaPracticePage() {
                   <Button
                     onClick={handleSubmit}
                     disabled={submitting || running || !code.trim()}
-                    className="flex-1 font-game font-normal bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="flex-1 font-game font-normal bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-2 border-black/80 shadow-[3px_3px_0_0_#000] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000] disabled:opacity-60 disabled:cursor-not-allowed"
                     variant="pixel"
                     size="lg"
                   >
@@ -662,7 +718,7 @@ export default function DsaPracticePage() {
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Submit
+                        Submit Solution
                       </>
                     )}
                   </Button>

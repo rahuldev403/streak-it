@@ -13,12 +13,12 @@ export default function ProblemStatement({ content }: ProblemStatementProps) {
   return (
     <div className="h-full overflow-auto">
       <div className="p-6">
-        <h1 className="text-3xl font-bold font-game font-normal mb-4 text-black dark:text-white border-b-4 border-gray-800 pb-2">
+        <h1 className="text-3xl font-game font-normal mb-4 text-black dark:text-white border-b-4 border-gray-800 pb-2">
           {content.title}
         </h1>
 
         <div className="space-y-4">
-          {/* Problem Statement */}
+          {/* Problem Statem`ent */}
           <div className="border-4 border-gray-800 bg-yellow-100 dark:bg-yellow-900/30 p-4 shadow-[4px_4px_0_0_#000]">
             <h2 className="font-game font-normal text-lg mb-2 flex items-center gap-2">
              <Image src={pr} alt="Problem Statement" className="w-5 h-5" />

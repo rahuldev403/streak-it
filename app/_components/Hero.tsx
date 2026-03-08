@@ -7,7 +7,7 @@ import Link from "next/link";
 import herobg from "@/public/hero-bg.gif";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import bg from "@/public/bg.png";
-import logo from "@/public/logo.png";
+import horizontalLockup from "@/public/navlogo.png";
 import Image from "next/image";
 const Hero = () => {
   const { user } = useUser();
@@ -60,13 +60,12 @@ const Hero = () => {
                 >
                   DEV ADVENTURE WITH
                 </h2>
-                <div
-                  className="font-game text-2xl md:text-3xl font-normal border-4 border-purple-600 px-4 rounded-md flex items-center justify-between mb-4"
-                  style={{ imageRendering: "pixelated" }}
-                >
-                  <span className="text-pink-500">Streak</span>
-                  <span className="text-gray-500">{"-"}IT</span>
-                </div>
+                <Image
+                  src={horizontalLockup}
+                  alt="Rewind logo"
+                  className="h-20 sm:h-24 md:h-28 lg:h-32 w-auto"
+                  priority
+                />
               </div>
 
               <div className="flex justify-center mb-6">

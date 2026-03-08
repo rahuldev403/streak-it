@@ -229,7 +229,7 @@ export default function DSAPracticeExample({ userId }: DSAPracticeProps) {
               <Button
                 onClick={submitCode}
                 disabled={submitting || !code.trim()}
-                className="w-full"
+                className="w-full font-semibold text-white border-2 border-black/80 bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-[3px_3px_0_0_#000] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#000] active:translate-y-0 active:shadow-[2px_2px_0_0_#000] disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>

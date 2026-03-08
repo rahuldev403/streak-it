@@ -13,10 +13,12 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { isAdmin } from "@/lib/admin";
+import navlogo from "@/public/navlogo.png";
 interface Course {
   id: number;
   courseId: string;
@@ -56,14 +58,13 @@ const Header_one = () => {
 
   return (
     <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-gray-800 b-shadow-md ">
-      <Link href="/" className="shrink-0">
-        <div
-          className="font-game text-2xl md:text-3xl font-normal border-4 border-purple-600 px-4 rounded-md flex items-center justify-between"
-          style={{ imageRendering: "pixelated" }}
-        >
-          <span className="text-pink-500">Streak</span>
-          <span className="text-gray-500">{"-"}IT</span>
-        </div>
+      <Link href="/" className="shrink-0" aria-label="Go to home">
+        <Image
+          src={navlogo}
+          alt="Rewind logo"
+          className="h-10 w-auto sm:h-12"
+          priority
+        />
       </Link>
 
       {/* Chapter name in center - hide on small screens */}

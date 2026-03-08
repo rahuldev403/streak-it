@@ -6,6 +6,7 @@ import LinkedinLogo from "@/public/linkedin.png";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import bg from "@/public/footer-bg.webp";
+import stackedLockup from "@/public/navlogo.png";
 
 const Footer = () => {
   const socialLinks = [
@@ -54,14 +55,12 @@ const Footer = () => {
           <div className="grid md:grid-cols-2 gap-12 mb-8">
             {/* Brand section */}
             <div className="text-center md:text-left">
-              <div className="mb-6 flex flex-col items-center md:items-start gap-4">
+              <div className="mb-3 flex flex-col items-center md:items-start gap-1">
                 <motion.div style={{ imageRendering: "pixelated" }}>
                   <Image
-                    src="/dev.png"
-                    alt="RahulDev Logo"
-                    width={96}
-                    height={96}
-                    className="h-24 w-auto"
+                    src={stackedLockup}
+                    alt="Rewind stacked logo"
+                    className="h-32 sm:h-36 lg:h-40 w-auto"
                     style={{ imageRendering: "pixelated" }}
                   />
                 </motion.div>
