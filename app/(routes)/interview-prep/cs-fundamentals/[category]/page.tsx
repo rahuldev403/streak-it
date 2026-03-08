@@ -11,10 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { CourseStyleLoader } from "@/components/ui/course-style-loader";
 import { useUser } from "@clerk/nextjs";
 import { useParams, useRouter } from "next/navigation";
 import {
-  Loader2,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -133,7 +133,7 @@ export default function CsFundamentalsPracticePage() {
   if (loading) {
     return (
       <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <CourseStyleLoader message="Loading questions..." className="py-0" />
       </div>
     );
   }
@@ -270,7 +270,7 @@ export default function CsFundamentalsPracticePage() {
               }`}
             >
               <div className="flex items-start gap-3">
-                <Lightbulb className="h-5 w-5 mt-1 flex-shrink-0" />
+                <Lightbulb className="h-5 w-5 mt-1 shrink-0" />
                 <div>
                   <p className="font-semibold mb-2">Explanation:</p>
                   <p className="text-sm">{result.explanation}</p>

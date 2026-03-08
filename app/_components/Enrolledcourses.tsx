@@ -4,6 +4,7 @@ import empty from "@/public/Questions-amico.svg";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
+import { CourseStyleLoader } from "@/components/ui/course-style-loader";
 
 interface EnrolledCourse {
   id: number;
@@ -33,8 +34,11 @@ const Enrolledcourses = ({
           Enrolled Courses
         </h2>
         <div className="flex flex-col items-center justify-center p-12 bg-muted/50 border-4 border-dotted border-muted rounded-lg mt-2">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 dark:border-white mb-4"></div>
-          <p className="font-game font-normal text-lg">Loading courses...</p>
+          <CourseStyleLoader
+            message="Loading courses..."
+            className="py-0"
+            spinnerClassName="h-12 w-12"
+          />
         </div>
       </div>
     );
@@ -73,7 +77,7 @@ const Enrolledcourses = ({
               const progressPercent =
                 course.totalChapters > 0
                   ? Math.round(
-                      (course.completedChapters / course.totalChapters) * 100
+                      (course.completedChapters / course.totalChapters) * 100,
                     )
                   : 0;
 
@@ -94,7 +98,7 @@ const Enrolledcourses = ({
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-game font-normal text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
+                        <h3 className="font-game font-normal text-base sm:text-lg text-gray-900 dark:text-white truncate">
                           {course.title}
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CourseStyleLoader } from "@/components/ui/course-style-loader";
 
 const AdminPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +60,7 @@ const AdminPage = () => {
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white"></div>
+        <CourseStyleLoader className="py-0" />
       </div>
     );
   }
@@ -113,7 +114,7 @@ const AdminPage = () => {
     } catch (error: any) {
       console.error("Error updating subscription:", error);
       toast.error(
-        error.response?.data?.message || "Failed to update subscription"
+        error.response?.data?.message || "Failed to update subscription",
       );
     } finally {
       setIsLoading(false);
@@ -204,8 +205,8 @@ const AdminPage = () => {
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-6xl">
       <div className="space-y-8">
-        <div className="text-center border-4 border-black p-6 bg-gradient-to-r from-purple-400/20 to-pink-400/20">
-          <h1 className="text-4xl font-bold font-game font-normal text-primary mb-4">
+        <div className="text-center border-4 border-black p-6 bg-linear-to-r from-purple-400/20 to-pink-400/20">
+          <h1 className="text-4xl font-game font-normal text-primary mb-4">
             🔧 Admin Dashboard
           </h1>
           <p className="text-lg font-comfortaa">
@@ -224,7 +225,7 @@ const AdminPage = () => {
           {/* USER MANAGEMENT TAB */}
           <TabsContent value="users" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game font-normal mb-4">
+              <h2 className="text-2xl font-game font-normal mb-4">
                 👥 User Subscription Management
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -274,7 +275,7 @@ const AdminPage = () => {
           {/* COURSE MANAGEMENT TAB */}
           <TabsContent value="courses" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game font-normal mb-4">
+              <h2 className="text-2xl font-game font-normal mb-4">
                 📚 Add New Course
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -323,7 +324,7 @@ const AdminPage = () => {
                         description: e.target.value,
                       })
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-[100px]"
+                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-25"
                   />
                 </div>
 
@@ -393,7 +394,7 @@ const AdminPage = () => {
           {/* CHAPTER MANAGEMENT TAB */}
           <TabsContent value="chapters" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game font-normal mb-4">
+              <h2 className="text-2xl font-game font-normal mb-4">
                 📖 Add New Chapter
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -442,7 +443,7 @@ const AdminPage = () => {
                     onChange={(e) =>
                       setChapterData({ ...chapterData, desc: e.target.value })
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-[100px]"
+                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-25"
                   />
                 </div>
 
@@ -459,7 +460,7 @@ const AdminPage = () => {
                         exercise: e.target.value,
                       })
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-[80px]"
+                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-20"
                   />
                 </div>
 
@@ -474,7 +475,7 @@ const AdminPage = () => {
             </div>
 
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game font-normal mb-4">
+              <h2 className="text-2xl font-game font-normal mb-4">
                 📦 Bulk Load Chapters
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
@@ -494,7 +495,7 @@ const AdminPage = () => {
           {/* CONTENT MANAGEMENT TAB */}
           <TabsContent value="content" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-bold font-game font-normal mb-4">
+              <h2 className="text-2xl font-game font-normal mb-4">
                 💾 Chapter Content (HTML/CSS/JS)
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">

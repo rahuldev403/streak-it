@@ -6,6 +6,14 @@ import {
   DsaSubmissionTable,
 } from "@/app/config/schema";
 import { eq, and, desc } from "drizzle-orm";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  baseURL:
+    process.env.GEMINI_BASE_URL ||
+    "https://generativelanguage.googleapis.com/v1beta/openai",
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,12 +64,10 @@ export async function POST(req: NextRequest) {
       .orderBy(desc(DsaSubmissionTable.submittedAt))
       .limit(10);
 
-    // Generate personalized question using OpenAI
-    const openaiApiKey = process.env.OPENAI_API_KEY;
-
-    if (!openaiApiKey) {
+    // Generate personalized question using Gemini
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: "OpenAI API key not configured" },
+        { error: "GEMINI_API_KEY is not configured" },
         { status: 500 },
       );
     }
@@ -75,8 +81,8 @@ export async function POST(req: NextRequest) {
       progress.preferredCategories || "",
     );
 
-    // Call Azure OpenAI API to generate question
-    const questionData = await generateQuestionWithAzureOpenAI(
+    // Call Gemini API to generate question
+    const questionData = await generateQuestionWithGemini(
       difficulty,
       category,
       progress.skillLevel,
@@ -171,21 +177,15 @@ function determineCategory(
   return categories[Math.floor(Math.random() * categories.length)];
 }
 
-// Helper function to call OpenAI API
-async function generateQuestionWithAzureOpenAI(
+// Helper function to call Gemini via OpenAI-compatible API
+async function generateQuestionWithGemini(
   difficulty: string,
   category: string,
   skillLevel: string,
   recentSubmissions: any[],
 ): Promise<any> {
-  const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
-  const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
-  const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o";
-  const apiVersion =
-    process.env.AZURE_OPENAI_API_VERSION || "2024-08-01-preview";
-
-  if (!azureApiKey || !azureEndpoint) {
-    throw new Error("Azure OpenAI API configuration missing");
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Gemini API configuration missing");
   }
   const submissionContext =
     recentSubmissions.length > 0
@@ -239,39 +239,28 @@ Return a JSON object with the following structure:
 
 Make sure the question is ORIGINAL and not copied from existing platforms. Focus on teaching the concept.`;
 
-  const azureUrl = `${azureEndpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
-
-  const response = await fetch(azureUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": azureApiKey,
-    },
-    body: JSON.stringify({
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert computer science educator who creates original, educational coding problems. Generate unique questions that are not from LeetCode or other platforms.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      response_format: { type: "json_object" },
-    }),
+  const completion = await openai.chat.completions.create({
+    model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are an expert computer science educator who creates original, educational coding problems. Generate unique questions that are not from LeetCode or other platforms.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    response_format: { type: "json_object" },
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Azure OpenAI API error: ${response.statusText} - ${errorText}`,
-    );
+  const responseContent = completion.choices[0].message.content;
+  if (!responseContent) {
+    throw new Error("No response from Gemini");
   }
 
-  const data = await response.json();
-  const questionData = JSON.parse(data.choices[0].message.content);
+  const questionData = JSON.parse(responseContent);
 
   return questionData;
 }

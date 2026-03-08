@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import Editor from "@monaco-editor/react";
 import { DsaQuestion } from "@/types/dsa";
+import { CourseStyleLoader } from "@/components/ui/course-style-loader";
 
 export default function DsaPracticePage() {
   const { user } = useUser();
@@ -196,11 +197,8 @@ export default function DsaPracticePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Card className="p-8">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p>Loading questions...</p>
-          </div>
+        <Card className="p-8 border-4 border-black dark:border-white shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff]">
+          <CourseStyleLoader message="Loading questions..." className="py-0" />
         </Card>
       </div>
     );
@@ -218,7 +216,7 @@ export default function DsaPracticePage() {
     : [];
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
+    <div className="h-screen flex flex-col bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
       {/* Sub Header */}
       <div className="border-b border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-4">
@@ -340,7 +338,7 @@ export default function DsaPracticePage() {
                     {examples.map((example: any, idx: number) => (
                       <div
                         key={idx}
-                        className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg mb-3 border-2 border-gray-800"
+                        className="bg-linear-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg mb-3 border-2 border-gray-800"
                       >
                         <div className="text-sm space-y-1">
                           <div>
@@ -427,7 +425,7 @@ export default function DsaPracticePage() {
 
               {/* Results Panel - Slides up from bottom */}
               {showResults && (
-                <div className="h-[50%] border-t-4 border-gray-800 bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900 overflow-y-auto animate-slide-up">
+                <div className="h-[50%] border-t-4 border-gray-800 bg-linear-to-br from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900 overflow-y-auto animate-slide-up">
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-normal text-lg font-game">
@@ -597,7 +595,7 @@ export default function DsaPracticePage() {
                   <Button
                     onClick={handleSubmit}
                     disabled={submitting || running || !code.trim()}
-                    className="flex-1 font-game font-normal bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="flex-1 font-game font-normal bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                     variant="pixel"
                     size="lg"
                   >

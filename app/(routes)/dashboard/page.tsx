@@ -6,7 +6,6 @@ import Enrolledcourses from "@/app/_components/Enrolledcourses";
 import ExploreMore from "@/app/_components/ExploreMore";
 import InviteFriend from "@/app/_components/InviteFriend";
 import UpgradeToPro from "@/app/_components/UpgradeToPro";
-import UserStatus from "@/app/_components/UserStatus";
 import Welcomebanner from "@/app/_components/Welcomebanner";
 import axios from "axios";
 import { MonitorIcon } from "lucide-react";
@@ -19,6 +18,19 @@ interface DashboardData {
     certificatesEarned: number;
     hoursLearned: number;
   };
+  lastSessionPerformance: {
+    date: string;
+    latestSubmissionAt: string;
+    attempted: number;
+    solved: number;
+    accuracy: number;
+    breakdown: {
+      dsaAttempted: number;
+      dsaSolved: number;
+      csAttempted: number;
+      csSolved: number;
+    };
+  } | null;
 }
 
 const Page = () => {
@@ -147,32 +159,6 @@ const Page = () => {
               loading={loading}
             />
 
-            {/* AI Interview Prep Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 p-6 border-4 border-black dark:border-purple-700 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-game font-normal text-black dark:text-purple-300 mb-2">
-                    AI Interview Prep
-                  </h3>
-                  <p className="text-sm font-comfortaa text-gray-600 dark:text-gray-400">
-                    Generate personalized DSA problems and CS fundamentals
-                    questions
-                  </p>
-                </div>
-                <button
-                  onClick={() => router.push("/interview-prep")}
-                  className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white border-4 border-black dark:border-white font-game font-normal rounded shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#fff] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] dark:hover:shadow-[2px_2px_0_0_#fff] transition-all"
-                >
-                  Generate Questions
-                </button>
-              </div>
-            </motion.div>
-
             <ExploreMore />
           </motion.div>
           <motion.div
@@ -181,20 +167,43 @@ const Page = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col gap-4 sm:gap-6 border-2 items-center border-gray-600 p-3 sm:p-4 rounded-lg"
           >
-            <UserStatus stats={dashboardData?.stats} loading={loading} />
+            <button
+              onClick={() => router.push("/interview-prep/questions")}
+              className="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white border-2 border-black font-game font-normal rounded shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all"
+            >
+              View All Questions & Status
+            </button>
+            <button
+              onClick={() => router.push("/learning-stats")}
+              className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white border-2 border-black font-game font-normal rounded shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all"
+            >
+              Your Learning Stats
+            </button>
+
+            <div className="w-full p-4 border-4 border-black dark:border-purple-700 bg-linear-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded">
+              <h3 className="text-lg font-game font-normal text-black dark:text-purple-300 mb-2">
+                AI Interview Prep
+              </h3>
+              <p className="text-xs font-comfortaa text-gray-600 dark:text-gray-400 mb-3">
+                Generate personalized DSA and CS fundamentals questions
+              </p>
+              <button
+                onClick={() => router.push("/interview-prep")}
+                className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white border-2 border-black dark:border-white font-game font-normal rounded shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#fff] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] dark:hover:shadow-[2px_2px_0_0_#fff] transition-all"
+              >
+                Generate Questions
+              </button>
+            </div>
+
             <div className="mt-15">
               <UpgradeToPro />
             </div>
+
+            <div className="w-full">
+              <InviteFriend />
+            </div>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
-          <InviteFriend />
-        </motion.div>
       </div>
     </motion.div>
   );

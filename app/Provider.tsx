@@ -8,6 +8,7 @@ import axios from "axios";
 import { UserDeatailContext } from "./context/UserDetailContext";
 import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import Header_one from "./_components/Header_one";
+import { CourseStyleLoader } from "@/components/ui/course-style-loader";
 interface ProviderProps {
   children: ReactNode;
   [key: string]: unknown;
@@ -20,12 +21,10 @@ const GlobalLoadingScreen = React.memo(() => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
-        <p className="font-game font-normal text-xl">
-          {loadingMessage || "Loading..."}
-        </p>
-      </div>
+      <CourseStyleLoader
+        message={loadingMessage || "Loading..."}
+        className="py-0"
+      />
     </div>
   );
 });

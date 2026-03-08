@@ -5,12 +5,10 @@ import OpenAI from "openai";
 import { eq } from "drizzle-orm";
 
 const openai = new OpenAI({
-  apiKey: process.env.AZURE_OPENAI_API_KEY,
-  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o"}`,
-  defaultQuery: {
-    "api-version": process.env.AZURE_OPENAI_API_VERSION || "2024-08-01-preview",
-  },
-  defaultHeaders: { "api-key": process.env.AZURE_OPENAI_API_KEY },
+  apiKey: process.env.GEMINI_API_KEY,
+  baseURL:
+    process.env.GEMINI_BASE_URL ||
+    "https://generativelanguage.googleapis.com/v1beta/openai",
 });
 
 export async function POST(req: NextRequest) {
@@ -43,7 +41,14 @@ export async function POST(req: NextRequest) {
       ? JSON.parse(userProgress[0].weakCategories)
       : [];
 
-    // Generate DSA questions using OpenAI
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: "GEMINI_API_KEY is not configured" },
+        { status: 500 },
+      );
+    }
+
+    // Generate DSA questions using Gemini (OpenAI-compatible API)
     const prompt = generateDsaPrompt(
       count,
       difficulty,
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
     );
 
     const completion = await openai.chat.completions.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o",
+      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
       messages: [
         {
           role: "system",
@@ -70,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     const responseContent = completion.choices[0].message.content;
     if (!responseContent) {
-      throw new Error("No response from OpenAI");
+      throw new Error("No response from Gemini");
     }
 
     const generatedData = JSON.parse(responseContent);

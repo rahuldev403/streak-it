@@ -10,12 +10,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Database, Cpu, Network, Code2, Brain } from "lucide-react";
+import { Database, Cpu, Network, Code2, Brain } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
-
+import Image from "next/image";
+import thinking from "@/public/thinking.png";
+import interview from "@/public/online-interview.png";
+import { useLoading } from "@/app/context/LoadingContext";
 interface Bundle {
   id: string;
   name: string;
@@ -91,6 +94,7 @@ const INTERVIEW_BUNDLES: Bundle[] = [
 export default function InterviewPrepPage() {
   const { user } = useUser();
   const router = useRouter();
+  const { setIsLoading, setLoadingMessage } = useLoading();
   const [generatingBundle, setGeneratingBundle] = useState<string | null>(null);
 
   const handleGenerateQuestions = async (bundle: Bundle) => {
@@ -100,6 +104,8 @@ export default function InterviewPrepPage() {
     }
 
     setGeneratingBundle(bundle.id);
+    setLoadingMessage(`Generating ${bundle.name} questions...`);
+    setIsLoading(true);
 
     try {
       if (bundle.type === "mcq") {
@@ -137,6 +143,8 @@ export default function InterviewPrepPage() {
       toast.error("Failed to generate questions. Please try again.");
     } finally {
       setGeneratingBundle(null);
+      setIsLoading(false);
+      setLoadingMessage("Loading...");
     }
   };
 
@@ -158,8 +166,7 @@ export default function InterviewPrepPage() {
       {/* Header */}
       <div className="text-center mb-12">
         <div className="flex items-center justify-center gap-3 mb-4">
-          {/* TODO: Replace with custom icon/image */}
-          <div className="h-10 w-10 bg-gray-300 dark:bg-gray-700 rounded" />
+          <Image src={interview} width={48} height={48} alt="interview" />
           <h1 className="text-4xl font-normal font-game bg-black bg-clip-text text-transparent">
             AI Interview Prep
           </h1>
@@ -168,13 +175,26 @@ export default function InterviewPrepPage() {
           Generate personalized interview questions powered by AI. All questions
           are private and tailored specifically for you.
         </p>
+        <Button
+          variant="pixel"
+          className="mt-5 border-2 border-black dark:border-white rounded-md"
+          onClick={() => router.push("/interview-prep/questions")}
+        >
+          View All Generated Questions
+        </Button>
       </div>
 
       {/* Info Banner */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-4 border-purple-200 dark:border-purple-800 rounded p-6 mb-8">
+      <div className="bg-linear-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-4 border-purple-200 dark:border-purple-800 rounded p-6 mb-8">
         <div className="flex items-start gap-4">
-          {/* TODO: Replace with custom icon/image */}
-          <div className="h-6 w-6 bg-gray-300 dark:bg-gray-700 rounded mt-1 flex-shrink-0" />
+          {/* TODO: Replace with custom icon/image */}{" "}
+          <Image
+            src={thinking}
+            alt="Thinking mascot"
+            width={48}
+            height={48}
+            className="rounded mt-1 shrink-0 border-2 border-black dark:border-white"
+          />
           <div>
             <h3 className="font-game font-semibold text-lg mb-2">
               How It Works
@@ -231,14 +251,9 @@ export default function InterviewPrepPage() {
                 className="w-full font-game text-black rounded"
                 variant="pixel"
               >
-                {generatingBundle === bundle.id ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  "Generate Questions"
-                )}
+                {generatingBundle === bundle.id
+                  ? "Generating..."
+                  : "Generate Questions"}
               </Button>
               <Button
                 onClick={() => handleViewExisting(bundle)}
