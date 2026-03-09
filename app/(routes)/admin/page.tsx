@@ -5,7 +5,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
-import { isAdmin } from "@/lib/admin";
+import { hasAdminAccess, isSuperAdmin } from "@/lib/admin";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +49,15 @@ interface ExerciseDraftTestCase {
   description: string;
 }
 
+interface AdminListUser {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  isAdminFromMetadata: boolean;
+  isSuperAdmin: boolean;
+}
+
 type WebDevQuestionType =
   | "html-css-js"
   | "react"
@@ -65,6 +74,18 @@ const QUESTION_TYPE_LABELS: Record<WebDevQuestionType, string> = {
 };
 
 const DELETE_CONFIRM_TOKEN = "DELETE";
+
+const SURFACE_CARD_CLASS =
+  "rounded-3xl border border-black/15 dark:border-white/15 bg-white/85 dark:bg-gray-900/75 backdrop-blur-sm shadow-[0_16px_50px_rgba(0,0,0,0.14)] p-6 md:p-7 space-y-5";
+
+const FIELD_CLASS =
+  "rounded-xl border-2 border-black/20 dark:border-white/20 bg-white/80 dark:bg-gray-950/70 font-comfortaa focus-visible:ring-2 focus-visible:ring-sky-500/60";
+
+const MONO_FIELD_CLASS =
+  "rounded-xl border-2 border-black/20 dark:border-white/20 bg-gray-950 text-gray-100 font-mono focus-visible:ring-2 focus-visible:ring-sky-500/60";
+
+const TABS_TRIGGER_CLASS =
+  "rounded-xl border border-transparent data-[state=active]:border-black/15 dark:data-[state=active]:border-white/20 data-[state=active]:bg-white/80 dark:data-[state=active]:bg-gray-900/80 data-[state=active]:shadow-sm";
 
 const AdminPage = () => {
   const { user, isLoaded } = useUser();
@@ -95,6 +116,11 @@ const AdminPage = () => {
   const [manageCourseId, setManageCourseId] = useState("");
   const [manageChapterId, setManageChapterId] = useState("");
   const [manageChapters, setManageChapters] = useState<ChapterOption[]>([]);
+  const [superAdminTargetEmail, setSuperAdminTargetEmail] = useState("");
+  const [superAdminGrantLoading, setSuperAdminGrantLoading] = useState(false);
+  const [superAdminMakeAdmin, setSuperAdminMakeAdmin] = useState(true);
+  const [adminUsersLoading, setAdminUsersLoading] = useState(false);
+  const [adminUsers, setAdminUsers] = useState<AdminListUser[]>([]);
 
   const [manageCourseData, setManageCourseData] = useState({
     title: "",
@@ -156,7 +182,7 @@ const AdminPage = () => {
     }
 
     const userEmail = user.primaryEmailAddress?.emailAddress;
-    if (!isAdmin(userEmail)) {
+    if (!hasAdminAccess(userEmail, user.publicMetadata?.isAdmin)) {
       toast.error("Access denied. Admin privileges required.");
       router.push("/dashboard");
       return;
@@ -228,6 +254,33 @@ const AdminPage = () => {
     });
   }, [manageChapterId, manageChapters]);
 
+  const loadAdminUsers = async () => {
+    setAdminUsersLoading(true);
+    try {
+      const response = await axios.get(
+        "/api/admin/super-admin/manage-user-admin",
+      );
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to load admin users");
+        return;
+      }
+      setAdminUsers(response.data.users || []);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to load admin users");
+    } finally {
+      setAdminUsersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    const email = user.primaryEmailAddress?.emailAddress;
+    if (!isSuperAdmin(email)) return;
+
+    loadAdminUsers();
+  }, [isLoaded, user]);
+
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -237,7 +290,9 @@ const AdminPage = () => {
   }
 
   const userEmail = user?.primaryEmailAddress?.emailAddress;
-  if (!isAdmin(userEmail)) {
+  const isCurrentUserSuperAdmin = isSuperAdmin(userEmail);
+
+  if (!hasAdminAccess(userEmail, user?.publicMetadata?.isAdmin)) {
     return null;
   }
 
@@ -551,30 +606,78 @@ const AdminPage = () => {
     }
   };
 
+  const handleManageUserAdminAccess = async () => {
+    const email = superAdminTargetEmail.trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      toast.error("Enter a valid user email");
+      return;
+    }
+
+    setSuperAdminGrantLoading(true);
+    try {
+      const response = await axios.post(
+        "/api/admin/super-admin/manage-user-admin",
+        {
+          email,
+          makeAdmin: superAdminMakeAdmin,
+        },
+      );
+
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to update admin access");
+        return;
+      }
+
+      toast.success(response.data.message || "User admin access updated");
+      setSuperAdminTargetEmail("");
+      await loadAdminUsers();
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.error || "Failed to update admin access",
+      );
+    } finally {
+      setSuperAdminGrantLoading(false);
+    }
+  };
+
   return (
-    <div className="container mx-auto p-4 md:p-8 max-w-6xl">
-      <div className="space-y-8">
-        <div className="text-center border-4 border-black p-6 bg-linear-to-r from-sky-400/20 to-emerald-400/20">
-          <h1 className="text-4xl font-game font-normal text-primary mb-4">
+    <div className="relative container mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.23),transparent_45%),radial-gradient(circle_at_80%_5%,rgba(16,185,129,0.2),transparent_40%)]" />
+      <div className="space-y-7">
+        <div className="rounded-3xl border border-black/15 dark:border-white/15 bg-linear-to-r from-sky-500/15 via-white/70 to-emerald-500/15 dark:from-sky-500/20 dark:via-gray-900/75 dark:to-emerald-500/20 shadow-[0_16px_50px_rgba(0,0,0,0.14)] p-6 md:p-8">
+          <h1 className="text-3xl md:text-4xl font-game font-normal text-primary mb-3">
             Admin Web Dev Control
           </h1>
-          <p className="text-lg font-comfortaa">
+          <p className="text-sm md:text-base font-comfortaa text-gray-700 dark:text-gray-300 max-w-2xl">
             Build and maintain web-development courses with chapter-level
             broken-code exercises.
           </p>
         </div>
 
         <Tabs defaultValue="manual" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 font-game font-normal">
-            <TabsTrigger value="manual">Courses</TabsTrigger>
-            <TabsTrigger value="json-import">
+          <TabsList
+            className={`grid w-full ${
+              isCurrentUserSuperAdmin ? "grid-cols-4" : "grid-cols-3"
+            } rounded-2xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-gray-900/55 backdrop-blur-sm p-1.5 font-game font-normal h-auto`}
+          >
+            <TabsTrigger value="manual" className={TABS_TRIGGER_CLASS}>
+              Courses
+            </TabsTrigger>
+            <TabsTrigger value="json-import" className={TABS_TRIGGER_CLASS}>
               Chapter + Exercise JSON
             </TabsTrigger>
-            <TabsTrigger value="manage">Manage Existing</TabsTrigger>
+            <TabsTrigger value="manage" className={TABS_TRIGGER_CLASS}>
+              Manage Existing
+            </TabsTrigger>
+            {isCurrentUserSuperAdmin && (
+              <TabsTrigger value="super-admin" className={TABS_TRIGGER_CLASS}>
+                Super Admin
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="manual" className="space-y-4">
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
+            <div className={SURFACE_CARD_CLASS}>
               <h2 className="text-2xl font-game font-normal mb-4">
                 Create Web-Development Course
               </h2>
@@ -597,7 +700,7 @@ const AdminPage = () => {
                         courseId: e.target.value,
                       }))
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
+                    className={FIELD_CLASS}
                   />
                 </div>
 
@@ -614,7 +717,7 @@ const AdminPage = () => {
                         title: e.target.value,
                       }))
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
+                    className={FIELD_CLASS}
                   />
                 </div>
 
@@ -631,7 +734,7 @@ const AdminPage = () => {
                         description: e.target.value,
                       }))
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-25"
+                    className={`${FIELD_CLASS} min-h-25`}
                   />
                 </div>
 
@@ -648,7 +751,7 @@ const AdminPage = () => {
                         bannerImage: e.target.value,
                       }))
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
+                    className={FIELD_CLASS}
                   />
                 </div>
 
@@ -663,7 +766,9 @@ const AdminPage = () => {
                         setCourseData((prev) => ({ ...prev, level: value }))
                       }
                     >
-                      <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                      <SelectTrigger
+                        className={`${FIELD_CLASS} font-game font-normal`}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -689,7 +794,7 @@ const AdminPage = () => {
                           tags: e.target.value,
                         }))
                       }
-                      className="border-4 border-gray-800 rounded-none font-comfortaa"
+                      className={FIELD_CLASS}
                     />
                   </div>
                 </div>
@@ -706,7 +811,7 @@ const AdminPage = () => {
           </TabsContent>
 
           <TabsContent value="json-import" className="space-y-4">
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg space-y-4">
+            <div className={SURFACE_CARD_CLASS}>
               <h2 className="text-2xl font-game font-normal">
                 Chapter + Exercise JSON Import
               </h2>
@@ -726,7 +831,9 @@ const AdminPage = () => {
                     value: "chapter-packages" | "existing-chapter",
                   ) => setImportPayloadType(value)}
                 >
-                  <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                  <SelectTrigger
+                    className={`${FIELD_CLASS} font-game font-normal`}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -755,7 +862,9 @@ const AdminPage = () => {
                       }))
                     }
                   >
-                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                    <SelectTrigger
+                      className={`${FIELD_CLASS} font-game font-normal`}
+                    >
                       <SelectValue
                         placeholder={
                           coursesLoading
@@ -789,7 +898,9 @@ const AdminPage = () => {
                       }))
                     }
                   >
-                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                    <SelectTrigger
+                      className={`${FIELD_CLASS} font-game font-normal`}
+                    >
                       <SelectValue
                         placeholder={
                           contentImportData.courseId
@@ -825,7 +936,9 @@ const AdminPage = () => {
                       }))
                     }
                   >
-                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                    <SelectTrigger
+                      className={`${FIELD_CLASS} font-game font-normal`}
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -840,7 +953,7 @@ const AdminPage = () => {
                   </Select>
                 </div>
 
-                <div className="flex items-end justify-between border-2 border-gray-700 p-3">
+                <div className="flex items-end justify-between rounded-xl border border-black/15 dark:border-white/15 bg-white/50 dark:bg-gray-950/35 p-3">
                   <p className="font-comfortaa text-sm">
                     Overwrite existing content
                   </p>
@@ -860,10 +973,10 @@ const AdminPage = () => {
                 placeholder='{"chapterPackages":[{"chapter":{"name":"...","desc":"...","exercise":"..."},"questionType":"react","drafts":[{"title":"...","problemStatement":"...","instructions":"...","expectedOutput":"...","hints":"...","solutionCode":"...","boilerplateFiles":[...],"testCases":[...]}]}]}'
                 value={chapterContentJsonText}
                 onChange={(e) => setChapterContentJsonText(e.target.value)}
-                className="border-4 border-gray-800 rounded-none font-mono text-xs min-h-90"
+                className={`${MONO_FIELD_CLASS} text-xs min-h-90`}
               />
 
-              <details className="border-2 border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-3">
+              <details className="rounded-xl border border-black/15 dark:border-white/15 bg-white/60 dark:bg-gray-900/35 p-3">
                 <summary className="cursor-pointer font-game font-normal text-xs">
                   Sample exercise JSON payloads
                 </summary>
@@ -953,7 +1066,7 @@ const AdminPage = () => {
           </TabsContent>
 
           <TabsContent value="manage" className="space-y-4">
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg space-y-4">
+            <div className={SURFACE_CARD_CLASS}>
               <h2 className="text-2xl font-game font-normal">Manage Course</h2>
 
               <div>
@@ -964,7 +1077,9 @@ const AdminPage = () => {
                   value={manageCourseId}
                   onValueChange={setManageCourseId}
                 >
-                  <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                  <SelectTrigger
+                    className={`${FIELD_CLASS} font-game font-normal`}
+                  >
                     <SelectValue placeholder="Select course" />
                   </SelectTrigger>
                   <SelectContent>
@@ -987,7 +1102,7 @@ const AdminPage = () => {
                       title: e.target.value,
                     }))
                   }
-                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                  className={FIELD_CLASS}
                 />
                 <Input
                   placeholder="Banner image URL"
@@ -998,7 +1113,7 @@ const AdminPage = () => {
                       bannerImage: e.target.value,
                     }))
                   }
-                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                  className={FIELD_CLASS}
                 />
               </div>
 
@@ -1011,7 +1126,7 @@ const AdminPage = () => {
                     description: e.target.value,
                   }))
                 }
-                className="border-4 border-gray-800 rounded-none font-comfortaa min-h-24"
+                className={`${FIELD_CLASS} min-h-24`}
               />
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -1024,7 +1139,7 @@ const AdminPage = () => {
                       level: e.target.value,
                     }))
                   }
-                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                  className={FIELD_CLASS}
                 />
                 <Input
                   placeholder="Tags (comma separated)"
@@ -1035,7 +1150,7 @@ const AdminPage = () => {
                       tags: e.target.value,
                     }))
                   }
-                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                  className={FIELD_CLASS}
                 />
               </div>
 
@@ -1051,7 +1166,7 @@ const AdminPage = () => {
                   placeholder="Type DELETE to enable deletion"
                   value={courseDeleteConfirmText}
                   onChange={(e) => setCourseDeleteConfirmText(e.target.value)}
-                  className="border-4 border-red-700 rounded-none font-comfortaa"
+                  className={`${FIELD_CLASS} border-red-500/70`}
                 />
               </div>
 
@@ -1069,7 +1184,7 @@ const AdminPage = () => {
               </div>
             </div>
 
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg space-y-4">
+            <div className={SURFACE_CARD_CLASS}>
               <h2 className="text-2xl font-game font-normal">Manage Chapter</h2>
 
               <div>
@@ -1080,7 +1195,9 @@ const AdminPage = () => {
                   value={manageChapterId}
                   onValueChange={setManageChapterId}
                 >
-                  <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                  <SelectTrigger
+                    className={`${FIELD_CLASS} font-game font-normal`}
+                  >
                     <SelectValue placeholder="Select chapter" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1102,7 +1219,7 @@ const AdminPage = () => {
                     name: e.target.value,
                   }))
                 }
-                className="border-4 border-gray-800 rounded-none font-comfortaa"
+                className={FIELD_CLASS}
               />
 
               <Textarea
@@ -1114,7 +1231,7 @@ const AdminPage = () => {
                     desc: e.target.value,
                   }))
                 }
-                className="border-4 border-gray-800 rounded-none font-comfortaa min-h-20"
+                className={`${FIELD_CLASS} min-h-20`}
               />
 
               <Textarea
@@ -1126,7 +1243,7 @@ const AdminPage = () => {
                     exercise: e.target.value,
                   }))
                 }
-                className="border-4 border-gray-800 rounded-none font-comfortaa min-h-16"
+                className={`${FIELD_CLASS} min-h-16`}
               />
 
               <div className="grid md:grid-cols-2 gap-3">
@@ -1141,7 +1258,7 @@ const AdminPage = () => {
                   placeholder="Type DELETE to enable deletion"
                   value={chapterDeleteConfirmText}
                   onChange={(e) => setChapterDeleteConfirmText(e.target.value)}
-                  className="border-4 border-red-700 rounded-none font-comfortaa"
+                  className={`${FIELD_CLASS} border-red-500/70`}
                 />
               </div>
 
@@ -1159,6 +1276,96 @@ const AdminPage = () => {
               </div>
             </div>
           </TabsContent>
+
+          {isCurrentUserSuperAdmin && (
+            <TabsContent value="super-admin" className="space-y-4">
+              <div className={SURFACE_CARD_CLASS}>
+                <h2 className="text-2xl font-game font-normal">
+                  Super Admin Controls
+                </h2>
+                <p className="text-muted-foreground font-comfortaa">
+                  Grant or remove platform admin access for any registered user.
+                </p>
+
+                <div>
+                  <label className="font-game font-normal text-sm mb-2 block">
+                    User Email
+                  </label>
+                  <Input
+                    placeholder="user@example.com"
+                    value={superAdminTargetEmail}
+                    onChange={(e) => setSuperAdminTargetEmail(e.target.value)}
+                    className={FIELD_CLASS}
+                  />
+                </div>
+
+                <div className="flex items-end justify-between rounded-xl border border-black/15 dark:border-white/15 bg-white/50 dark:bg-gray-950/35 p-3">
+                  <p className="font-comfortaa text-sm">
+                    Enable admin access for this user
+                  </p>
+                  <Switch
+                    checked={superAdminMakeAdmin}
+                    onCheckedChange={setSuperAdminMakeAdmin}
+                  />
+                </div>
+
+                <LoadingButton
+                  onClick={handleManageUserAdminAccess}
+                  loading={superAdminGrantLoading}
+                  className="w-full font-game font-normal"
+                >
+                  {superAdminMakeAdmin
+                    ? "Grant Admin Access"
+                    : "Remove Admin Access"}
+                </LoadingButton>
+
+                <div className="rounded-2xl border border-black/15 dark:border-white/15 bg-white/65 dark:bg-gray-950/40 p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-game font-normal text-sm">
+                      Current Admin Users
+                    </p>
+                    <LoadingButton
+                      onClick={loadAdminUsers}
+                      loading={adminUsersLoading}
+                      className="font-game font-normal"
+                    >
+                      Refresh
+                    </LoadingButton>
+                  </div>
+
+                  {adminUsers.length === 0 ? (
+                    <p className="text-sm font-comfortaa text-muted-foreground">
+                      No admin users found.
+                    </p>
+                  ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {adminUsers.map((adminUser) => (
+                        <div
+                          key={adminUser.id}
+                          className="rounded-xl border border-black/10 dark:border-white/15 bg-white/70 dark:bg-gray-900/65 px-3 py-2"
+                        >
+                          <p className="font-comfortaa text-sm break-all">
+                            {adminUser.email}
+                          </p>
+                          <p className="font-comfortaa text-xs text-muted-foreground">
+                            {(adminUser.firstName || "") +
+                              (adminUser.lastName
+                                ? ` ${adminUser.lastName}`
+                                : "") || "No name"}
+                          </p>
+                          <p className="font-comfortaa text-xs text-muted-foreground">
+                            {adminUser.isSuperAdmin
+                              ? "Role source: super-admin env"
+                              : "Role source: user metadata"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

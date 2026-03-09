@@ -3,7 +3,7 @@ import { ChapterContentTable } from "@/app/config/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { currentUser } from "@clerk/nextjs/server";
-import { isAdmin } from "@/lib/admin";
+import { hasAdminAccess } from "@/lib/admin";
 
 const QUESTION_TYPES = new Set([
   "html-css-js",
@@ -56,7 +56,7 @@ export const POST = async (req: NextRequest) => {
     }
 
     const userEmail = user.primaryEmailAddress?.emailAddress;
-    if (!isAdmin(userEmail)) {
+    if (!hasAdminAccess(userEmail, user.publicMetadata?.isAdmin)) {
       return NextResponse.json(
         { error: "Access denied. Admin privileges required." },
         { status: 403 },

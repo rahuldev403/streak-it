@@ -4,7 +4,7 @@ import {
   CourseChapterTable,
   CourseTable,
 } from "@/app/config/schema";
-import { isAdmin } from "@/lib/admin";
+import { hasAdminAccess } from "@/lib/admin";
 import { currentUser } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userEmail = user.primaryEmailAddress?.emailAddress;
-    if (!isAdmin(userEmail)) {
+    if (!hasAdminAccess(userEmail, user.publicMetadata?.isAdmin)) {
       return NextResponse.json(
         { error: "Access denied. Admin privileges required." },
         { status: 403 },

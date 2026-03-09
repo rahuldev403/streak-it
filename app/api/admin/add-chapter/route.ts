@@ -1,7 +1,7 @@
 import { db } from "@/app/config/db";
 import { CourseChapterTable, CourseTable } from "@/app/config/schema";
 import { currentUser } from "@clerk/nextjs/server";
-import { isAdmin } from "@/lib/admin";
+import { hasAdminAccess } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userEmail = user.primaryEmailAddress?.emailAddress;
-    if (!isAdmin(userEmail)) {
+    if (!hasAdminAccess(userEmail, user.publicMetadata?.isAdmin)) {
       return NextResponse.json(
         {
           success: false,

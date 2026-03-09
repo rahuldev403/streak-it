@@ -21,11 +21,13 @@ interface EnrolledCourse {
 interface EnrolledcoursesProps {
   enrolledCourses: EnrolledCourse[];
   loading?: boolean;
+  scrollable?: boolean;
 }
 
 const Enrolledcourses = ({
   enrolledCourses,
   loading,
+  scrollable = true,
 }: EnrolledcoursesProps) => {
   if (loading) {
     return (
@@ -49,7 +51,7 @@ const Enrolledcourses = ({
       <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-game font-normal">
         Enrolled Courses
       </h2>
-      <div className="max-h-100 overflow-y-auto">
+      <div className={scrollable ? "max-h-100 overflow-y-auto" : ""}>
         {enrolledCourses.length === 0 ? (
           <div className="flex flex-col items-center p-4 sm:p-7 bg-muted/50 border-4 border-dotted border-muted rounded-lg mt-2">
             <Image

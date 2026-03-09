@@ -9,6 +9,8 @@ import UpgradeToPro from "@/app/_components/UpgradeToPro";
 import Welcomebanner from "@/app/_components/Welcomebanner";
 import axios from "axios";
 import { MonitorIcon } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface DashboardData {
   enrolledCourses: any[];
@@ -155,9 +157,25 @@ const Page = () => {
           >
             <Welcomebanner />
             <Enrolledcourses
-              enrolledCourses={dashboardData?.enrolledCourses || []}
+              enrolledCourses={(dashboardData?.enrolledCourses || []).slice(
+                0,
+                2,
+              )}
               loading={loading}
             />
+
+            {!loading && (dashboardData?.enrolledCourses?.length || 0) > 2 && (
+              <div className="mt-3 flex justify-end">
+                <Link href="/dashboard/enrolled-courses">
+                  <Button
+                    variant="pixel"
+                    className="rounded-md text-black font-game font-normal"
+                  >
+                    View All Enrolled Courses
+                  </Button>
+                </Link>
+              </div>
+            )}
 
             <ExploreMore />
           </motion.div>

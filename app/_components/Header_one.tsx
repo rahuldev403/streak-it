@@ -17,7 +17,7 @@ import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { isAdmin } from "@/lib/admin";
+import { hasAdminAccess } from "@/lib/admin";
 import navlogo from "@/public/navlogo.png";
 interface Course {
   id: number;
@@ -197,7 +197,10 @@ const Header_one = () => {
                 <LayoutDashboard className="sm:hidden w-4 h-4" />
               </Button>
             </Link>
-            {isAdmin(user?.primaryEmailAddress?.emailAddress) && (
+            {hasAdminAccess(
+              user?.primaryEmailAddress?.emailAddress,
+              user?.publicMetadata?.isAdmin,
+            ) && (
               <Link href="/admin">
                 <Button
                   variant={"pixel"}

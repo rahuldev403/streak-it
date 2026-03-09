@@ -1,6 +1,6 @@
 import { db } from "@/app/config/db";
 import { ChapterContentTable } from "@/app/config/schema";
-import { isAdmin } from "@/lib/admin";
+import { hasAdminAccess } from "@/lib/admin";
 import { currentUser } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -30,7 +30,7 @@ const requireAdmin = async () => {
   }
 
   const email = user.primaryEmailAddress?.emailAddress;
-  if (!isAdmin(email)) {
+  if (!hasAdminAccess(email, user.publicMetadata?.isAdmin)) {
     return {
       ok: false as const,
       response: NextResponse.json(
