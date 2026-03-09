@@ -70,12 +70,12 @@ export const DsaQuestionTable = pgTable("dsa_questions", {
   userId: varchar({ length: 100 }).notNull(), // Personalized per user
   title: varchar({ length: 255 }).notNull(),
   description: text().notNull(),
-  difficulty: varchar({ length: 50 }).notNull(), // easy, medium, hard
+  difficulty: varchar({ length: 50 }).notNull(), 
   category: varchar({ length: 100 }).notNull(), // arrays, strings, trees, graphs, etc.
   constraints: text(),
   examples: text().notNull(), // JSON string
   testCases: text().notNull(), // JSON string with hidden test cases
-  starterCode: text().notNull(), // JSON string with code templates for multiple languages
+  starterCode: text().notNull(), 
   hints: text(), // JSON array of hints
   generatedAt: varchar({ length: 100 }).notNull(),
   tags: varchar({ length: 500 }),
@@ -121,6 +121,7 @@ export const CsFundamentalsQuestionTable = pgTable(
     options: text().notNull(), // JSON string array of options
     correctAnswer: varchar({ length: 10 }).notNull(), // A, B, C, or D
     explanation: text().notNull(),
+    hints: text(), // Optional hint set for question guidance
     difficulty: varchar({ length: 50 }).notNull(), // easy, medium, hard
     generatedAt: varchar({ length: 100 }).notNull(),
     tags: varchar({ length: 500 }),
@@ -151,5 +152,63 @@ export const UserCsFundamentalsProgressTable = pgTable(
     mediumQuestionsSolved: integer().default(0),
     hardQuestionsSolved: integer().default(0),
     lastActivityDate: varchar({ length: 100 }),
+  },
+);
+
+export const UserAiProviderTable = pgTable("user_ai_provider", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 100 }).notNull().unique(),
+  providerMode: varchar({ length: 20 }).default("platform").notNull(), // platform | user
+  encryptedApiKey: text(),
+  iv: varchar({ length: 128 }),
+  authTag: varchar({ length: 128 }),
+  maskedKey: varchar({ length: 40 }),
+  keyFingerprint: varchar({ length: 128 }),
+  lastValidatedAt: varchar({ length: 100 }),
+  updatedAt: varchar({ length: 100 }).notNull(),
+});
+
+export const UserAiGenerationLimitTable = pgTable("user_ai_generation_limit", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: varchar({ length: 100 }).notNull(),
+  dateKey: varchar({ length: 20 }).notNull(), // YYYY-MM-DD (UTC)
+  generationCount: integer().default(0).notNull(),
+  lastGenerationAt: varchar({ length: 100 }),
+  updatedAt: varchar({ length: 100 }).notNull(),
+});
+
+export const CommunityTable = pgTable("communities", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar({ length: 255 }).notNull(),
+  slug: varchar({ length: 120 }).notNull().unique(),
+  ownerUserId: varchar({ length: 100 }).notNull(),
+  adminSeatsPurchased: integer().default(1).notNull(),
+  aiGenerationEnabled: integer().default(1).notNull(), // 1=true, 0=false
+  createdAt: varchar({ length: 100 }).notNull(),
+  updatedAt: varchar({ length: 100 }).notNull(),
+});
+
+export const CommunityMemberTable = pgTable("community_members", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  communityId: integer().notNull(),
+  userId: varchar({ length: 100 }).notNull(),
+  role: varchar({ length: 40 }).notNull(), // owner | admin | subject-admin | member
+  seatType: varchar({ length: 40 }).default("member").notNull(), // admin | member
+  status: varchar({ length: 20 }).default("active").notNull(), // active | invited | revoked
+  createdAt: varchar({ length: 100 }).notNull(),
+  updatedAt: varchar({ length: 100 }).notNull(),
+});
+
+export const CommunitySubjectPermissionTable = pgTable(
+  "community_subject_permissions",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    communityId: integer().notNull(),
+    userId: varchar({ length: 100 }).notNull(),
+    subject: varchar({ length: 100 }).notNull(), // dsa, dbms, os, network, oops, etc.
+    canGenerateAi: integer().default(1).notNull(), // 1=true, 0=false
+    canGenerateManual: integer().default(1).notNull(), // 1=true, 0=false
+    createdAt: varchar({ length: 100 }).notNull(),
+    updatedAt: varchar({ length: 100 }).notNull(),
   },
 );

@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import CourseBanner from "./_components/CourseBanner";
 import CourseChapter from "./_components/CourseChapter";
 import CourseStatus from "./_components/CourseStatus";
-import UpgradeToPro from "@/app/_components/UpgradeToPro";
 import { CommunityHelp } from "./_components/CommunityHelp";
 import { useUser } from "@clerk/nextjs";
 import { MonitorIcon, AlertTriangle, ArrowLeft } from "lucide-react";
@@ -61,7 +60,6 @@ const CourseDetail = () => {
   const [chaptersLoading, setChaptersLoading] = useState(true);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
-  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
   // Check if device is small (mobile/tablet)
   useEffect(() => {
@@ -74,23 +72,6 @@ const CourseDetail = () => {
 
     return () => window.removeEventListener("resize", checkDeviceSize);
   }, []);
-
-  // Check subscription status from Clerk
-  useEffect(() => {
-    const checkSubscription = async () => {
-      if (!isLoaded || !user) return;
-
-      try {
-        const response = await axios.get("/api/user/subscription");
-        setHasPremiumAccess(response.data.hasPremium);
-      } catch (error) {
-        console.error("Failed to check subscription:", error);
-        setHasPremiumAccess(false);
-      }
-    };
-
-    checkSubscription();
-  }, [user, isLoaded]);
 
   const fetchCourse = useCallback(async () => {
     if (!courseid) return;
@@ -153,7 +134,7 @@ const CourseDetail = () => {
       const currentProgress = course.enrolledCourse?.progress ?? 0;
       const targetProgress = Math.min(
         chapters.length,
-        Math.max(currentProgress, chapterIndex + 1)
+        Math.max(currentProgress, chapterIndex + 1),
       );
 
       if (targetProgress === currentProgress) {
@@ -175,7 +156,7 @@ const CourseDetail = () => {
         toast.error("Failed to update progress. Please try again.");
       }
     },
-    [course, courseid, chapters.length, fetchCourse]
+    [course, courseid, chapters.length, fetchCourse],
   );
 
   // Block access on small devices
@@ -316,7 +297,6 @@ const CourseDetail = () => {
             completedExercises={completedExercises}
             onCompleteChapter={handleChapterComplete}
             courseId={course.courseId}
-            hasPremiumAccess={hasPremiumAccess}
           />
         </motion.div>
         <motion.div
@@ -333,7 +313,6 @@ const CourseDetail = () => {
             isEnrolled={isEnrolled}
             completedExercises={completedExercises}
           />
-          <UpgradeToPro />
           <CommunityHelp courseId={course.courseId} />
         </motion.div>
       </div>

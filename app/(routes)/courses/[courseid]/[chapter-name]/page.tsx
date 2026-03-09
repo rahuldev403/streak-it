@@ -33,6 +33,13 @@ const Page = () => {
   const [isSmallDevice, setIsSmallDevice] = useState(false);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const previewEnabledTypes = new Set([
+    "html-css-js",
+    "react",
+    "nextjs",
+    "typescript",
+    "mern",
+  ]);
 
   // Check if device is small (mobile/tablet)
   useEffect(() => {
@@ -64,7 +71,7 @@ const Page = () => {
       const decodedChapterName = decodeURIComponent(chapterName);
 
       const matchingChapter = chapters.find(
-        (ch: any) => ch.name === decodedChapterName
+        (ch: any) => ch.name === decodedChapterName,
       );
 
       if (matchingChapter) {
@@ -79,7 +86,7 @@ const Page = () => {
   const fetchChapterContent = async () => {
     try {
       const response = await fetch(
-        `/api/chapter-content?chapterId=${chapterId}`
+        `/api/chapter-content?chapterId=${chapterId}`,
       );
       const data = await response.json();
 
@@ -90,12 +97,12 @@ const Page = () => {
         const initialFiles = firstContent.boilerplateFiles.reduce(
           (
             acc: Record<string, string>,
-            file: { name: string; content: string }
+            file: { name: string; content: string },
           ) => ({
             ...acc,
             [file.name]: file.content,
           }),
-          {} as Record<string, string>
+          {} as Record<string, string>,
         );
 
         // Try to load saved code from localStorage
@@ -135,10 +142,18 @@ const Page = () => {
   };
 
   const handleRunCode = () => {
-    if (content?.questionType === "html-css-js") {
+    if (
+      content?.questionType &&
+      previewEnabledTypes.has(content.questionType)
+    ) {
+      toast.info("Preview requirements", {
+        description:
+          "Use an entry file like main.tsx/index.tsx/App.tsx (or jsx/js variants). Relative imports are supported, npm package imports are not.",
+      });
       setShowPreview(true);
     } else {
-      toast.info("Preview not available for this question type yet!");
+      toast.info("This preview type is not fully supported yet.");
+      setShowPreview(true);
     }
   };
 
@@ -148,12 +163,12 @@ const Page = () => {
     const initialFiles = content.boilerplateFiles.reduce(
       (
         acc: Record<string, string>,
-        file: { name: string; content: string }
+        file: { name: string; content: string },
       ) => ({
         ...acc,
         [file.name]: file.content,
       }),
-      {} as Record<string, string>
+      {} as Record<string, string>,
     );
 
     setFileContents(initialFiles);
@@ -211,11 +226,11 @@ const Page = () => {
         // Show validation results
         if (validationResult.allPassed) {
           toast.success(
-            `🎉 All ${validationResult.totalCount} test cases passed!`
+            `🎉 All ${validationResult.totalCount} test cases passed!`,
           );
         } else {
           toast.error(
-            `❌ ${validationResult.passedCount}/${validationResult.totalCount} test cases passed. Please fix your code.`
+            `❌ ${validationResult.passedCount}/${validationResult.totalCount} test cases passed. Please fix your code.`,
           );
           setIsMarkingComplete(false);
           return;
@@ -227,7 +242,7 @@ const Page = () => {
       const chapters = await response.json();
       const decodedChapterName = decodeURIComponent(chapterName);
       const currentChapter = chapters.find(
-        (ch: any) => ch.name === decodedChapterName
+        (ch: any) => ch.name === decodedChapterName,
       );
 
       if (!currentChapter) {
@@ -235,7 +250,7 @@ const Page = () => {
       }
 
       const chapterIndex = chapters.findIndex(
-        (ch: any) => ch.id === currentChapter.id
+        (ch: any) => ch.id === currentChapter.id,
       );
 
       // Update progress in the database

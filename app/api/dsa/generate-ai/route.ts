@@ -3,13 +3,10 @@ import { DsaQuestionTable, UserDsaProgressTable } from "@/app/config/schema";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { eq } from "drizzle-orm";
-
-const openai = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL:
-    process.env.GEMINI_BASE_URL ||
-    "https://generativelanguage.googleapis.com/v1beta/openai",
-});
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { ProviderMode, resolveGeminiApiKey } from "@/lib/gemini-provider";
+import { consumeAiGenerationQuota } from "@/lib/ai-rate-limit";
+import { ensureCommunityGenerationAccess } from "@/lib/community-access";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,12 +15,68 @@ export async function POST(req: NextRequest) {
       count = 10,
       difficulty = "mixed",
       category,
+      providerMode,
+      communityId,
     } = await req.json();
 
-    if (!userId) {
+    const authUser = await currentUser();
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (userId && userId !== authUser.id) {
+      return NextResponse.json(
+        { error: "Forbidden: userId mismatch" },
+        { status: 403 },
+      );
+    }
+
+    const effectiveUserId = authUser.id;
+
+    if (!effectiveUserId) {
       return NextResponse.json(
         { error: "userId is required" },
         { status: 400 },
+      );
+    }
+
+    const parsedCommunityId =
+      communityId !== undefined && communityId !== null
+        ? Number(communityId)
+        : undefined;
+
+    if (
+      communityId !== undefined &&
+      communityId !== null &&
+      !Number.isFinite(parsedCommunityId)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid communityId" },
+        { status: 400 },
+      );
+    }
+
+    const communityAccess = await ensureCommunityGenerationAccess(
+      effectiveUserId,
+      parsedCommunityId,
+      "dsa",
+    );
+    if (!communityAccess.allowed) {
+      return NextResponse.json(
+        { error: communityAccess.error || "Community access denied" },
+        { status: communityAccess.status || 403 },
+      );
+    }
+
+    const limit = await consumeAiGenerationQuota(effectiveUserId);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        {
+          error: limit.error || "Generation limit reached",
+          retryAfterSeconds: limit.retryAfterSeconds,
+          remainingToday: limit.remainingToday,
+        },
+        { status: limit.status || 429 },
       );
     }
 
@@ -31,7 +84,7 @@ export async function POST(req: NextRequest) {
     const userProgress = await db
       .select()
       .from(UserDsaProgressTable)
-      .where(eq(UserDsaProgressTable.userId, userId));
+      .where(eq(UserDsaProgressTable.userId, effectiveUserId));
 
     const skillLevel = userProgress[0]?.skillLevel || "beginner";
     const preferredCategories = userProgress[0]?.preferredCategories
@@ -41,12 +94,41 @@ export async function POST(req: NextRequest) {
       ? JSON.parse(userProgress[0].weakCategories)
       : [];
 
-    if (!process.env.GEMINI_API_KEY) {
+    const provider = await resolveGeminiApiKey(
+      effectiveUserId,
+      providerMode as ProviderMode | undefined,
+    );
+    if (!provider.success || !provider.apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY is not configured" },
-        { status: 500 },
+        { error: provider.message || "AI provider is not available" },
+        { status: provider.status || 500 },
       );
     }
+
+    if (provider.mode === "platform") {
+      const { has } = await auth();
+      const hasUnlimitedPlan = has ? has({ plan: "unlimited" }) : false;
+      const planFromMetadata = authUser.publicMetadata?.plan as string;
+      const hasEntitlement =
+        hasUnlimitedPlan || planFromMetadata === "unlimited";
+
+      if (!hasEntitlement) {
+        return NextResponse.json(
+          {
+            error:
+              "Platform AI generation requires an unlimited plan. Use BYOK mode or upgrade your plan.",
+          },
+          { status: 402 },
+        );
+      }
+    }
+
+    const openai = new OpenAI({
+      apiKey: provider.apiKey,
+      baseURL:
+        process.env.GEMINI_BASE_URL ||
+        "https://generativelanguage.googleapis.com/v1beta/openai",
+    });
 
     // Generate DSA questions using Gemini (OpenAI-compatible API)
     const prompt = generateDsaPrompt(
@@ -89,7 +171,7 @@ export async function POST(req: NextRequest) {
       const [inserted] = await db
         .insert(DsaQuestionTable)
         .values({
-          userId,
+          userId: effectiveUserId,
           title: q.title,
           description: q.description,
           difficulty: q.difficulty || "medium",
@@ -119,7 +201,7 @@ export async function POST(req: NextRequest) {
     // Initialize user progress if not exists
     if (userProgress.length === 0) {
       await db.insert(UserDsaProgressTable).values({
-        userId,
+        userId: effectiveUserId,
         totalQuestionsSolved: 0,
         easyQuestionsSolved: 0,
         mediumQuestionsSolved: 0,
@@ -135,6 +217,7 @@ export async function POST(req: NextRequest) {
       success: true,
       questions: insertedQuestions,
       message: `Generated ${insertedQuestions.length} DSA coding questions`,
+      remainingToday: limit.remainingToday,
     });
   } catch (error) {
     console.error("Error generating DSA questions:", error);

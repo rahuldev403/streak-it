@@ -6,13 +6,10 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { eq, and } from "drizzle-orm";
-
-const openai = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL:
-    process.env.GEMINI_BASE_URL ||
-    "https://generativelanguage.googleapis.com/v1beta/openai",
-});
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { ProviderMode, resolveGeminiApiKey } from "@/lib/gemini-provider";
+import { consumeAiGenerationQuota } from "@/lib/ai-rate-limit";
+import { ensureCommunityGenerationAccess } from "@/lib/community-access";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,12 +18,68 @@ export async function POST(req: NextRequest) {
       category,
       count = 15,
       difficulty = "mixed",
+      providerMode,
+      communityId,
     } = await req.json();
 
-    if (!userId || !category) {
+    const authUser = await currentUser();
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (userId && userId !== authUser.id) {
+      return NextResponse.json(
+        { error: "Forbidden: userId mismatch" },
+        { status: 403 },
+      );
+    }
+
+    const effectiveUserId = authUser.id;
+
+    if (!effectiveUserId || !category) {
       return NextResponse.json(
         { error: "userId and category are required" },
         { status: 400 },
+      );
+    }
+
+    const parsedCommunityId =
+      communityId !== undefined && communityId !== null
+        ? Number(communityId)
+        : undefined;
+
+    if (
+      communityId !== undefined &&
+      communityId !== null &&
+      !Number.isFinite(parsedCommunityId)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid communityId" },
+        { status: 400 },
+      );
+    }
+
+    const communityAccess = await ensureCommunityGenerationAccess(
+      effectiveUserId,
+      parsedCommunityId,
+      category,
+    );
+    if (!communityAccess.allowed) {
+      return NextResponse.json(
+        { error: communityAccess.error || "Community access denied" },
+        { status: communityAccess.status || 403 },
+      );
+    }
+
+    const limit = await consumeAiGenerationQuota(effectiveUserId);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        {
+          error: limit.error || "Generation limit reached",
+          retryAfterSeconds: limit.retryAfterSeconds,
+          remainingToday: limit.remainingToday,
+        },
+        { status: limit.status || 429 },
       );
     }
 
@@ -39,12 +92,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    const provider = await resolveGeminiApiKey(
+      effectiveUserId,
+      providerMode as ProviderMode | undefined,
+    );
+    if (!provider.success || !provider.apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY is not configured" },
-        { status: 500 },
+        { error: provider.message || "AI provider is not available" },
+        { status: provider.status || 500 },
       );
     }
+
+    if (provider.mode === "platform") {
+      const { has } = await auth();
+      const hasUnlimitedPlan = has ? has({ plan: "unlimited" }) : false;
+      const planFromMetadata = authUser.publicMetadata?.plan as string;
+      const hasEntitlement =
+        hasUnlimitedPlan || planFromMetadata === "unlimited";
+
+      if (!hasEntitlement) {
+        return NextResponse.json(
+          {
+            error:
+              "Platform AI generation requires an unlimited plan. Use BYOK mode or upgrade your plan.",
+          },
+          { status: 402 },
+        );
+      }
+    }
+
+    const openai = new OpenAI({
+      apiKey: provider.apiKey,
+      baseURL:
+        process.env.GEMINI_BASE_URL ||
+        "https://generativelanguage.googleapis.com/v1beta/openai",
+    });
 
     // Generate MCQ questions using Gemini (OpenAI-compatible API)
     const prompt = generatePrompt(category, count, difficulty);
@@ -81,7 +163,7 @@ export async function POST(req: NextRequest) {
       const [inserted] = await db
         .insert(CsFundamentalsQuestionTable)
         .values({
-          userId,
+          userId: effectiveUserId,
           category,
           question: q.question,
           options: JSON.stringify(q.options),
@@ -106,14 +188,14 @@ export async function POST(req: NextRequest) {
       .from(UserCsFundamentalsProgressTable)
       .where(
         and(
-          eq(UserCsFundamentalsProgressTable.userId, userId),
+          eq(UserCsFundamentalsProgressTable.userId, effectiveUserId),
           eq(UserCsFundamentalsProgressTable.category, category),
         ),
       );
 
     if (existingProgress.length === 0) {
       await db.insert(UserCsFundamentalsProgressTable).values({
-        userId,
+        userId: effectiveUserId,
         category,
         totalQuestionsSolved: 0,
         correctAnswers: 0,
@@ -128,6 +210,7 @@ export async function POST(req: NextRequest) {
       success: true,
       questions: insertedQuestions,
       message: `Generated ${insertedQuestions.length} ${category.toUpperCase()} questions`,
+      remainingToday: limit.remainingToday,
     });
   } catch (error) {
     console.error("Error generating CS fundamentals questions:", error);

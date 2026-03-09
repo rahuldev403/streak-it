@@ -1,15 +1,14 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { toast } from "sonner";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import { isAdmin } from "@/lib/admin";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -19,17 +18,98 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseStyleLoader } from "@/components/ui/course-style-loader";
+import { Switch } from "@/components/ui/switch";
+
+interface CourseOption {
+  id: number;
+  courseId: string;
+  title: string;
+  description: string;
+}
+
+interface ChapterOption {
+  id: number;
+  courseId: string;
+  name: string;
+  desc: string;
+  exercise?: string | null;
+}
+
+interface ExerciseDraftFile {
+  name: string;
+  content: string;
+  language: string;
+  readonly: boolean;
+}
+
+interface ExerciseDraftTestCase {
+  id: string;
+  input?: string;
+  expectedOutput: string;
+  description: string;
+}
+
+type WebDevQuestionType =
+  | "html-css-js"
+  | "react"
+  | "nextjs"
+  | "nodejs"
+  | "typescript";
+
+const QUESTION_TYPE_LABELS: Record<WebDevQuestionType, string> = {
+  "html-css-js": "HTML + CSS + JavaScript",
+  react: "React",
+  nextjs: "Next.js",
+  nodejs: "Node.js + Express",
+  typescript: "TypeScript",
+};
+
+const DELETE_CONFIRM_TOKEN = "DELETE";
 
 const AdminPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  // User Management State
-  const [userEmail, setUserEmail] = useState("");
-  const [subscription, setSubscription] = useState("");
+  const [contentImportLoading, setContentImportLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [manageLoading, setManageLoading] = useState(false);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [chaptersLoading, setChaptersLoading] = useState(false);
 
-  // Course Management State
+  const [courses, setCourses] = useState<CourseOption[]>([]);
+  const [chapterContentJsonText, setChapterContentJsonText] = useState("");
+  const [contentImportData, setContentImportData] = useState({
+    courseId: "",
+    chapterId: "",
+    questionType: "react" as WebDevQuestionType,
+    overwriteExisting: true,
+  });
+  const [importPayloadType, setImportPayloadType] = useState<
+    "chapter-packages" | "existing-chapter"
+  >("chapter-packages");
+  const [contentImportChapters, setContentImportChapters] = useState<
+    ChapterOption[]
+  >([]);
+  const [courseDeleteConfirmText, setCourseDeleteConfirmText] = useState("");
+  const [chapterDeleteConfirmText, setChapterDeleteConfirmText] = useState("");
+  const [manageCourseId, setManageCourseId] = useState("");
+  const [manageChapterId, setManageChapterId] = useState("");
+  const [manageChapters, setManageChapters] = useState<ChapterOption[]>([]);
+
+  const [manageCourseData, setManageCourseData] = useState({
+    title: "",
+    description: "",
+    bannerImage: "",
+    level: "beginner",
+    tags: "",
+  });
+
+  const [manageChapterData, setManageChapterData] = useState({
+    name: "",
+    desc: "",
+    exercise: "",
+  });
+
   const [courseData, setCourseData] = useState({
     courseId: "",
     title: "",
@@ -39,23 +119,114 @@ const AdminPage = () => {
     tags: "",
   });
 
-  // Chapter Management State
-  const [chapterData, setChapterData] = useState({
-    courseId: "",
-    name: "",
-    desc: "",
-    exercise: "",
-  });
+  const loadCourses = async () => {
+    setCoursesLoading(true);
+    try {
+      const response = await axios.get("/api/courses/list");
+      setCourses(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch courses:", error);
+      toast.error("Failed to load courses");
+    } finally {
+      setCoursesLoading(false);
+    }
+  };
+
+  const loadContentImportChapters = async (courseId: string) => {
+    if (!courseId) {
+      setContentImportChapters([]);
+      return;
+    }
+
+    setChaptersLoading(true);
+    try {
+      const response = await axios.get(`/api/chapters?courseId=${courseId}`);
+      setContentImportChapters(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch chapters for content import:", error);
+      toast.error("Failed to load chapters for content import");
+    } finally {
+      setChaptersLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (isLoaded && user) {
-      const userEmail = user.primaryEmailAddress?.emailAddress;
-      if (!isAdmin(userEmail)) {
-        toast.error("Access denied. Admin privileges required.");
-        router.push("/dashboard");
-      }
+    if (!isLoaded || !user) {
+      return;
     }
+
+    const userEmail = user.primaryEmailAddress?.emailAddress;
+    if (!isAdmin(userEmail)) {
+      toast.error("Access denied. Admin privileges required.");
+      router.push("/dashboard");
+      return;
+    }
+
+    loadCourses();
   }, [isLoaded, user, router]);
+
+  useEffect(() => {
+    if (contentImportData.courseId) {
+      loadContentImportChapters(contentImportData.courseId);
+    } else {
+      setContentImportChapters([]);
+    }
+  }, [contentImportData.courseId]);
+
+  useEffect(() => {
+    const selected = courses.find(
+      (course) => course.courseId === manageCourseId,
+    );
+    if (!selected) {
+      setManageCourseData({
+        title: "",
+        description: "",
+        bannerImage: "",
+        level: "beginner",
+        tags: "",
+      });
+      setManageChapters([]);
+      setManageChapterId("");
+      return;
+    }
+
+    setManageCourseData((prev) => ({
+      ...prev,
+      title: selected.title,
+      description: selected.description,
+    }));
+
+    const loadManageChapters = async () => {
+      try {
+        const response = await axios.get(
+          `/api/chapters?courseId=${manageCourseId}`,
+        );
+        setManageChapters(response.data || []);
+      } catch (error) {
+        console.error("Failed to load chapters for management:", error);
+        toast.error("Failed to load chapters for management");
+      }
+    };
+
+    loadManageChapters();
+  }, [manageCourseId, courses]);
+
+  useEffect(() => {
+    const selected = manageChapters.find(
+      (chapter) => String(chapter.id) === manageChapterId,
+    );
+
+    if (!selected) {
+      setManageChapterData({ name: "", desc: "", exercise: "" });
+      return;
+    }
+
+    setManageChapterData({
+      name: selected.name,
+      desc: selected.desc,
+      exercise: selected.exercise || "",
+    });
+  }, [manageChapterId, manageChapters]);
 
   if (!isLoaded) {
     return (
@@ -65,221 +236,351 @@ const AdminPage = () => {
     );
   }
 
-  const userEmailCheck = user?.primaryEmailAddress?.emailAddress;
-  if (!isAdmin(userEmailCheck)) {
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  if (!isAdmin(userEmail)) {
     return null;
   }
 
-  const handleSaveChapters = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get("/api/admin/save-chapters");
-
-      if (response.data.success) {
-        toast.success(response.data.message, {
-          description: `${response.data.chapters.length} chapters added successfully!`,
-          duration: 4000,
-        });
-      } else {
-        toast.error(response.data.message);
-      }
-    } catch (error) {
-      console.error("Error saving chapters:", error);
-      toast.error("Failed to save chapters. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpdateSubscription = async () => {
-    if (!userEmail || !subscription) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await axios.post("/api/admin/update-subscription", {
-        email: userEmail,
-        subscription,
-      });
-
-      if (response.data.success) {
-        toast.success("Subscription updated successfully!");
-        setUserEmail("");
-        setSubscription("");
-      } else {
-        toast.error(response.data.message);
-      }
-    } catch (error: any) {
-      console.error("Error updating subscription:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to update subscription",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleAddCourse = async () => {
     if (!courseData.courseId || !courseData.title || !courseData.description) {
-      toast.error("Please fill in all required fields");
+      toast.error("Please fill all required course fields");
       return;
     }
 
-    setIsLoading(true);
+    setFormLoading(true);
     try {
-      const response = await axios.post("/api/admin/add-course", courseData);
+      const response = await axios.post("/api/admin/add-course", {
+        courseId: courseData.courseId,
+        title: courseData.title,
+        description: courseData.description,
+        bannerImage: courseData.bannerImage,
+        level: courseData.level,
+        tags: courseData.tags,
+      });
 
-      if (response.data.success) {
-        toast.success("Course added successfully!");
-        setCourseData({
-          courseId: "",
-          title: "",
-          description: "",
-          bannerImage: "",
-          level: "beginner",
-          tags: "",
-        });
-      } else {
-        toast.error(response.data.message);
+      if (!response.data.success) {
+        toast.error(response.data.message || "Failed to create course");
+        return;
       }
+
+      toast.success("Web-dev course created successfully");
+      setCourseData({
+        courseId: "",
+        title: "",
+        description: "",
+        bannerImage: "",
+        level: "beginner",
+        tags: "",
+      });
+      await loadCourses();
     } catch (error: any) {
       console.error("Error adding course:", error);
       toast.error(error.response?.data?.message || "Failed to add course");
     } finally {
-      setIsLoading(false);
+      setFormLoading(false);
     }
   };
 
-  const handleAddChapter = async () => {
-    if (!chapterData.courseId || !chapterData.name || !chapterData.desc) {
-      toast.error("Please fill in all required fields");
+  const handleImportChapterContentOnly = async () => {
+    if (!contentImportData.courseId) {
+      toast.error("Select course first");
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await axios.post("/api/admin/add-chapter", chapterData);
+    if (!chapterContentJsonText.trim()) {
+      toast.error("Paste chapter content JSON first");
+      return;
+    }
 
-      if (response.data.success) {
-        toast.success("Chapter added successfully!");
-        setChapterData({
-          courseId: "",
-          name: "",
-          desc: "",
-          exercise: "",
+    let parsedPayload: unknown;
+    try {
+      parsedPayload = JSON.parse(chapterContentJsonText);
+    } catch {
+      toast.error("Invalid JSON format for chapter content");
+      return;
+    }
+
+    const isChapterPackageObject =
+      !!parsedPayload &&
+      typeof parsedPayload === "object" &&
+      !Array.isArray(parsedPayload) &&
+      Array.isArray(
+        (parsedPayload as { chapterPackages?: unknown[] }).chapterPackages,
+      );
+
+    const isChapterPackageArray =
+      Array.isArray(parsedPayload) &&
+      parsedPayload.length > 0 &&
+      parsedPayload.every(
+        (item) =>
+          !!item &&
+          typeof item === "object" &&
+          ("chapter" in (item as object) || "name" in (item as object)),
+      );
+
+    const isCombinedChapterPackagePayload =
+      isChapterPackageObject || isChapterPackageArray;
+    const isArrayPayload = Array.isArray(parsedPayload);
+
+    setContentImportLoading(true);
+    try {
+      if (importPayloadType === "chapter-packages") {
+        if (!isCombinedChapterPackagePayload) {
+          toast.error(
+            "Expected chapterPackages payload. Switch import type if using draft/drafts JSON.",
+          );
+          return;
+        }
+
+        const chapterPackages = isChapterPackageObject
+          ? (parsedPayload as { chapterPackages: unknown[] }).chapterPackages
+          : (parsedPayload as unknown[]);
+
+        const response = await axios.post("/api/admin/import-webdev-json", {
+          courseId: contentImportData.courseId,
+          questionType: contentImportData.questionType,
+          chapterPackages,
+          overwriteExisting: contentImportData.overwriteExisting,
         });
-      } else {
-        toast.error(response.data.message);
+
+        if (!response.data.success) {
+          toast.error(
+            response.data.error || "Failed to import chapter packages",
+          );
+          return;
+        }
+
+        toast.success("Chapter packages imported successfully", {
+          description: `Chapters: ${response.data.summary?.chaptersProcessed || 0} | Exercises: ${response.data.summary?.exercisesImported || 0}`,
+        });
+
+        setChapterContentJsonText("");
+        await loadContentImportChapters(contentImportData.courseId);
+        return;
       }
+
+      let targetChapterId = Number(contentImportData.chapterId);
+      let targetChapterName =
+        contentImportChapters.find(
+          (chapter) => String(chapter.id) === contentImportData.chapterId,
+        )?.name || contentImportData.chapterId;
+
+      if (!contentImportData.chapterId) {
+        toast.error("Select an existing chapter first");
+        return;
+      }
+
+      if (isCombinedChapterPackagePayload) {
+        toast.error(
+          "Detected chapterPackages JSON. Change Import Payload Type to 'Chapter Packages JSON'.",
+        );
+        return;
+      }
+
+      const response = await axios.post("/api/admin/import-webdev-json", {
+        courseId: contentImportData.courseId,
+        chapterId: targetChapterId,
+        questionType: contentImportData.questionType,
+        ...(isArrayPayload
+          ? { drafts: parsedPayload }
+          : { draft: parsedPayload }),
+        overwriteExisting: contentImportData.overwriteExisting,
+      });
+
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to import chapter content");
+        return;
+      }
+
+      const importedCount = Number(
+        response.data.summary?.exercisesImported || 1,
+      );
+      toast.success(
+        importedCount > 1
+          ? "Challenges imported successfully"
+          : "Chapter content imported successfully",
+        {
+          description: `Chapter: ${response.data.summary?.chapterName || targetChapterName} | Imported: ${importedCount}`,
+        },
+      );
+
+      setChapterContentJsonText("");
     } catch (error: any) {
-      console.error("Error adding chapter:", error);
-      toast.error(error.response?.data?.message || "Failed to add chapter");
+      console.error("Content-only import failed:", error);
+      toast.error(
+        error.response?.data?.error || "Failed to import chapter content",
+      );
     } finally {
-      setIsLoading(false);
+      setContentImportLoading(false);
     }
   };
 
-  const handleSeedContent = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.post("/api/admin/seed-content");
+  const handleUpdateCourse = async () => {
+    if (!manageCourseId) {
+      toast.error("Select a course first");
+      return;
+    }
 
-      if (response.data.success) {
-        toast.success("Content seeded successfully!", {
-          description: response.data.message,
-          duration: 4000,
-        });
-      } else {
-        toast.error(response.data.message);
+    setManageLoading(true);
+    try {
+      const response = await axios.patch("/api/admin/manage-course", {
+        courseId: manageCourseId,
+        ...manageCourseData,
+      });
+
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to update course");
+        return;
       }
+
+      toast.success("Course updated successfully");
+      await loadCourses();
     } catch (error: any) {
-      console.error("Error seeding content:", error);
-      toast.error(error.response?.data?.message || "Failed to seed content");
+      toast.error(error.response?.data?.error || "Failed to update course");
     } finally {
-      setIsLoading(false);
+      setManageLoading(false);
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    if (!manageCourseId) {
+      toast.error("Select a course first");
+      return;
+    }
+
+    if (courseDeleteConfirmText.trim() !== DELETE_CONFIRM_TOKEN) {
+      toast.error("Type DELETE to confirm course deletion");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Delete this course and all its chapters/content? This cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    setManageLoading(true);
+    try {
+      const response = await axios.delete("/api/admin/manage-course", {
+        data: { courseId: manageCourseId, deleteDependents: true },
+      });
+
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to delete course");
+        return;
+      }
+
+      toast.success("Course deleted successfully");
+      setManageCourseId("");
+      setCourseDeleteConfirmText("");
+      await loadCourses();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to delete course");
+    } finally {
+      setManageLoading(false);
+    }
+  };
+
+  const handleUpdateChapter = async () => {
+    if (!manageChapterId) {
+      toast.error("Select a chapter first");
+      return;
+    }
+
+    setManageLoading(true);
+    try {
+      const response = await axios.patch("/api/admin/manage-chapter", {
+        chapterId: Number(manageChapterId),
+        ...manageChapterData,
+      });
+
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to update chapter");
+        return;
+      }
+
+      toast.success("Chapter updated successfully");
+      const chapterResponse = await axios.get(
+        `/api/chapters?courseId=${manageCourseId}`,
+      );
+      setManageChapters(chapterResponse.data || []);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to update chapter");
+    } finally {
+      setManageLoading(false);
+    }
+  };
+
+  const handleDeleteChapter = async () => {
+    if (!manageChapterId) {
+      toast.error("Select a chapter first");
+      return;
+    }
+
+    if (chapterDeleteConfirmText.trim() !== DELETE_CONFIRM_TOKEN) {
+      toast.error("Type DELETE to confirm chapter deletion");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Delete this chapter and all its content? This cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    setManageLoading(true);
+    try {
+      const response = await axios.delete("/api/admin/manage-chapter", {
+        data: { chapterId: Number(manageChapterId), deleteContent: true },
+      });
+
+      if (!response.data.success) {
+        toast.error(response.data.error || "Failed to delete chapter");
+        return;
+      }
+
+      toast.success("Chapter deleted successfully");
+      const chapterResponse = await axios.get(
+        `/api/chapters?courseId=${manageCourseId}`,
+      );
+      setManageChapters(chapterResponse.data || []);
+      setManageChapterId("");
+      setChapterDeleteConfirmText("");
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to delete chapter");
+    } finally {
+      setManageLoading(false);
     }
   };
 
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-6xl">
       <div className="space-y-8">
-        <div className="text-center border-4 border-black p-6 bg-linear-to-r from-purple-400/20 to-pink-400/20">
+        <div className="text-center border-4 border-black p-6 bg-linear-to-r from-sky-400/20 to-emerald-400/20">
           <h1 className="text-4xl font-game font-normal text-primary mb-4">
-            🔧 Admin Dashboard
+            Admin Web Dev Control
           </h1>
           <p className="text-lg font-comfortaa">
-            Manage users, courses, and content
+            Build and maintain web-development courses with chapter-level
+            broken-code exercises.
           </p>
         </div>
 
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 font-game font-normal">
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="chapters">Chapters</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 font-game font-normal">
+            <TabsTrigger value="manual">Courses</TabsTrigger>
+            <TabsTrigger value="json-import">
+              Chapter + Exercise JSON
+            </TabsTrigger>
+            <TabsTrigger value="manage">Manage Existing</TabsTrigger>
           </TabsList>
 
-          {/* USER MANAGEMENT TAB */}
-          <TabsContent value="users" className="space-y-4">
+          <TabsContent value="manual" className="space-y-4">
             <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
               <h2 className="text-2xl font-game font-normal mb-4">
-                👥 User Subscription Management
+                Create Web-Development Course
               </h2>
               <p className="text-muted-foreground mb-6 font-comfortaa">
-                Update user subscription plans
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    User Email
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="user@example.com"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    Subscription Plan
-                  </label>
-                  <Select value={subscription} onValueChange={setSubscription}>
-                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
-                      <SelectValue placeholder="Select plan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="unlimited">Unlimited</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <LoadingButton
-                  onClick={handleUpdateSubscription}
-                  loading={isLoading}
-                  className="w-full font-game font-normal"
-                >
-                  Update Subscription
-                </LoadingButton>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* COURSE MANAGEMENT TAB */}
-          <TabsContent value="courses" className="space-y-4">
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-game font-normal mb-4">
-                📚 Add New Course
-              </h2>
-              <p className="text-muted-foreground mb-6 font-comfortaa">
-                Create a new course in the system
+                Every course created here is automatically tagged as
+                subject:web-dev.
               </p>
 
               <div className="space-y-4">
@@ -288,10 +589,13 @@ const AdminPage = () => {
                     Course ID (URL slug) *
                   </label>
                   <Input
-                    placeholder="web-foundations"
+                    placeholder="nextjs-auth-debugging"
                     value={courseData.courseId}
                     onChange={(e) =>
-                      setCourseData({ ...courseData, courseId: e.target.value })
+                      setCourseData((prev) => ({
+                        ...prev,
+                        courseId: e.target.value,
+                      }))
                     }
                     className="border-4 border-gray-800 rounded-none font-comfortaa"
                   />
@@ -302,10 +606,13 @@ const AdminPage = () => {
                     Course Title *
                   </label>
                   <Input
-                    placeholder="Web Development Foundations"
+                    placeholder="Practical Next.js Debugging"
                     value={courseData.title}
                     onChange={(e) =>
-                      setCourseData({ ...courseData, title: e.target.value })
+                      setCourseData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
                     }
                     className="border-4 border-gray-800 rounded-none font-comfortaa"
                   />
@@ -316,13 +623,13 @@ const AdminPage = () => {
                     Description *
                   </label>
                   <Textarea
-                    placeholder="Master the fundamentals of web development..."
+                    placeholder="Teach practical debugging workflows for modern web applications..."
                     value={courseData.description}
                     onChange={(e) =>
-                      setCourseData({
-                        ...courseData,
+                      setCourseData((prev) => ({
+                        ...prev,
                         description: e.target.value,
-                      })
+                      }))
                     }
                     className="border-4 border-gray-800 rounded-none font-comfortaa min-h-25"
                   />
@@ -333,191 +640,523 @@ const AdminPage = () => {
                     Banner Image URL
                   </label>
                   <Input
-                    placeholder="https://example.com/banner.jpg"
+                    placeholder="https://example.com/banner.png"
                     value={courseData.bannerImage}
                     onChange={(e) =>
-                      setCourseData({
-                        ...courseData,
+                      setCourseData((prev) => ({
+                        ...prev,
                         bannerImage: e.target.value,
-                      })
+                      }))
                     }
                     className="border-4 border-gray-800 rounded-none font-comfortaa"
                   />
                 </div>
 
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-game font-normal text-sm mb-2 block">
+                      Level
+                    </label>
+                    <Select
+                      value={courseData.level}
+                      onValueChange={(value) =>
+                        setCourseData((prev) => ({ ...prev, level: value }))
+                      }
+                    >
+                      <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="intermediate">
+                          Intermediate
+                        </SelectItem>
+                        <SelectItem value="advanced">Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="font-game font-normal text-sm mb-2 block">
+                      Extra Tags (comma separated)
+                    </label>
+                    <Input
+                      placeholder="frontend, api, debugging"
+                      value={courseData.tags}
+                      onChange={(e) =>
+                        setCourseData((prev) => ({
+                          ...prev,
+                          tags: e.target.value,
+                        }))
+                      }
+                      className="border-4 border-gray-800 rounded-none font-comfortaa"
+                    />
+                  </div>
+                </div>
+
+                <LoadingButton
+                  onClick={handleAddCourse}
+                  loading={formLoading}
+                  className="w-full font-game font-normal"
+                >
+                  Create Web-Dev Course
+                </LoadingButton>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="json-import" className="space-y-4">
+            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg space-y-4">
+              <h2 className="text-2xl font-game font-normal">
+                Chapter + Exercise JSON Import
+              </h2>
+              <p className="text-muted-foreground font-comfortaa">
+                Choose a course and existing chapter for normal imports, or
+                paste a combined `chapterPackages` payload in the main JSON box
+                to create/update chapter metadata and challenges together.
+              </p>
+
+              <div>
+                <label className="font-game font-normal text-sm mb-2 block">
+                  Import Payload Type
+                </label>
+                <Select
+                  value={importPayloadType}
+                  onValueChange={(
+                    value: "chapter-packages" | "existing-chapter",
+                  ) => setImportPayloadType(value)}
+                >
+                  <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="chapter-packages">
+                      Chapter Packages JSON (recommended)
+                    </SelectItem>
+                    <SelectItem value="existing-chapter">
+                      Existing Chapter Draft JSON
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="font-game font-normal text-sm mb-2 block">
-                    Level
+                    Existing Course *
                   </label>
                   <Select
-                    value={courseData.level}
+                    value={contentImportData.courseId}
                     onValueChange={(value) =>
-                      setCourseData({ ...courseData, level: value })
+                      setContentImportData((prev) => ({
+                        ...prev,
+                        courseId: value,
+                        chapterId: "",
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                      <SelectValue
+                        placeholder={
+                          coursesLoading
+                            ? "Loading courses..."
+                            : "Select course"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courses.map((course) => (
+                        <SelectItem key={course.id} value={course.courseId}>
+                          {course.title} ({course.courseId})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {importPayloadType === "existing-chapter" && (
+                <div>
+                  <label className="font-game font-normal text-sm mb-2 block">
+                    Existing Chapter *
+                  </label>
+                  <Select
+                    value={contentImportData.chapterId}
+                    onValueChange={(value) =>
+                      setContentImportData((prev) => ({
+                        ...prev,
+                        chapterId: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                      <SelectValue
+                        placeholder={
+                          contentImportData.courseId
+                            ? chaptersLoading
+                              ? "Loading chapters..."
+                              : "Select chapter"
+                            : "Choose a course first"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contentImportChapters.map((chapter) => (
+                        <SelectItem key={chapter.id} value={String(chapter.id)}>
+                          {chapter.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-game font-normal text-sm mb-2 block">
+                    Stack Type
+                  </label>
+                  <Select
+                    value={contentImportData.questionType}
+                    onValueChange={(value: WebDevQuestionType) =>
+                      setContentImportData((prev) => ({
+                        ...prev,
+                        questionType: value,
+                      }))
                     }
                   >
                     <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
+                      {Object.entries(QUESTION_TYPE_LABELS).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    Tags (comma separated)
-                  </label>
-                  <Input
-                    placeholder="HTML, CSS, JavaScript"
-                    value={courseData.tags}
-                    onChange={(e) =>
-                      setCourseData({ ...courseData, tags: e.target.value })
+                <div className="flex items-end justify-between border-2 border-gray-700 p-3">
+                  <p className="font-comfortaa text-sm">
+                    Overwrite existing content
+                  </p>
+                  <Switch
+                    checked={contentImportData.overwriteExisting}
+                    onCheckedChange={(checked) =>
+                      setContentImportData((prev) => ({
+                        ...prev,
+                        overwriteExisting: checked,
+                      }))
                     }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
                   />
                 </div>
-
-                <LoadingButton
-                  onClick={handleAddCourse}
-                  loading={isLoading}
-                  className="w-full font-game font-normal"
-                >
-                  Add Course
-                </LoadingButton>
               </div>
-            </div>
-          </TabsContent>
 
-          {/* CHAPTER MANAGEMENT TAB */}
-          <TabsContent value="chapters" className="space-y-4">
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-game font-normal mb-4">
-                📖 Add New Chapter
-              </h2>
-              <p className="text-muted-foreground mb-6 font-comfortaa">
-                Add a chapter to an existing course
-              </p>
+              <Textarea
+                placeholder='{"chapterPackages":[{"chapter":{"name":"...","desc":"...","exercise":"..."},"questionType":"react","drafts":[{"title":"...","problemStatement":"...","instructions":"...","expectedOutput":"...","hints":"...","solutionCode":"...","boilerplateFiles":[...],"testCases":[...]}]}]}'
+                value={chapterContentJsonText}
+                onChange={(e) => setChapterContentJsonText(e.target.value)}
+                className="border-4 border-gray-800 rounded-none font-mono text-xs min-h-90"
+              />
 
-              <div className="space-y-4">
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    Course ID *
-                  </label>
-                  <Input
-                    placeholder="web-foundations"
-                    value={chapterData.courseId}
-                    onChange={(e) =>
-                      setChapterData({
-                        ...chapterData,
-                        courseId: e.target.value,
-                      })
-                    }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
-                  />
-                </div>
+              <details className="border-2 border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-3">
+                <summary className="cursor-pointer font-game font-normal text-xs">
+                  Sample exercise JSON payloads
+                </summary>
+                <pre className="mt-2 text-xs font-mono whitespace-pre-wrap wrap-break-word">
+                  {`{
+  "title": "Fix state update bug",
+  "problemStatement": "The todo list does not re-render after adding an item.",
+  "instructions": "Do not mutate state directly. Return a new array.",
+  "expectedOutput": "New todo appears immediately.",
+  "hints": "Use setTodos(prev => [...prev, newTodo])",
+  "solutionCode": "// your solution...",
+  "boilerplateFiles": [
+    { "name": "app.jsx", "content": "...", "language": "jsx", "readonly": false }
+  ],
+  "testCases": [
+    { "id": "tc-1", "expectedOutput": "renders new item", "description": "adds one todo" }
+  ]
+}
 
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    Chapter Name *
-                  </label>
-                  <Input
-                    placeholder="HTML Basics"
-                    value={chapterData.name}
-                    onChange={(e) =>
-                      setChapterData({ ...chapterData, name: e.target.value })
-                    }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    Description *
-                  </label>
-                  <Textarea
-                    placeholder="Learn the basics of HTML structure..."
-                    value={chapterData.desc}
-                    onChange={(e) =>
-                      setChapterData({ ...chapterData, desc: e.target.value })
-                    }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-25"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-game font-normal text-sm mb-2 block">
-                    Exercise (optional)
-                  </label>
-                  <Textarea
-                    placeholder="Create a webpage with proper HTML structure..."
-                    value={chapterData.exercise}
-                    onChange={(e) =>
-                      setChapterData({
-                        ...chapterData,
-                        exercise: e.target.value,
-                      })
-                    }
-                    className="border-4 border-gray-800 rounded-none font-comfortaa min-h-20"
-                  />
-                </div>
-
-                <LoadingButton
-                  onClick={handleAddChapter}
-                  loading={isLoading}
-                  className="w-full font-game font-normal"
-                >
-                  Add Chapter
-                </LoadingButton>
-              </div>
-            </div>
-
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-game font-normal mb-4">
-                📦 Bulk Load Chapters
-              </h2>
-              <p className="text-muted-foreground mb-6 font-comfortaa">
-                Load pre-defined sample chapters from database
-              </p>
+[
+  {
+    "questionType": "react",
+    "draft": {
+      "title": "Fix stale state",
+      "problemStatement": "...",
+      "instructions": "...",
+      "expectedOutput": "...",
+      "hints": "...",
+      "solutionCode": "...",
+      "boilerplateFiles": [{ "name": "app.jsx", "content": "...", "language": "jsx", "readonly": false }],
+      "testCases": [{ "id": "tc-1", "expectedOutput": "...", "description": "..." }]
+    }
+  }
+]`}
+                </pre>
+                <pre className="mt-3 text-xs font-mono whitespace-pre-wrap wrap-break-word">
+                  {`{
+  "chapterPackages": [
+    {
+      "chapter": {
+        "name": "Debug React State",
+        "desc": "Fix state mutation and rerender issues.",
+        "exercise": "Use immutable updates"
+      },
+      "questionType": "react",
+      "drafts": [
+        {
+          "title": "Fix push mutation",
+          "problemStatement": "Todo list does not update",
+          "instructions": "Avoid mutating previous state",
+          "expectedOutput": "New todo appears",
+          "hints": "setTodos(prev => [...prev, newTodo])",
+          "solutionCode": "...",
+          "boilerplateFiles": [{ "name": "app.jsx", "content": "...", "language": "jsx", "readonly": false }],
+          "testCases": [{ "id": "tc-1", "expectedOutput": "renders new item", "description": "adds one todo" }]
+        }
+      ]
+    },
+    {
+      "name": "Fix Effect Dependencies",
+      "desc": "Repair stale closure issues",
+      "questionType": "react",
+      "draft": {
+        "title": "Fix stale interval",
+        "problemStatement": "...",
+        "instructions": "...",
+        "expectedOutput": "...",
+        "hints": "...",
+        "solutionCode": "...",
+        "boilerplateFiles": [{ "name": "app.jsx", "content": "...", "language": "jsx", "readonly": false }],
+        "testCases": [{ "id": "tc-1", "expectedOutput": "...", "description": "..." }]
+      }
+    }
+  ]
+}`}
+                </pre>
+              </details>
 
               <LoadingButton
-                onClick={handleSaveChapters}
-                loading={isLoading}
+                onClick={handleImportChapterContentOnly}
+                loading={contentImportLoading}
                 className="w-full font-game font-normal"
               >
-                Load Sample Chapters
+                Import Exercise JSON
               </LoadingButton>
             </div>
           </TabsContent>
 
-          {/* CONTENT MANAGEMENT TAB */}
-          <TabsContent value="content" className="space-y-4">
-            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg">
-              <h2 className="text-2xl font-game font-normal mb-4">
-                💾 Chapter Content (HTML/CSS/JS)
-              </h2>
-              <p className="text-muted-foreground mb-6 font-comfortaa">
-                Load chapter content from scripts folder (HTML, CSS, JS
-                exercises)
-              </p>
+          <TabsContent value="manage" className="space-y-4">
+            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg space-y-4">
+              <h2 className="text-2xl font-game font-normal">Manage Course</h2>
 
-              <div className="bg-blue-50 dark:bg-blue-900/20 border-4 border-blue-500 p-4 mb-4">
-                <p className="font-comfortaa text-sm">
-                  ℹ️ This will load content from
-                  /scripts/seed-all-course-content.ts for web-foundations course
-                  chapters
+              <div>
+                <label className="font-game font-normal text-sm mb-2 block">
+                  Course
+                </label>
+                <Select
+                  value={manageCourseId}
+                  onValueChange={setManageCourseId}
+                >
+                  <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                    <SelectValue placeholder="Select course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((course) => (
+                      <SelectItem key={course.id} value={course.courseId}>
+                        {course.title} ({course.courseId})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="Course title"
+                  value={manageCourseData.title}
+                  onChange={(e) =>
+                    setManageCourseData((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                />
+                <Input
+                  placeholder="Banner image URL"
+                  value={manageCourseData.bannerImage}
+                  onChange={(e) =>
+                    setManageCourseData((prev) => ({
+                      ...prev,
+                      bannerImage: e.target.value,
+                    }))
+                  }
+                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                />
+              </div>
+
+              <Textarea
+                placeholder="Course description"
+                value={manageCourseData.description}
+                onChange={(e) =>
+                  setManageCourseData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                className="border-4 border-gray-800 rounded-none font-comfortaa min-h-24"
+              />
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="Level"
+                  value={manageCourseData.level}
+                  onChange={(e) =>
+                    setManageCourseData((prev) => ({
+                      ...prev,
+                      level: e.target.value,
+                    }))
+                  }
+                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                />
+                <Input
+                  placeholder="Tags (comma separated)"
+                  value={manageCourseData.tags}
+                  onChange={(e) =>
+                    setManageCourseData((prev) => ({
+                      ...prev,
+                      tags: e.target.value,
+                    }))
+                  }
+                  className="border-4 border-gray-800 rounded-none font-comfortaa"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <LoadingButton
+                  onClick={handleUpdateCourse}
+                  loading={manageLoading}
+                  className="w-full font-game font-normal"
+                >
+                  Update Course
+                </LoadingButton>
+                <Input
+                  placeholder="Type DELETE to enable deletion"
+                  value={courseDeleteConfirmText}
+                  onChange={(e) => setCourseDeleteConfirmText(e.target.value)}
+                  className="border-4 border-red-700 rounded-none font-comfortaa"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <LoadingButton
+                  onClick={handleDeleteCourse}
+                  loading={manageLoading}
+                  className="w-full font-game font-normal"
+                >
+                  Delete Course
+                </LoadingButton>
+                <p className="text-xs font-comfortaa text-muted-foreground self-center">
+                  Deletion requires typing `DELETE` and confirmation popup.
                 </p>
               </div>
+            </div>
 
-              <LoadingButton
-                onClick={handleSeedContent}
-                loading={isLoading}
-                className="w-full font-game font-normal"
-              >
-                Seed Chapter Content
-              </LoadingButton>
+            <div className="border-4 border-gray-800 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-lg space-y-4">
+              <h2 className="text-2xl font-game font-normal">Manage Chapter</h2>
+
+              <div>
+                <label className="font-game font-normal text-sm mb-2 block">
+                  Chapter
+                </label>
+                <Select
+                  value={manageChapterId}
+                  onValueChange={setManageChapterId}
+                >
+                  <SelectTrigger className="border-4 border-gray-800 rounded-none font-game font-normal">
+                    <SelectValue placeholder="Select chapter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {manageChapters.map((chapter) => (
+                      <SelectItem key={chapter.id} value={String(chapter.id)}>
+                        {chapter.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Input
+                placeholder="Chapter name"
+                value={manageChapterData.name}
+                onChange={(e) =>
+                  setManageChapterData((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+                className="border-4 border-gray-800 rounded-none font-comfortaa"
+              />
+
+              <Textarea
+                placeholder="Chapter description"
+                value={manageChapterData.desc}
+                onChange={(e) =>
+                  setManageChapterData((prev) => ({
+                    ...prev,
+                    desc: e.target.value,
+                  }))
+                }
+                className="border-4 border-gray-800 rounded-none font-comfortaa min-h-20"
+              />
+
+              <Textarea
+                placeholder="Chapter exercise text"
+                value={manageChapterData.exercise}
+                onChange={(e) =>
+                  setManageChapterData((prev) => ({
+                    ...prev,
+                    exercise: e.target.value,
+                  }))
+                }
+                className="border-4 border-gray-800 rounded-none font-comfortaa min-h-16"
+              />
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <LoadingButton
+                  onClick={handleUpdateChapter}
+                  loading={manageLoading}
+                  className="w-full font-game font-normal"
+                >
+                  Update Chapter
+                </LoadingButton>
+                <Input
+                  placeholder="Type DELETE to enable deletion"
+                  value={chapterDeleteConfirmText}
+                  onChange={(e) => setChapterDeleteConfirmText(e.target.value)}
+                  className="border-4 border-red-700 rounded-none font-comfortaa"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <LoadingButton
+                  onClick={handleDeleteChapter}
+                  loading={manageLoading}
+                  className="w-full font-game font-normal"
+                >
+                  Delete Chapter
+                </LoadingButton>
+                <p className="text-xs font-comfortaa text-muted-foreground self-center">
+                  Deletion requires typing `DELETE` and confirmation popup.
+                </p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

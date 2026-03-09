@@ -34,7 +34,7 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
   const courseId = courseDetail?.courseId;
   const canEnroll = useMemo(
     () => Boolean(courseId && !loadingEnroll),
-    [courseId, loadingEnroll]
+    [courseId, loadingEnroll],
   );
 
   const handleContinueScroll = () => {
@@ -54,7 +54,7 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
         description: "You need an account to track your progress.",
       });
       router.push(
-        "/sign-in?redirect_url=" + encodeURIComponent(window.location.href)
+        "/sign-in?redirect_url=" + encodeURIComponent(window.location.href),
       );
       return;
     }
@@ -95,14 +95,16 @@ const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
             layout="fill"
             objectFit="cover"
           />
-          <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-start p-3 sm:p-4 md:p-6 lg:p-8">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2 font-game font-normal drop-shadow-lg">
-              {courseDetail?.title}
-            </h1>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white mb-2 sm:mb-3 md:mb-4 font-comfortaa max-w-2xl line-clamp-2 sm:line-clamp-3 drop-shadow-lg text-start">
-              {courseDetail?.description}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto mt-2 sm:mt-4">
+          <div className="absolute inset-0 bg-black/40 flex flex-col justify-between items-start p-3 sm:p-4 md:p-6 lg:p-8">
+            <div className="w-full max-w-3xl">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-1 sm:mb-2 font-game font-normal drop-shadow-lg">
+                {courseDetail?.title}
+              </h1>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white font-comfortaa line-clamp-2 sm:line-clamp-3 drop-shadow-lg text-start">
+                {courseDetail?.description}
+              </p>
+            </div>
+            <div className="flex w-full justify-start sm:justify-end mt-2 sm:mt-4">
               {!courseDetail?.isEnrolled ? (
                 <Button
                   className="font-game font-normal rounded-md text-xs sm:text-sm md:text-base lg:text-lg px-3 sm:px-4 md:px-6 w-full sm:w-auto"

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -23,30 +23,68 @@ export async function POST(req: NextRequest) {
           success: false,
           message: "Access denied. Admin privileges required.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     const { courseId, title, description, bannerImage, level, tags } =
       await req.json();
 
-    if (!courseId || !title || !description) {
+    const normalizedCourseId =
+      typeof courseId === "string"
+        ? courseId
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9-]+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "")
+        : "";
+
+    if (!normalizedCourseId || !title || !description) {
       return NextResponse.json(
         {
           success: false,
           message: "Course ID, title, and description are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
+    const extraTags =
+      typeof tags === "string"
+        ? tags
+            .split(",")
+            .map((tag: string) => tag.trim())
+            .filter(Boolean)
+        : [];
+
+    const disallowedSubjects = ["subject:dsa", "subject:cs-fundamentals"];
+    const hasDisallowedSubject = extraTags.some((tag: string) =>
+      disallowedSubjects.includes(tag.toLowerCase()),
+    );
+
+    if (hasDisallowedSubject) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Admin course creation is restricted to web-development content only.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const finalTags = ["subject:web-dev", ...extraTags]
+      .filter((value, index, array) => array.indexOf(value) === index)
+      .join(", ");
+
     const result = await db.insert(CourseTable).values({
-      courseId,
-      title,
-      description,
+      courseId: normalizedCourseId,
+      title: String(title).trim(),
+      description: String(description).trim(),
       bannerImage: bannerImage || "https://via.placeholder.com/800x400",
       level: level || "beginner",
-      tags: tags || "",
+      tags: finalTags,
     });
 
     return NextResponse.json({
@@ -62,7 +100,7 @@ export async function POST(req: NextRequest) {
         message: "Failed to add course. It might already exist.",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

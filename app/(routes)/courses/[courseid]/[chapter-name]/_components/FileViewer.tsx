@@ -19,6 +19,36 @@ export default function FileViewer({
 
   const activeFile = files[activeFileIndex];
 
+  const getMonacoLanguage = (file: BoilerplateFile) => {
+    const lang = String(file.language || "").toLowerCase();
+    const name = file.name.toLowerCase();
+
+    if (name.endsWith(".tsx") || name.endsWith(".ts")) return "typescript";
+    if (name.endsWith(".jsx") || name.endsWith(".js")) return "javascript";
+    if (name.endsWith(".css")) return "css";
+    if (name.endsWith(".html")) return "html";
+    if (name.endsWith(".json")) return "json";
+
+    if (lang === "tsx" || lang === "typescript") return "typescript";
+    if (lang === "jsx" || lang === "javascript") return "javascript";
+    if (lang === "css" || lang === "html" || lang === "json") return lang;
+
+    return "javascript";
+  };
+
+  const configureMonaco = (monaco: any) => {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      allowNonTsExtensions: true,
+    });
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      allowNonTsExtensions: true,
+    });
+  };
+
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined && activeFile) {
       onCodeChange?.(activeFile.name, value);
@@ -51,9 +81,11 @@ export default function FileViewer({
           <Editor
             key={activeFile.name}
             height="100%"
-            language={activeFile.language}
+            path={activeFile.name}
+            language={getMonacoLanguage(activeFile)}
             value={fileContents[activeFile.name] || ""}
             onChange={handleEditorChange}
+            beforeMount={configureMonaco}
             theme="vs-dark"
             options={{
               readOnly: activeFile.readonly,

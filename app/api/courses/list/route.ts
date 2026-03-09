@@ -1,8 +1,9 @@
 import { db } from "@/app/config/db";
 import { CourseTable } from "@/app/config/schema";
-import { NextResponse } from "next/server";
+import { ilike } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     // Check if DATABASE_URL is set
     if (!process.env.DATABASE_URL) {
@@ -13,7 +14,9 @@ export async function GET() {
       );
     }
 
-    const courses = await db
+    const subject = req.nextUrl.searchParams.get("subject")?.trim();
+
+    let query = db
       .select({
         id: CourseTable.id,
         courseId: CourseTable.courseId,
@@ -21,6 +24,12 @@ export async function GET() {
         description: CourseTable.description,
       })
       .from(CourseTable);
+
+    if (subject) {
+      query = query.where(ilike(CourseTable.tags, `%subject:${subject}%`));
+    }
+
+    const courses = await query;
 
     return NextResponse.json(courses);
   } catch (error) {

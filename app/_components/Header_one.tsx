@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
-import { LayoutDashboard, Settings } from "lucide-react";
+import { BookOpen, LayoutDashboard, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -77,6 +77,16 @@ const Header_one = () => {
       )}
 
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        <Link href="/courses">
+          <Button
+            variant="pixel"
+            className="rounded-md text-black font-game font-normal text-xs sm:text-sm px-3 sm:px-4"
+          >
+            <span className="hidden sm:inline">Courses</span>
+            <BookOpen className="sm:hidden w-4 h-4" />
+          </Button>
+        </Link>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

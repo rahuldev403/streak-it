@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,14 @@ import Image from "next/image";
 import thinking from "@/public/thinking.png";
 import interview from "@/public/online-interview.png";
 import { useLoading } from "@/app/context/LoadingContext";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 interface Bundle {
   id: string;
   name: string;
@@ -96,10 +104,133 @@ export default function InterviewPrepPage() {
   const router = useRouter();
   const { setIsLoading, setLoadingMessage } = useLoading();
   const [generatingBundle, setGeneratingBundle] = useState<string | null>(null);
+  const [providerMode, setProviderMode] = useState<"platform" | "user">(
+    "platform",
+  );
+  const [maskedKey, setMaskedKey] = useState<string | null>(null);
+  const [hasUserKey, setHasUserKey] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [savingKey, setSavingKey] = useState(false);
+  const [remainingToday, setRemainingToday] = useState<number | null>(null);
+  const [dailyLimit, setDailyLimit] = useState<number | null>(null);
+  const [cooldownRemainingSeconds, setCooldownRemainingSeconds] = useState(0);
+  const [canGenerateNow, setCanGenerateNow] = useState(true);
+
+  const loadQuotaStatus = async () => {
+    if (!user) return;
+
+    try {
+      const response = await axios.get("/api/user/ai-quota");
+      setRemainingToday(response.data.remainingToday ?? null);
+      setDailyLimit(response.data.dailyLimit ?? null);
+      setCooldownRemainingSeconds(response.data.cooldownRemainingSeconds || 0);
+      setCanGenerateNow(Boolean(response.data.canGenerate));
+    } catch (error) {
+      console.error("Failed to load AI quota status:", error);
+    }
+  };
+
+  const loadAiKeySettings = async () => {
+    if (!user) return;
+
+    try {
+      const response = await axios.get("/api/user/ai-key");
+      setProviderMode(response.data.mode || "platform");
+      setMaskedKey(response.data.maskedKey || null);
+      setHasUserKey(Boolean(response.data.hasUserKey));
+    } catch (error) {
+      console.error("Failed to load AI key settings:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadAiKeySettings();
+    loadQuotaStatus();
+  }, [user]);
+
+  useEffect(() => {
+    if (cooldownRemainingSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldownRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          loadQuotaStatus();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldownRemainingSeconds]);
+
+  const handleSaveAiSettings = async () => {
+    if (!user) {
+      toast.error("Please sign in to update AI settings");
+      return;
+    }
+
+    if (providerMode === "user" && !apiKeyInput.trim() && !hasUserKey) {
+      toast.error("Please provide your Gemini API key");
+      return;
+    }
+
+    setSavingKey(true);
+    try {
+      await axios.post("/api/user/ai-key", {
+        mode: providerMode,
+        apiKey: apiKeyInput.trim() || undefined,
+      });
+
+      setApiKeyInput("");
+      await loadAiKeySettings();
+      toast.success("AI provider settings saved");
+    } catch (error: any) {
+      console.error("Failed to save AI settings:", error);
+      toast.error(error.response?.data?.error || "Failed to save settings");
+    } finally {
+      setSavingKey(false);
+    }
+  };
+
+  const handleRemovePersonalKey = async () => {
+    if (!user) {
+      toast.error("Please sign in to remove key");
+      return;
+    }
+
+    setSavingKey(true);
+    try {
+      await axios.delete("/api/user/ai-key");
+      setProviderMode("platform");
+      setHasUserKey(false);
+      setMaskedKey(null);
+      setApiKeyInput("");
+      toast.success("Personal API key removed");
+    } catch (error: any) {
+      console.error("Failed to remove personal key:", error);
+      toast.error(error.response?.data?.error || "Failed to remove API key");
+    } finally {
+      setSavingKey(false);
+    }
+  };
 
   const handleGenerateQuestions = async (bundle: Bundle) => {
     if (!user) {
       toast.error("Please sign in to generate questions");
+      return;
+    }
+
+    if (!canGenerateNow) {
+      if (cooldownRemainingSeconds > 0) {
+        const minutes = Math.ceil(cooldownRemainingSeconds / 60);
+        toast.error(
+          `Rate limit active. Try again in about ${minutes} minute(s).`,
+        );
+      } else {
+        toast.error("Daily generation limit reached. Try again tomorrow.");
+      }
       return;
     }
 
@@ -115,6 +246,7 @@ export default function InterviewPrepPage() {
           category: bundle.category,
           count: bundle.questionsPerGeneration,
           difficulty: "mixed",
+          providerMode,
         });
 
         toast.success(
@@ -129,6 +261,7 @@ export default function InterviewPrepPage() {
           userId: user.id,
           count: bundle.questionsPerGeneration,
           difficulty: "mixed",
+          providerMode,
         });
 
         toast.success(
@@ -138,13 +271,17 @@ export default function InterviewPrepPage() {
         // Navigate to DSA practice page
         router.push(`/interview-prep/dsa`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating questions:", error);
-      toast.error("Failed to generate questions. Please try again.");
+      toast.error(
+        error.response?.data?.error ||
+          "Failed to generate questions. Please try again.",
+      );
     } finally {
       setGeneratingBundle(null);
       setIsLoading(false);
       setLoadingMessage("Loading...");
+      loadQuotaStatus();
     }
   };
 
@@ -216,6 +353,111 @@ export default function InterviewPrepPage() {
         </div>
       </div>
 
+      <Card className="border-4 border-black dark:border-gray-600 rounded mb-8">
+        <CardHeader>
+          <CardTitle className="font-game">AI Provider Settings</CardTitle>
+          <CardDescription className="font-comfortaa">
+            Choose whether question generation uses our platform Gemini key or
+            your personal Gemini key.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="font-game font-normal text-sm mb-2 block">
+              Provider Mode
+            </label>
+            <Select
+              value={providerMode}
+              onValueChange={(value: "platform" | "user") =>
+                setProviderMode(value)
+              }
+            >
+              <SelectTrigger className="border-2 border-black dark:border-gray-400">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="platform">
+                  Platform key (billable)
+                </SelectItem>
+                <SelectItem value="user">My key (BYOK)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {providerMode === "user" && (
+            <div className="space-y-3">
+              <div>
+                <label className="font-game font-normal text-sm mb-2 block">
+                  Gemini API Key
+                </label>
+                <Input
+                  type="password"
+                  placeholder={
+                    hasUserKey ? "Enter new key to rotate" : "AIza..."
+                  }
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  className="border-2 border-black dark:border-gray-400 font-comfortaa"
+                />
+              </div>
+              {maskedKey && (
+                <p className="text-xs font-comfortaa text-muted-foreground">
+                  Saved key: {maskedKey}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              onClick={handleSaveAiSettings}
+              disabled={savingKey}
+              variant="pixel"
+              className="font-game text-black"
+            >
+              {savingKey ? "Saving..." : "Save AI Settings"}
+            </Button>
+            {hasUserKey && (
+              <Button
+                onClick={handleRemovePersonalKey}
+                disabled={savingKey}
+                variant="outline"
+                className="font-game border-2 border-black dark:border-gray-400"
+              >
+                Remove Personal Key
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-4 border-black dark:border-gray-600 rounded mb-8">
+        <CardHeader>
+          <CardTitle className="font-game">Generation Limits</CardTitle>
+          <CardDescription className="font-comfortaa">
+            10 generations/day with a 15-minute cooldown between generations.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2 items-center">
+            <Badge variant="secondary" className="font-game">
+              Remaining today: {remainingToday ?? "-"}
+              {dailyLimit ? ` / ${dailyLimit}` : ""}
+            </Badge>
+            <Badge
+              variant={canGenerateNow ? "default" : "destructive"}
+              className="font-game"
+            >
+              {canGenerateNow
+                ? "Available now"
+                : cooldownRemainingSeconds > 0
+                  ? `Cooldown: ${Math.ceil(cooldownRemainingSeconds / 60)} min`
+                  : "Daily limit reached"}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Bundles Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {INTERVIEW_BUNDLES.map((bundle) => (
@@ -247,7 +489,7 @@ export default function InterviewPrepPage() {
             <CardContent className="space-y-3">
               <Button
                 onClick={() => handleGenerateQuestions(bundle)}
-                disabled={generatingBundle === bundle.id}
+                disabled={generatingBundle === bundle.id || !canGenerateNow}
                 className="w-full font-game text-black rounded"
                 variant="pixel"
               >
