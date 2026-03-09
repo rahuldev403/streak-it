@@ -16,20 +16,17 @@ export async function GET(req: NextRequest) {
 
     const subject = req.nextUrl.searchParams.get("subject")?.trim();
 
-    let query = db
+    const courses = await db
       .select({
         id: CourseTable.id,
         courseId: CourseTable.courseId,
         title: CourseTable.title,
         description: CourseTable.description,
       })
-      .from(CourseTable);
-
-    if (subject) {
-      query = query.where(ilike(CourseTable.tags, `%subject:${subject}%`));
-    }
-
-    const courses = await query;
+      .from(CourseTable)
+      .where(
+        subject ? ilike(CourseTable.tags, `%subject:${subject}%`) : undefined,
+      );
 
     return NextResponse.json(courses);
   } catch (error) {
