@@ -193,7 +193,9 @@ const ActivityHeatmap = () => {
                           {day.date}
                         </p>
                         <p className="font-comfortaa text-[11px] text-muted-foreground">
-                          {day.count} submissions
+                          {day.count === 0
+                            ? "No submissions"
+                            : `${day.count} submission${day.count > 1 ? "s" : ""}`}
                         </p>
                       </TooltipContent>
                     </Tooltip>
