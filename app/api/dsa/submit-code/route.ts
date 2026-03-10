@@ -198,56 +198,84 @@ function wrapJavaCode(userCode: string, input: string): string {
     return userCode;
   }
 
-  // Parse the input to create proper test case call
-  const inputLines = input.trim().split("\n");
-  const inputData = inputLines[0]; // First line is usually the array or data
+  // Detect method signature from Solution class: returnType methodName(params)
+  const signatureMatch = userCode.match(
+    /public\s+([\w\[\]]+)\s+(\w+)\s*\(([^)]*)\)/,
+  );
 
-  // Detect the method signature from the Solution class
-  const methodMatch = userCode.match(/public\s+\w+\s+(\w+)\s*\([^)]*\)/);
-  const methodName = methodMatch ? methodMatch[1] : "solve";
+  const returnType = signatureMatch ? signatureMatch[1] : "int";
+  const methodName = signatureMatch ? signatureMatch[2] : "solve";
+  const rawParams = signatureMatch ? signatureMatch[3].trim() : "int[] arr";
 
-  // Detect return type
-  const returnTypeMatch = userCode.match(/public\s+(\w+)\s+\w+\s*\([^)]*\)/);
-  const returnType = returnTypeMatch ? returnTypeMatch[1] : "int";
+  const parsedParams = rawParams
+    ? rawParams
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => {
+          const parts = p.split(/\s+/);
+          const name = parts[parts.length - 1] || "arg";
+          const type = parts.slice(0, -1).join(" ") || "int";
+          return { type, name };
+        })
+    : [];
 
-  // Detect parameter type (int[], String, etc.)
-  const paramMatch = userCode.match(/public\s+\w+\s+\w+\s*\(([^)]*)\)/);
-  const paramType = paramMatch ? paramMatch[1].split(" ")[0] : "int[]";
+  const declarations: string[] = [];
+  const callArgs: string[] = [];
 
-  // Generate appropriate input parsing and method call based on parameter type
-  let inputParsing = "";
-  let methodCall = "";
+  parsedParams.forEach((param, index) => {
+    const keyExpr = `namedInputs.getOrDefault(\"${param.name}\", unnamedInput)`;
+    const isLast = index === parsedParams.length - 1;
 
-  if (paramType.includes("int[]")) {
-    inputParsing = `
-        // Clean input: remove brackets, "arr =", etc.
-        String cleanInput = input.replaceAll("\\\\[|\\\\]|arr\\\\s*=\\\\s*", "").trim();
-        String[] parts = cleanInput.split(",");
-        int[] arr = new int[parts.length];
-        for (int i = 0; i < parts.length; i++) {
-            arr[i] = Integer.parseInt(parts[i].trim());
-        }`;
-    methodCall = `solution.${methodName}(arr)`;
-  } else if (paramType === "int") {
-    inputParsing = `
-        String cleanInput = input.replaceAll("\\\\[|\\\\]|arr\\\\s*=\\\\s*|n\\\\s*=\\\\s*|num\\\\s*=\\\\s*", "").trim();
-        int num = Integer.parseInt(cleanInput);`;
-    methodCall = `solution.${methodName}(num)`;
-  } else if (paramType === "String") {
-    inputParsing = `
-        String str = input.replaceAll("\\\"", "").trim();`;
-    methodCall = `solution.${methodName}(str)`;
+    if (param.type.includes("int[]")) {
+      declarations.push(
+        `        int[] ${param.name} = parseIntArray(${keyExpr});`,
+      );
+      callArgs.push(param.name);
+    } else if (param.type === "int") {
+      declarations.push(
+        `        int ${param.name} = parseIntValue(${keyExpr});`,
+      );
+      callArgs.push(param.name);
+    } else if (param.type === "String") {
+      declarations.push(
+        `        String ${param.name} = stripQuotes(${keyExpr}).trim();`,
+      );
+      callArgs.push(param.name);
+    } else {
+      // Fallback to raw string for unknown parameter types to avoid compile breaks.
+      declarations.push(
+        `        String ${param.name} = stripQuotes(${keyExpr}).trim();`,
+      );
+      callArgs.push(param.name);
+    }
+
+    if (!isLast) {
+      declarations.push("");
+    }
+  });
+
+  const methodCall = `solution.${methodName}(${callArgs.join(", ")})`;
+
+  let invocationBlock = "";
+  if (returnType === "void") {
+    const firstParam = parsedParams[0];
+    const outputExpr =
+      firstParam && firstParam.type.includes("int[]")
+        ? `Arrays.toString(${firstParam.name})`
+        : '"OK"';
+
+    invocationBlock = `
+        ${methodCall};
+        System.out.println(${outputExpr});`;
+  } else if (returnType.includes("int[]")) {
+    invocationBlock = `
+        int[] result = ${methodCall};
+        System.out.println(Arrays.toString(result));`;
   } else {
-    // Default to int[]
-    inputParsing = `
-        // Clean input: remove brackets, "arr =", etc.
-        String cleanInput = input.replaceAll("\\\\[|\\\\]|arr\\\\s*=\\\\s*", "").trim();
-        String[] parts = cleanInput.split(",");
-        int[] arr = new int[parts.length];
-        for (int i = 0; i < parts.length; i++) {
-            arr[i] = Integer.parseInt(parts[i].trim());
-        }`;
-    methodCall = `solution.${methodName}(arr)`;
+    invocationBlock = `
+        ${returnType} result = ${methodCall};
+        System.out.println(result);`;
   }
 
   const wrappedCode = `
@@ -256,15 +284,58 @@ import java.util.*;
 ${userCode}
 
 public class Main {
+  private static Map<String, String> parseNamedInputs(String input) {
+    Map<String, String> values = new HashMap<>();
+    java.util.regex.Matcher matcher = java.util.regex.Pattern
+        .compile("(\\\\w+)\\\\s*=\\\\s*(\\\\[[^\\\\]]*\\\\]|[^,]+)")
+        .matcher(input);
+
+    while (matcher.find()) {
+      values.put(matcher.group(1).trim(), matcher.group(2).trim());
+    }
+
+    return values;
+  }
+
+  private static String stripQuotes(String value) {
+    if (value == null) return "";
+    return value.replaceAll("^\\\"|\\\"$", "").trim();
+  }
+
+  private static int parseIntValue(String value) {
+    String cleaned = stripQuotes(value)
+        .replaceAll("[^0-9-]", "")
+        .trim();
+
+    if (cleaned.isEmpty()) return 0;
+    return Integer.parseInt(cleaned);
+  }
+
+  private static int[] parseIntArray(String value) {
+    String cleaned = stripQuotes(value)
+        .replaceAll("\\\\[|\\\\]", "")
+        .trim();
+
+    if (cleaned.isEmpty()) return new int[0];
+
+    String[] parts = cleaned.split(",");
+    int[] arr = new int[parts.length];
+    for (int i = 0; i < parts.length; i++) {
+      arr[i] = Integer.parseInt(parts[i].trim());
+    }
+    return arr;
+  }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
+    String input = scanner.useDelimiter("\\\\A").hasNext() ? scanner.next() : "";
         scanner.close();
-        ${inputParsing}
+    Map<String, String> namedInputs = parseNamedInputs(input);
+    String unnamedInput = input.trim();
+${declarations.length > 0 ? declarations.join("\n") : ""}
         
         Solution solution = new Solution();
-        ${returnType} result = ${methodCall};
-        System.out.println(result);
+${invocationBlock}
     }
 }`;
 
