@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { CourseStyleLoader } from "@/components/ui/course-style-loader";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ActivityData {
   date: string;
@@ -30,6 +35,9 @@ function getStartOfWeek(date: Date) {
 }
 
 const ActivityHeatmap = () => {
+  const cellSize = 14;
+  const cellGap = 6;
+
   const [activities, setActivities] = useState<ActivityData[]>([]);
   const [streak, setStreak] = useState({
     currentStreak: 0,
@@ -73,31 +81,46 @@ const ActivityHeatmap = () => {
     const gridEnd = new Date(endDate);
     gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
 
-    const days: { date: string; count: number; month: string }[] = [];
+    const days: {
+      date: string;
+      count: number;
+      month: string;
+      dayOfMonth: number;
+      yearMonth: string;
+    }[] = [];
     const cursor = new Date(gridStart);
 
     while (cursor <= gridEnd) {
       const key = formatDateKey(cursor);
+      const month = cursor.toLocaleString("default", { month: "short" });
       days.push({
         date: key,
         count: countMap.get(key) || 0,
-        month: cursor.toLocaleString("default", { month: "short" }),
+        month,
+        dayOfMonth: cursor.getDate(),
+        yearMonth: `${cursor.getFullYear()}-${cursor.getMonth()}`,
       });
       cursor.setDate(cursor.getDate() + 1);
     }
 
-    const weekColumns: { date: string; count: number; month: string }[][] = [];
+    const weekColumns: {
+      date: string;
+      count: number;
+      month: string;
+      dayOfMonth: number;
+      yearMonth: string;
+    }[][] = [];
     for (let i = 0; i < days.length; i += 7) {
       weekColumns.push(days.slice(i, i + 7));
     }
 
     const labels: { index: number; label: string }[] = [];
-    let lastMonth = "";
-    weekColumns.forEach((week, index) => {
-      const month = week[0]?.month;
-      if (month && month !== lastMonth) {
-        labels.push({ index, label: month });
-        lastMonth = month;
+    const seenMonth = new Set<string>();
+    days.forEach((day, dayIndex) => {
+      const shouldLabel = dayIndex === 0 || day.dayOfMonth === 1;
+      if (shouldLabel && !seenMonth.has(day.yearMonth)) {
+        labels.push({ index: Math.floor(dayIndex / 7), label: day.month });
+        seenMonth.add(day.yearMonth);
       }
     });
 
@@ -144,37 +167,36 @@ const ActivityHeatmap = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border-2 border-black/70 dark:border-white/60 p-3 bg-zinc-50 dark:bg-zinc-900/50">
-        <div className="min-w-190">
-          <div className="relative h-5 mb-1">
-            {monthLabels.map((month) => (
-              <span
-                key={`${month.index}-${month.label}`}
-                className="absolute text-[10px] text-muted-foreground"
-                style={{ left: `${month.index * 14}px` }}
-              >
-                {month.label}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex gap-1 items-start">
-            <div className="flex flex-col gap-1 mr-1 mt-1 text-[10px] text-muted-foreground">
-              <span>Sun</span>
-              <span className="mt-4.5">Tue</span>
-              <span className="mt-4.5">Thu</span>
-              <span className="mt-4.5">Sat</span>
-            </div>
-
-            <div className="flex gap-1">
+      <div className="overflow-x-auto rounded-lg border-2 border-black/70 dark:border-white/60 p-4 bg-zinc-50 dark:bg-zinc-900/50">
+        <div className="mx-auto w-max min-w-215">
+          <div className="flex justify-center">
+            <div className="flex" style={{ gap: `${cellGap}px` }}>
               {weeks.map((week, weekIdx) => (
-                <div key={weekIdx} className="flex flex-col gap-1">
+                <div
+                  key={weekIdx}
+                  className="flex flex-col"
+                  style={{ gap: `${cellGap}px` }}
+                >
                   {week.map((day) => (
-                    <div
-                      key={day.date}
-                      className={`w-3 h-3 rounded-[2px] border border-black/10 dark:border-white/20 ${getColorClass(day.count)} transition-transform hover:scale-125`}
-                      title={`${day.date}: ${day.count} solved/submitted activities`}
-                    />
+                    <Tooltip key={day.date}>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`rounded-[3px] border border-black/10 dark:border-white/20 ${getColorClass(day.count)} transition-transform hover:scale-110 cursor-pointer`}
+                          style={{
+                            width: `${cellSize}px`,
+                            height: `${cellSize}px`,
+                          }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent className="border-2 border-black dark:border-white bg-white dark:bg-gray-900 shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#fff] px-3 py-2">
+                        <p className="font-game text-xs text-black dark:text-white">
+                          {day.date}
+                        </p>
+                        <p className="font-comfortaa text-[11px] text-muted-foreground">
+                          {day.count} submissions
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
                   ))}
                 </div>
               ))}
