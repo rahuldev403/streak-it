@@ -349,49 +349,110 @@ function wrapPythonCode(userCode: string, input: string): string {
     return userCode;
   }
 
-  // Detect the function signature
-  const functionMatch = userCode.match(/def\s+(\w+)\s*\([^)]*\)/);
-  const functionName = functionMatch ? functionMatch[1] : "solve";
+  const signatureMatch = userCode.match(
+    /def\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^:\n]+))?\s*:/,
+  );
 
-  // Detect parameter type from function signature
-  const paramMatch = userCode.match(/def\s+\w+\s*\(([^)]*)\)/);
-  const params = paramMatch ? paramMatch[1].split(":")[0].trim() : "arr";
+  const functionName = signatureMatch ? signatureMatch[1] : "solve";
+  const rawParams = signatureMatch ? signatureMatch[2].trim() : "arr";
+  const hasClassSolution = /class\s+Solution\b/.test(userCode);
 
-  let inputParsing = "";
-  let functionCall = "";
+  const parsedParams = rawParams
+    ? rawParams
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => {
+          const noDefault = p.split("=")[0].trim();
+          const [namePart, typePart] = noDefault.includes(":")
+            ? noDefault.split(":").map((v) => v.trim())
+            : [noDefault, ""];
+          return { name: namePart, typeHint: typePart };
+        })
+        .filter((p) => p.name !== "self")
+    : [];
 
-  // Check if parameter suggests list/array type
-  if (
-    params.includes("arr") ||
-    params.includes("list") ||
-    params.includes("nums")
-  ) {
-    inputParsing = `
-import re
-input_line = input().strip()
-# Clean input: remove brackets, "arr =", etc.
-clean_input = re.sub(r'\\[|\\]|arr\\s*=\\s*', '', input_line).strip()
-arr = list(map(int, clean_input.split(',')))`;
-    functionCall = `${functionName}(arr)`;
-  } else if (params.includes("s") || params.includes("str")) {
-    inputParsing = `
-input_line = input().strip()`;
-    functionCall = `${functionName}(input_line)`;
-  } else {
-    inputParsing = `
-import re
-input_line = input().strip()
-# Clean input: remove brackets, prefixes like "n ="
-clean_input = re.sub(r'\\[|\\]|n\\s*=\\s*|num\\s*=\\s*', '', input_line).strip()
-num = int(clean_input)`;
-    functionCall = `${functionName}(num)`;
-  }
+  const declarationLines: string[] = [];
+  const callArgs: string[] = [];
+
+  parsedParams.forEach((param) => {
+    const keyExpr = `named_inputs.get("${param.name}", raw_input)`;
+    const typeHint = param.typeHint.toLowerCase();
+    const isIntList =
+      typeHint.includes("list") ||
+      typeHint.includes("array") ||
+      /(arr|nums|list|vector)/i.test(param.name);
+    const isString =
+      typeHint.includes("str") || /^(s|str|string|text)$/i.test(param.name);
+
+    if (isIntList) {
+      declarationLines.push(`
+${param.name} = parse_int_list(${keyExpr})`);
+    } else if (isString) {
+      declarationLines.push(`
+${param.name} = parse_string(${keyExpr})`);
+    } else {
+      declarationLines.push(`
+${param.name} = parse_int_value(${keyExpr})`);
+    }
+
+    callArgs.push(param.name);
+  });
+
+  const callTarget = hasClassSolution ? `solver.${functionName}` : functionName;
+  const firstListParam =
+    parsedParams.find((p) => /(arr|nums|list|vector)/i.test(p.name))?.name ||
+    "";
 
   const wrappedCode = `${userCode}
 
-${inputParsing}
-result = ${functionCall}
-print(result)`;
+import re
+import ast
+import sys
+
+def parse_named_inputs(raw):
+    matches = re.findall(r'(\\w+)\\s*=\\s*(\\[[^\\]]*\\]|[^,\\n]+)', raw)
+    return {k.strip(): v.strip() for k, v in matches}
+
+def parse_string(value):
+    return str(value).strip().strip('"').strip("'")
+
+def parse_int_value(value):
+    token = ''.join(ch for ch in parse_string(value) if ch.isdigit() or ch == '-')
+    return int(token) if token else 0
+
+def parse_int_list(value):
+    text = parse_string(value)
+    if not text:
+      return []
+    try:
+      if text.startswith('['):
+          parsed = ast.literal_eval(text)
+          if isinstance(parsed, list):
+              return [int(x) for x in parsed]
+    except Exception:
+      pass
+    cleaned = re.sub(r'\\[|\\]', '', text).strip()
+    if not cleaned:
+      return []
+    return [int(x.strip()) for x in cleaned.split(',') if x.strip()]
+
+def format_list(values):
+    return '[' + ','.join(str(x) for x in values) + ']'
+
+raw_input = sys.stdin.read().strip()
+named_inputs = parse_named_inputs(raw_input)
+${declarationLines.join("\n")}
+
+${hasClassSolution ? "solver = Solution()" : ""}
+result = ${callTarget}(${callArgs.join(", ")})
+
+if result is None:
+    ${firstListParam ? `print(format_list(${firstListParam}))` : "print('OK')"}
+elif isinstance(result, list):
+    print(format_list(result))
+else:
+    print(result)`;
 
   return wrappedCode;
 }
@@ -406,47 +467,107 @@ function wrapJavaScriptCode(userCode: string, input: string): string {
     return userCode;
   }
 
-  // Detect the function signature
+  const classMethodMatch = userCode.match(
+    /class\s+Solution[\s\S]*?\n\s*(?!constructor\b)(\w+)\s*\(([^)]*)\)\s*\{/,
+  );
   const functionMatch = userCode.match(
-    /(?:function|const|let|var)\s+(\w+)\s*[=\(]/,
+    /function\s+(\w+)\s*\(([^)]*)\)|(?:const|let|var)\s+(\w+)\s*=\s*\(([^)]*)\)\s*=>/,
   );
-  const functionName = functionMatch ? functionMatch[1] : "solve";
 
-  // Detect parameter type
-  const paramMatch = userCode.match(
-    /(?:function|const|let|var)\s+\w+\s*[=]?\s*\(([^)]*)\)/,
-  );
-  const params = paramMatch ? paramMatch[1].trim() : "arr";
+  const hasClassSolution = Boolean(classMethodMatch);
+  const functionName = hasClassSolution
+    ? classMethodMatch?.[1] || "solve"
+    : functionMatch?.[1] || functionMatch?.[3] || "solve";
+  const rawParams = hasClassSolution
+    ? classMethodMatch?.[2] || "arr"
+    : functionMatch?.[2] || functionMatch?.[4] || "arr";
 
-  let inputParsing = "";
-  let functionCall = "";
+  const parsedParams = rawParams
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => p.split("=")[0].trim())
+    .filter(Boolean);
 
-  // Check if parameter suggests array type
-  if (
-    params.includes("arr") ||
-    params.includes("array") ||
-    params.includes("nums")
-  ) {
-    inputParsing = `// Clean input: remove brackets, "arr =", etc.
-const cleanInput = input.trim().replace(/\\[|\\]|arr\\s*=\\s*/g, '').trim();
-const arr = cleanInput.split(',').map(x => parseInt(x.trim()));`;
-    functionCall = `${functionName}(arr)`;
-  } else if (params.includes("s") || params.includes("str")) {
-    inputParsing = `const str = input.trim().replace(/"/g, '');`;
-    functionCall = `${functionName}(str)`;
-  } else {
-    inputParsing = `// Clean input: remove brackets, prefixes
-const cleanInput = input.trim().replace(/\\[|\\]|n\\s*=\\s*|num\\s*=\\s*/g, '').trim();
-const num = parseInt(cleanInput);`;
-    functionCall = `${functionName}(num)`;
-  }
+  const declarationLines: string[] = [];
+  const callArgs: string[] = [];
+
+  parsedParams.forEach((param) => {
+    const keyExpr = `getInput(namedInputs, "${param}", rawInput)`;
+
+    if (/(arr|nums|list|vector|array)/i.test(param)) {
+      declarationLines.push(`const ${param} = parseIntArray(${keyExpr});`);
+    } else if (/^(s|str|string|text)$/i.test(param)) {
+      declarationLines.push(`const ${param} = parseString(${keyExpr});`);
+    } else {
+      declarationLines.push(`const ${param} = parseIntValue(${keyExpr});`);
+    }
+
+    callArgs.push(param);
+  });
+
+  const firstArrayParam =
+    parsedParams.find((p) => /(arr|nums|list|vector|array)/i.test(p)) || "";
+  const targetCall = hasClassSolution
+    ? `solution.${functionName}(${callArgs.join(", ")})`
+    : `${functionName}(${callArgs.join(", ")})`;
 
   const wrappedCode = `${userCode}
 
-const input = require('fs').readFileSync(0, 'utf-8');
-${inputParsing}
-const result = ${functionCall};
-console.log(result);`;
+const rawInput = require('fs').readFileSync(0, 'utf-8').trim();
+
+function parseNamedInputs(raw) {
+  const values = {};
+  const regex = /(\\w+)\\s*=\\s*(\\[[^\\]]*\\]|[^,\\n]+)/g;
+  let match;
+  while ((match = regex.exec(raw)) !== null) {
+    values[match[1].trim()] = match[2].trim();
+  }
+  return values;
+}
+
+function getInput(namedInputs, key, fallback) {
+  return Object.prototype.hasOwnProperty.call(namedInputs, key)
+    ? namedInputs[key]
+    : fallback;
+}
+
+function parseString(value) {
+  return String(value).trim().replace(/^['"]|['"]$/g, '');
+}
+
+function parseIntValue(value) {
+  const token = parseString(value).replace(/[^0-9-]/g, '');
+  return token ? parseInt(token, 10) : 0;
+}
+
+function parseIntArray(value) {
+  const text = parseString(value).replace(/\\[|\\]/g, '').trim();
+  if (!text) return [];
+  return text
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .map((x) => parseInt(x, 10));
+}
+
+function formatArray(arr) {
+  return '[' + arr.join(',') + ']';
+}
+
+const namedInputs = parseNamedInputs(rawInput);
+${declarationLines.join("\n")}
+
+${hasClassSolution ? "const solution = new Solution();" : ""}
+const result = ${targetCall};
+
+if (typeof result === 'undefined') {
+  ${firstArrayParam ? `console.log(formatArray(${firstArrayParam}));` : "console.log('OK');"}
+} else if (Array.isArray(result)) {
+  console.log(formatArray(result));
+} else {
+  console.log(result);
+}`;
 
   return wrappedCode;
 }
@@ -458,82 +579,170 @@ function wrapCppCode(userCode: string, input: string): string {
     return userCode;
   }
 
-  // Detect the function signature
-  const functionMatch = userCode.match(
-    /(?:int|void|string|bool|double|float)\s+(\w+)\s*\([^)]*\)/,
+  const hasClassSolution = /class\s+Solution\b/.test(userCode);
+  const signatureMatch = userCode.match(
+    /([A-Za-z_][\w:<>,\s&\*]*)\s+(\w+)\s*\(([^)]*)\)\s*\{/,
   );
-  const functionName = functionMatch ? functionMatch[1] : "solve";
 
-  // Detect return type
-  const returnTypeMatch = userCode.match(
-    /(?:int|void|string|bool|double|float)\s+\w+\s*\([^)]*\)/,
-  );
-  const returnType = returnTypeMatch ? returnTypeMatch[0].split(" ")[0] : "int";
+  const returnType = signatureMatch ? signatureMatch[1].trim() : "int";
+  const functionName = signatureMatch ? signatureMatch[2].trim() : "solve";
+  const rawParams = signatureMatch
+    ? signatureMatch[3].trim()
+    : "vector<int> arr";
 
-  // Detect parameter type
-  const paramMatch = userCode.match(/\w+\s+\w+\s*\(([^)]*)\)/);
-  const params = paramMatch ? paramMatch[1] : "vector<int> arr";
+  const parsedParams = rawParams
+    ? rawParams
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => {
+          const noDefault = p.split("=")[0].trim();
+          const nameMatch = noDefault.match(/([A-Za-z_]\w*)$/);
+          const name = nameMatch ? nameMatch[1] : "arg";
+          const type = noDefault
+            .slice(0, noDefault.length - name.length)
+            .trim();
+          return { type, name };
+        })
+    : [];
 
-  let inputParsing = "";
-  let functionCall = "";
+  const declarationLines: string[] = [];
+  const callArgs: string[] = [];
 
-  // Check if parameter suggests vector/array type
-  if (
-    params.includes("vector") ||
-    params.includes("arr") ||
-    params.includes("array")
-  ) {
-    inputParsing = `
-    string line;
-    getline(cin, line);
-    // Clean input: remove brackets, "arr =", etc.
-    line.erase(remove(line.begin(), line.end(), '['), line.end());
-    line.erase(remove(line.begin(), line.end(), ']'), line.end());
-    size_t pos = line.find("arr");
-    if (pos != string::npos) {
-        line = line.substr(pos + 3);
-        pos = line.find("=");
-        if (pos != string::npos) line = line.substr(pos + 1);
+  parsedParams.forEach((param) => {
+    const keyExpr = `getInput(namedInputs, "${param.name}", unnamedInput)`;
+    const normalizedType = param.type.toLowerCase();
+
+    if (normalizedType.includes("vector")) {
+      declarationLines.push(
+        `    vector<int> ${param.name} = parseIntVector(${keyExpr});`,
+      );
+    } else if (normalizedType.includes("string")) {
+      declarationLines.push(
+        `    string ${param.name} = stripQuotes(${keyExpr});`,
+      );
+    } else {
+      declarationLines.push(
+        `    int ${param.name} = parseIntValue(${keyExpr});`,
+      );
     }
-    vector<int> arr;
-    stringstream ss(line);
-    string item;
-    while (getline(ss, item, ',')) {
-        arr.push_back(stoi(item));
-    }`;
-    functionCall = `${functionName}(arr)`;
-  } else if (params.includes("string")) {
-    inputParsing = `
-    string str;
-    getline(cin, str);
-    // Remove quotes if present
-    str.erase(remove(str.begin(), str.end(), '"'), str.end());`;
-    functionCall = `${functionName}(str)`;
+
+    callArgs.push(param.name);
+  });
+
+  const firstVectorParam =
+    parsedParams.find((p) => p.type.toLowerCase().includes("vector"))?.name ||
+    "";
+  const callExpr = hasClassSolution
+    ? `solution.${functionName}(${callArgs.join(", ")})`
+    : `${functionName}(${callArgs.join(", ")})`;
+
+  let invocationBlock = "";
+  if (returnType.toLowerCase().startsWith("void")) {
+    invocationBlock = `
+    ${callExpr};
+    ${firstVectorParam ? `cout << formatVector(${firstVectorParam}) << endl;` : 'cout << "OK" << endl;'}`;
+  } else if (returnType.toLowerCase().includes("vector")) {
+    invocationBlock = `
+    auto result = ${callExpr};
+    cout << formatVector(result) << endl;`;
   } else {
-    inputParsing = `
-    string line;
-    getline(cin, line);
-    // Clean input: remove brackets, prefixes
-    line.erase(remove(line.begin(), line.end(), '['), line.end());
-    line.erase(remove(line.begin(), line.end(), ']'), line.end());
-    size_t pos = line.find("=");
-    if (pos != string::npos) line = line.substr(pos + 1);
-    int num = stoi(line);`;
-    functionCall = `${functionName}(num)`;
+    invocationBlock = `
+    auto result = ${callExpr};
+    cout << result << endl;`;
   }
 
   const wrappedCode = `#include <iostream>
 #include <vector>
 #include <string>
 #include <sstream>
+#include <unordered_map>
+#include <regex>
+#include <algorithm>
+#include <cctype>
 using namespace std;
 
 ${userCode}
 
+string trim(const string& s) {
+    size_t start = s.find_first_not_of(" \t\r\n");
+    if (start == string::npos) return "";
+    size_t end = s.find_last_not_of(" \t\r\n");
+    return s.substr(start, end - start + 1);
+}
+
+string stripQuotes(const string& value) {
+    string out = trim(value);
+    if (!out.empty() && (out.front() == '\"' || out.front() == '\'')) out.erase(out.begin());
+    if (!out.empty() && (out.back() == '\"' || out.back() == '\'')) out.pop_back();
+    return trim(out);
+}
+
+unordered_map<string, string> parseNamedInputs(const string& input) {
+    unordered_map<string, string> values;
+    regex re("(\\\\w+)\\\\s*=\\\\s*(\\\\[[^\\\\]]*\\\\]|[^,\\\\n]+)");
+    auto begin = sregex_iterator(input.begin(), input.end(), re);
+    auto end = sregex_iterator();
+    for (auto it = begin; it != end; ++it) {
+        values[trim((*it)[1].str())] = trim((*it)[2].str());
+    }
+    return values;
+}
+
+string getInput(const unordered_map<string, string>& namedInputs, const string& key, const string& fallback) {
+    auto it = namedInputs.find(key);
+    if (it != namedInputs.end()) return it->second;
+    return fallback;
+}
+
+int parseIntValue(const string& value) {
+    string s = stripQuotes(value);
+    string token;
+    for (char c : s) {
+        if (isdigit(static_cast<unsigned char>(c)) || c == '-') token.push_back(c);
+    }
+    if (token.empty() || token == "-") return 0;
+    return stoi(token);
+}
+
+vector<int> parseIntVector(const string& value) {
+    string s = stripQuotes(value);
+    s.erase(remove(s.begin(), s.end(), '['), s.end());
+    s.erase(remove(s.begin(), s.end(), ']'), s.end());
+    s = trim(s);
+    if (s.empty()) return {};
+
+    vector<int> result;
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, ',')) {
+        item = trim(item);
+        if (!item.empty()) result.push_back(stoi(item));
+    }
+    return result;
+}
+
+string formatVector(const vector<int>& arr) {
+    string out = "[";
+    for (size_t i = 0; i < arr.size(); ++i) {
+        out += to_string(arr[i]);
+        if (i + 1 < arr.size()) out += ",";
+    }
+    out += "]";
+    return out;
+}
+
 int main() {
-    ${inputParsing}
-    ${returnType} result = ${functionCall};
-    cout << result << endl;
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string rawInput((istreambuf_iterator<char>(cin)), istreambuf_iterator<char>());
+    string unnamedInput = trim(rawInput);
+    auto namedInputs = parseNamedInputs(rawInput);
+
+${declarationLines.join("\n")}
+
+    ${hasClassSolution ? "Solution solution;" : ""}${invocationBlock}
     return 0;
 }`;
 
@@ -597,7 +806,58 @@ async function executeCode(
   let status = "accepted";
   const actualOutput = (submissionData.stdout || "").trim();
   const expectedOutputTrimmed = expectedOutput.trim();
-  const passed = actualOutput === expectedOutputTrimmed;
+
+  const stripOuterQuotes = (value: string) => {
+    const trimmed = value.trim();
+    if (
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("'") && trimmed.endsWith("'"))
+    ) {
+      return trimmed.slice(1, -1).trim();
+    }
+    return trimmed;
+  };
+
+  const parseArrayLike = (value: string): number[] | null => {
+    const raw = stripOuterQuotes(value).trim();
+    if (!(raw.startsWith("[") && raw.endsWith("]"))) return null;
+
+    const inner = raw.slice(1, -1).trim();
+    if (!inner) return [];
+
+    const parts = inner
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    const nums = parts.map((p) => Number(p));
+    return nums.every((n) => Number.isFinite(n)) ? nums : null;
+  };
+
+  const areOutputsEquivalent = (actual: string, expected: string) => {
+    const a = stripOuterQuotes(actual).replace(/\r\n/g, "\n").trim();
+    const e = stripOuterQuotes(expected).replace(/\r\n/g, "\n").trim();
+
+    if (a === e) return true;
+
+    const aArray = parseArrayLike(a);
+    const eArray = parseArrayLike(e);
+    if (aArray && eArray) {
+      if (aArray.length !== eArray.length) return false;
+      return aArray.every((val, idx) => val === eArray[idx]);
+    }
+
+    const aNum = Number(a);
+    const eNum = Number(e);
+    if (Number.isFinite(aNum) && Number.isFinite(eNum)) {
+      return aNum === eNum;
+    }
+
+    // Fallback: ignore insignificant whitespace differences.
+    return a.replace(/\s+/g, "") === e.replace(/\s+/g, "");
+  };
+
+  const passed = areOutputsEquivalent(actualOutput, expectedOutputTrimmed);
 
   // Determine status based on response
   if (submissionData.stderr && submissionData.stderr.trim()) {

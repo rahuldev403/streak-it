@@ -21,7 +21,6 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Trophy,
   Send,
   X,
   CheckCircle,
@@ -583,7 +582,6 @@ export default function DsaPracticePage() {
 
                         {result.summary.allPassed && (
                           <div className="border-4 border-green-700 bg-green-100 dark:bg-green-900/30 p-4 text-center mb-4 shadow-[4px_4px_0_0_#000]">
-                            <Trophy className="h-8 w-8 mx-auto mb-2 text-green-600 dark:text-green-300" />
                             <p className="font-normal text-green-800 dark:text-green-200 font-game text-lg">
                               All test cases passed!
                             </p>
