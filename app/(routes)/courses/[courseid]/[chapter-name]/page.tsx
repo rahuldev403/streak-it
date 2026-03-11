@@ -142,19 +142,58 @@ const Page = () => {
   };
 
   const handleRunCode = () => {
-    if (
-      content?.questionType &&
-      previewEnabledTypes.has(content.questionType)
-    ) {
-      toast.info("Preview requirements", {
-        description:
-          "Use an entry file like main.tsx/index.tsx/App.tsx (or jsx/js variants). Relative imports are supported, npm package imports are not.",
-      });
-      setShowPreview(true);
-    } else {
+    if (!content?.questionType) return;
+
+    if (!previewEnabledTypes.has(content.questionType)) {
       toast.info("This preview type is not fully supported yet.");
       setShowPreview(true);
+      return;
     }
+
+    const needsEntryFileGuidance =
+      content.questionType === "typescript" || content.questionType === "mern";
+
+    if (needsEntryFileGuidance) {
+      const entryCandidates = [
+        "main.tsx",
+        "index.tsx",
+        "App.tsx",
+        "app.tsx",
+        "main.jsx",
+        "index.jsx",
+        "App.jsx",
+        "app.jsx",
+        "main.ts",
+        "index.ts",
+        "main.js",
+        "index.js",
+        "script.js",
+      ];
+
+      const hasEntryFile = Object.keys(fileContents).some((fileName) =>
+        entryCandidates.includes(fileName),
+      );
+
+      if (!hasEntryFile) {
+        const hintKey = `preview-entry-hint:${courseId}:${chapterId || chapterName}`;
+        const alreadyShown =
+          typeof window !== "undefined" &&
+          window.sessionStorage.getItem(hintKey) === "1";
+
+        if (!alreadyShown) {
+          toast.info("Preview requirements", {
+            description:
+              "Use an entry file like main.tsx/index.tsx/App.tsx (or jsx/js variants). Relative imports are supported, npm package imports are not.",
+          });
+
+          if (typeof window !== "undefined") {
+            window.sessionStorage.setItem(hintKey, "1");
+          }
+        }
+      }
+    }
+
+    setShowPreview(true);
   };
 
   const handleResetCode = () => {
@@ -469,6 +508,10 @@ const Page = () => {
                   files={content.boilerplateFiles}
                   fileContents={fileContents}
                   onCodeChange={handleCodeChange}
+                  showPreviewWarningButton={
+                    content.questionType === "react" ||
+                    content.questionType === "nextjs"
+                  }
                 />
               </div>
             </div>

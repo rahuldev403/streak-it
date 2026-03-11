@@ -749,7 +749,6 @@ ${declarationLines.join("\n")}
   return wrappedCode;
 }
 
-// Helper function to execute code using OneCompiler API
 async function executeCode(
   code: string,
   language: string,
@@ -760,7 +759,14 @@ async function executeCode(
 ): Promise<any> {
   const startTime = Date.now();
 
-  // Wrap code with Main/boilerplate if needed
+  const stripAnsi = (value: string) =>
+    value.replace(/\u001b\[[0-9;]*m/g, "").replace(/\x1B\[[0-9;]*m/g, "");
+
+  const normalizeNewLines = (value: string) =>
+    stripAnsi(value || "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+
   let finalCode = code;
   if (language === "java") {
     finalCode = wrapJavaCode(code, input);
@@ -804,8 +810,8 @@ async function executeCode(
 
   // Check the status
   let status = "accepted";
-  const actualOutput = (submissionData.stdout || "").trim();
-  const expectedOutputTrimmed = expectedOutput.trim();
+  const rawActualOutput = normalizeNewLines(submissionData.stdout || "");
+  const expectedOutputTrimmed = normalizeNewLines(expectedOutput || "").trim();
 
   const stripOuterQuotes = (value: string) => {
     const trimmed = value.trim();
@@ -835,10 +841,19 @@ async function executeCode(
   };
 
   const areOutputsEquivalent = (actual: string, expected: string) => {
-    const a = stripOuterQuotes(actual).replace(/\r\n/g, "\n").trim();
-    const e = stripOuterQuotes(expected).replace(/\r\n/g, "\n").trim();
+    const a = stripOuterQuotes(normalizeNewLines(actual)).trim();
+    const e = stripOuterQuotes(normalizeNewLines(expected)).trim();
 
     if (a === e) return true;
+
+    const aLower = a.toLowerCase();
+    const eLower = e.toLowerCase();
+    if (
+      (aLower === "true" || aLower === "false") &&
+      (eLower === "true" || eLower === "false")
+    ) {
+      return aLower === eLower;
+    }
 
     const aArray = parseArrayLike(a);
     const eArray = parseArrayLike(e);
@@ -857,10 +872,28 @@ async function executeCode(
     return a.replace(/\s+/g, "") === e.replace(/\s+/g, "");
   };
 
-  const passed = areOutputsEquivalent(actualOutput, expectedOutputTrimmed);
+  const actualLines = rawActualOutput
+    .split("\n")
+    .map((line: string) => line.trim())
+    .filter(Boolean);
+
+  const actualCandidates = [rawActualOutput.trim()];
+  if (actualLines.length > 0) {
+    actualCandidates.push(actualLines[actualLines.length - 1]);
+  }
+
+  const matchedOutput = actualCandidates.find((candidate) =>
+    areOutputsEquivalent(candidate, expectedOutputTrimmed),
+  );
+
+  const passed = Boolean(matchedOutput);
+  const actualOutput = (matchedOutput || rawActualOutput.trim()).trim();
 
   // Determine status based on response
-  if (submissionData.stderr && submissionData.stderr.trim()) {
+  if (
+    submissionData.stderr &&
+    normalizeNewLines(submissionData.stderr).trim()
+  ) {
     // Check if it's a compilation error or runtime error
     if (
       submissionData.stderr.includes("error:") ||
